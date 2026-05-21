@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bestil tryksager — Brandsurface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #1a1a17;
+  --surface: #1e1d1a;
+  --surface-2: #242220;
+  --surface-3: #2c2a27;
+  --border: #4a4640;
+  --border-light: #5c5750;
+  --accent: #f1562e;
+  --accent-dim: rgba(241,86,46,0.12);
+  --accent-dim2: rgba(241,86,46,0.06);
+  --text: #f0ede8;
+  --text-2: #b8b4ae;
+  --text-3: #7a7672;
+  --success: #4ade80;
+  --success-dim: rgba(74,222,128,0.1);
+  --error: #f87171;
+  --error-dim: rgba(248,113,113,0.1);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Manrope', sans-serif;
+  background: linear-gradient(135deg, #46473e 0%, #0e0a00 100%);
+  background-attachment: fixed;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.5;
+}
+
+/* ── Header ── */
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(14,10,0,0.88);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.step-pills { display: flex; align-items: center; gap: 8px; }
+.step-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 5px 14px; border-radius: 999px;
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.05em;
+  color: var(--text-3); border: 1px solid transparent; transition: all 0.3s ease;
+}
+.step-pill.active {
+  color: var(--accent); border-color: rgba(241,86,46,0.5); background: var(--accent-dim);
+  animation: pill-pulse 2s ease-in-out infinite;
+}
+@keyframes pill-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(241,86,46,0); border-color: rgba(241,86,46,0.5); }
+  50%      { box-shadow: 0 0 0 4px rgba(241,86,46,0.12); border-color: rgba(241,86,46,0.85); }
+}
+.step-pill.done { color: var(--success); border-color: rgba(74,222,128,0.25); background: var(--success-dim); }
+.step-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.step-sep { color: var(--text-3); font-size: 12px; }
+
+/* ── Page & Views ── */
+.page { position: relative; z-index: 1; }
+.view { display: none; animation: fadeUp 0.4s ease; }
+.view.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Form wrap ── */
+.form-wrap { max-width: 1100px; margin: 0 auto; padding: 52px 40px 160px; }
+.form-hero { margin-bottom: 52px; }
+.form-hero h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.0; color: #f1562e; }
+.form-hero p { margin-top: 14px; color: var(--text-2); font-size: 16px; font-weight: 300; line-height: 1.6; }
+
+/* ── Layout grid ── */
+.grid-main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+.grid-left { display: flex; flex-direction: column; gap: 20px; }
+.grid-right { display: flex; flex-direction: column; gap: 20px; }
+
+/* ── Card ── */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-xl); padding: 28px; transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--border-light); }
+
+.card-label {
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-2);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 24px;
+}
+.card-label::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+
+/* ── Fields ── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label {
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2);
+}
+.field label .req { color: var(--accent); margin-left: 2px; }
+
+input[type="text"], input[type="email"], input[type="number"], select, textarea {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 14px; color: var(--text); font-family: 'Manrope', sans-serif; font-size: 14px;
+  font-weight: 400; width: 100%; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  outline: none; -webkit-appearance: none;
+}
+input::placeholder, textarea::placeholder { color: var(--text-3); }
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(241,86,46,0.55); box-shadow: 0 0 0 3px rgba(241,86,46,0.08); background: var(--surface-3);
+}
+input.error { border-color: var(--error); box-shadow: 0 0 0 3px var(--error-dim); }
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.select-wrap { position: relative; }
+.select-wrap select { padding-right: 36px; cursor: pointer; }
+.select-wrap::after {
+  content: ''; position: absolute; right: 13px; top: 50%; transform: translateY(-50%);
+  width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent;
+  border-top: 5px solid var(--text-2); pointer-events: none;
+}
+
+.row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.divider { height: 1px; background: var(--border); margin: 4px 0; }
+.field-error { font-size: 11px; color: var(--error); margin-top: 3px; display: none; }
+.field-error.show { display: block; }
+
+/* ── Product type cards (placat, bordkort etc.) ── */
+.produkt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.produkt-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 14px;
+  transition: border-color 0.2s;
+  position: relative;
+}
+
+.produkt-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.produkt-name {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.produkt-name svg { color: var(--accent); flex-shrink: 0; }
+
+.produkt-inner { display: flex; flex-direction: column; gap: 10px; }
+
+/* Format chip group */
+.format-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.format-chip {
+  padding: 5px 11px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--surface-3);
+  color: var(--text-2); font-family: 'DM Mono', monospace;
+  font-size: 11px; cursor: pointer; transition: all 0.18s; user-select: none;
+}
+.format-chip:hover { border-color: rgba(241,86,46,0.35); color: var(--text); }
+.format-chip.active {
+  background: var(--accent-dim); border-color: rgba(241,86,46,0.5); color: var(--accent);
+}
+
+/* Quantity stepper */
+.qty-row { display: flex; align-items: center; gap: 8px; }
+.qty-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); white-space: nowrap; }
+.qty-stepper {
+  display: flex; align-items: center; gap: 0;
+  border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface-3);
+}
+.qty-stepper button {
+  width: 32px; height: 34px; background: none; border: none; cursor: pointer;
+  color: var(--text-2); font-size: 16px; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.qty-stepper button:hover { background: var(--accent-dim); color: var(--accent); }
+.qty-stepper input {
+  width: 48px; border: none; border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+  border-radius: 0; background: var(--surface-2); text-align: center;
+  font-size: 14px; font-weight: 600; padding: 6px 0; color: var(--text);
+}
+.qty-stepper input:focus { box-shadow: none; }
+
+/* Andet felt */
+.andet-card {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 20px; display: flex; flex-direction: column; gap: 12px; margin-top: 4px;
+}
+.andet-label {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 2px;
+}
+.andet-label svg { color: var(--accent); }
+
+/* ── Address tabs ── */
+.addr-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+.addr-tab {
+  flex: 1; padding: 10px; border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text-2);
+  font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;
+}
+.addr-tab:hover { border-color: rgba(241,86,46,0.3); color: var(--text); }
+.addr-tab.active { background: var(--accent-dim); border-color: rgba(241,86,46,0.4); color: var(--accent); }
+.addr-tab svg { flex-shrink: 0; }
+
+/* ── Alt addr toggle ── */
+.alt-addr-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; margin-top: 16px;
+  border-radius: var(--radius); border: 1px solid var(--border);
+  background: var(--surface-2); cursor: pointer; user-select: none; transition: all 0.2s;
+}
+.alt-addr-toggle:hover { border-color: rgba(241,86,46,0.3); background: var(--accent-dim2); }
+.alt-addr-toggle.active { border-color: rgba(241,86,46,0.4); background: var(--accent-dim); }
+.toggle-switch {
+  width: 36px; height: 20px; border-radius: 999px;
+  background: var(--surface-3); border: 1px solid var(--border-light);
+  position: relative; flex-shrink: 0; transition: all 0.2s;
+}
+.toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 14px; height: 14px; border-radius: 50%; background: var(--text-3); transition: all 0.2s;
+}
+.alt-addr-toggle.active .toggle-switch { background: var(--accent); border-color: var(--accent); }
+.alt-addr-toggle.active .toggle-switch::after { left: 18px; background: #fff; }
+.alt-addr-toggle-label { font-size: 13px; color: var(--text-2); }
+.alt-addr-toggle.active .alt-addr-toggle-label { color: var(--text); }
+.alt-addr-fields { display: none; flex-direction: column; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+.alt-addr-fields.show { display: flex; animation: fadeUp 0.3s ease; }
+
+/* ── Collapsible mailflow ── */
+.collapse-trigger {
+  width: 100%; padding: 14px 16px;
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  color: var(--text-2); font-family: 'DM Mono', monospace; font-size: 11px;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 8px; transition: all 0.2s;
+}
+.collapse-trigger:hover { border-color: rgba(241,86,46,0.3); color: var(--text); }
+.collapse-trigger.open { border-color: rgba(241,86,46,0.3); color: var(--accent); background: var(--accent-dim2); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.collapse-chevron { transition: transform 0.3s ease; }
+.collapse-trigger.open .collapse-chevron { transform: rotate(180deg); }
+.collapse-content { display: none; padding: 20px; background: var(--surface-2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 var(--radius-lg) var(--radius-lg); }
+.collapse-content.open { display: block; animation: fadeUp 0.3s ease; }
+
+/* ── Mailflow ── */
+.mailflow { display: flex; flex-direction: column; }
+.mf-step { display: flex; gap: 14px; position: relative; padding-bottom: 20px; }
+.mf-step:last-child { padding-bottom: 0; }
+.mf-line { position: absolute; left: 19px; top: 40px; bottom: 0; width: 1px; background: var(--border); }
+.mf-step:last-child .mf-line { display: none; }
+.mf-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--surface-3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--text-2); }
+.mf-body { flex: 1; padding-top: 8px; }
+.mf-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.mf-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.mf-tag { display: inline-block; margin-top: 6px; padding: 2px 8px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 500; }
+.mf-tag.yes { background: var(--success-dim); color: var(--success); }
+.mf-tag.no { background: var(--error-dim); color: var(--error); }
+
+/* ── Bottom bar ── */
+.bottom-bar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 40px; background: rgba(14,10,0,0.92);
+  backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.bottom-bar-info .bbl { font-size: 16px; font-weight: 600; color: var(--text); }
+.bottom-bar-info .bbs { font-size: 14px; color: var(--text-2); margin-top: 2px; }
+
+.btn-primary {
+  padding: 14px 30px; background: var(--accent); color: #fff; border: none;
+  border-radius: 999px; font-family: 'Manrope', sans-serif; font-size: 15px;
+  font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-primary:hover { background: #ff6a3d; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(241,86,46,0.3); }
+.btn-primary:active { transform: translateY(0); }
+.btn-secondary {
+  padding: 12px 22px; background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 999px;
+  font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+}
+.btn-secondary:hover { background: var(--surface-3); border-color: var(--border-light); }
+.btn-ghost {
+  padding: 12px 22px; background: transparent; color: var(--text-2);
+  border: none; border-radius: 999px; font-family: 'Manrope', sans-serif;
+  font-size: 14px; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.btn-ghost:hover { color: var(--text); }
+
+/* ── Review ── */
+.review-wrap { max-width: 780px; margin: 0 auto; padding: 52px 40px 160px; }
+.review-title { font-size: 36px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; }
+.review-sub { color: var(--text-2); font-size: 15px; margin-bottom: 44px; }
+.review-section { margin-bottom: 32px; }
+.review-section-label {
+  font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.review-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+.review-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.review-field { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; }
+.review-field .rf-label { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); margin-bottom: 4px; }
+.review-field .rf-val { font-size: 14px; color: var(--text); font-weight: 500; }
+.review-field.full { grid-column: 1/-1; }
+
+.rv-produkt-row {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 14px 18px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;
+}
+.rv-produkt-name { font-size: 14px; font-weight: 600; color: var(--text); }
+.rv-produkt-meta { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text-2); text-align: right; line-height: 1.6; }
+
+/* ── Confirm ── */
+.confirm-wrap { max-width: 560px; margin: 0 auto; padding: 80px 40px 160px; text-align: center; }
+.confirm-icon { width: 80px; height: 80px; border-radius: 24px; background: var(--accent-dim); border: 1px solid rgba(241,86,46,0.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; color: var(--accent); }
+.confirm-title { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 12px; }
+.confirm-text { color: var(--text-2); font-size: 16px; line-height: 1.6; margin-bottom: 8px; }
+.confirm-email { display: inline-block; font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(241,86,46,0.2); border-radius: 6px; padding: 4px 12px; margin: 4px 0 24px; }
+.confirm-steps { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 24px; margin: 28px 0; text-align: left; }
+.cs-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin-bottom: 16px; }
+.cs-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cs-item:last-child { border-bottom: none; padding-bottom: 0; }
+.cs-num { width: 24px; height: 24px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-3); flex-shrink: 0; margin-top: 1px; }
+.cs-body .cs-h { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
+.cs-body .cs-d { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+
+/* ── Toast ── */
+.toast { position: fixed; top: 80px; right: 24px; z-index: 200; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; font-size: 14px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.5); transform: translateX(120%); transition: transform 0.3s ease; max-width: 300px; }
+.toast.show { transform: translateX(0); }
+.toast.success { border-color: rgba(74,222,128,0.3); }
+.toast.error-t { border-color: rgba(248,113,113,0.3); }
+
+@media (max-width: 900px) {
+  .grid-main { grid-template-columns: 1fr; }
+  header { padding: 0 20px; }
+  .step-pills { display: none; }
+  .form-wrap, .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
+  .bottom-bar { padding: 14px 20px; }
+  .row-2 { grid-template-columns: 1fr; }
+  .review-grid { grid-template-columns: 1fr; }
+  .produkt-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="#" style="display:flex;align-items:center;line-height:0;">
+    <svg style="height:28px;width:auto;" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 872.61 87.54">
+      <defs>
+        <style>.bsl0{fill:url(#bslg2)}.bsl1{fill:url(#bslg10)}.bsl2{fill:url(#bslg1)}.bsl3{fill:url(#bslg9)}.bsl4{fill:url(#bslg8)}.bsl5{fill:url(#bslg11)}.bsl6{fill:url(#bslg7)}.bsl7{fill:url(#bslg4)}.bsl8{fill:url(#bslg5)}.bsl9{fill:url(#bslg3)}.bsl10{fill:url(#bslg6)}.bsl11{fill:url(#bslg)}</style>
+        <linearGradient id="bslg" x1="-71.28" y1="172.88" x2="620.45" y2="-92.16" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffeed3"/><stop offset=".17" stop-color="#ffe6c0"/><stop offset=".39" stop-color="#fdce7c"/><stop offset=".51" stop-color="#fdc45e"/><stop offset=".6" stop-color="#f9a851"/><stop offset=".87" stop-color="#f15e30"/><stop offset="1" stop-color="#ee4124"/></linearGradient>
+        <linearGradient id="bslg1" x1="-62.45" y1="195.92" x2="629.28" y2="-69.11" xlink:href="#bslg"/>
+        <linearGradient id="bslg2" x1="-80.13" y1="149.77" x2="611.6" y2="-115.27" xlink:href="#bslg"/>
+        <linearGradient id="bslg3" x1="-24.84" y1="294.08" x2="666.89" y2="29.05" xlink:href="#bslg"/>
+        <linearGradient id="bslg4" x1="2.64" y1="365.8" x2="694.37" y2="100.77" xlink:href="#bslg"/>
+        <linearGradient id="bslg5" x1="-13.31" y1="324.17" x2="678.42" y2="59.14" xlink:href="#bslg"/>
+        <linearGradient id="bslg6" x1="-4.8" y1="346.39" x2="686.93" y2="81.36" xlink:href="#bslg"/>
+        <linearGradient id="bslg7" x1="-102.41" y1="91.63" x2="589.32" y2="-173.4" xlink:href="#bslg"/>
+        <linearGradient id="bslg8" x1="-91.63" y1="119.75" x2="600.1" y2="-145.28" xlink:href="#bslg"/>
+        <linearGradient id="bslg9" x1="-31.41" y1="276.94" x2="660.32" y2="11.91" xlink:href="#bslg"/>
+        <linearGradient id="bslg10" x1="-42.69" y1="247.5" x2="649.04" y2="-17.53" xlink:href="#bslg"/>
+        <linearGradient id="bslg11" x1="-50.88" y1="226.11" x2="640.85" y2="-38.92" xlink:href="#bslg"/>
+      </defs>
+      <polygon class="bsl11" points="281.65 45.05 253.46 2.01 227.59 2.01 227.59 85.01 251.07 85.01 251.07 39.92 280.73 84.72 281.41 85.01 305.13 85.01 305.13 2.01 281.65 2.01 281.65 45.05"/>
+      <path class="bsl2" d="M347.84,2.04h-32.61v82.97h32.61c19.83,0,41.08-15.2,41.08-41.49S367.68,2.04,347.84,2.04ZM344.72,66.08h-5.43V22h5.43c6.45,0,21.84,3.56,21.84,21.53s-13.57,22.56-21.84,22.56Z"/>
+      <path class="bsl0" d="M193.95,2.01h-22.06l-28.59,83h23.92l4.64-12.98h24.47l4.64,12.98h21.53L193.95,2.01ZM177.39,53.47l6.64-24.14,5.52,24.14h-12.16Z"/>
+      <polygon class="bsl3" points="665.8 33.74 640.83 33.74 640.83 21.73 675 21.73 675 2.01 617.43 2.01 617.43 85.01 640.83 85.01 640.83 53.53 665.8 53.53 665.8 33.74"/>
+      <polygon class="bsl7" points="872.61 21.73 872.61 2.01 815.03 2.01 815.03 85.01 872.61 85.01 872.61 65.29 838.44 65.29 838.44 53.53 863.41 53.53 863.41 33.49 838.44 33.49 838.44 21.73 872.61 21.73"/>
+      <path class="bsl8" d="M715.96,2.01h-22.06l-28.59,83h23.92l4.64-12.98h24.47l4.64,12.98h21.53l-28.53-83ZM699.4,53.47l6.64-24.14,5.52,24.14h-12.16Z"/>
+      <path class="bsl10" d="M801.72,58.64c-4.09,4.59-10.03,7.49-16.66,7.49-12.34,0-22.35-10.01-22.35-22.35s10.01-22.35,22.35-22.35c6.62,0,12.54,2.89,16.64,7.46l5.41-22.92C800.63,2.18,793.1,0,785.06,0c-24.17,0-43.77,19.6-43.77,43.77s19.6,43.77,43.77,43.77c8.07,0,15.62-2.19,22.11-6l-5.45-22.91Z"/>
+      <path class="bsl6" d="M58.69,40.36c2.15-3.75,3.4-8.08,3.4-12.72,0-14.16-11.48-25.63-25.63-25.63H0v83h41.3c.09,0,.17.01.26.01,14.16,0,25.63-11.48,25.63-25.63,0-7.56-3.29-14.34-8.5-19.03ZM21.62,21.73h14.19c3.54,0,6.4,2.87,6.4,6.4s-2.87,6.4-6.4,6.4h-14.19v-12.81ZM39.3,65.96h-17.69v-13.14h17.68s0,0,0,0c3.63,0,6.57,2.94,6.57,6.57s-2.94,6.57-6.57,6.57Z"/>
+      <path class="bsl4" d="M123.6,53.39c7.25-4.34,14.23-12.31,14.23-23.77,0-16.64-15.09-27.61-28.28-27.61h-35.59v83h23.48v-27.77h4.94l14.06,27.77h24.34l-17.17-31.62ZM106.01,38.8h-8.57v-18.5h8.57c7.3,0,10.71,5.05,10.71,9.25s-2.71,9.25-10.71,9.25Z"/>
+      <path class="bsl9" d="M594.08,53.39c7.25-4.34,14.23-12.31,14.23-23.77,0-16.64-15.09-27.61-28.28-27.61h-35.59v83h23.48v-27.77h4.94l14.06,27.77h24.34l-17.17-31.62ZM576.49,38.8h-8.57v-18.5h8.57c7.3,0,10.71,5.05,10.71,9.25s-2.71,9.25-10.71,9.25Z"/>
+      <path class="bsl1" d="M511,55.82c0,6.47-5.99,10.46-11.43,10.46s-11.44-2.9-11.44-10.46V2.13h-24.05v49.96c0,29.85,21.69,35.4,35.48,35.4s35.48-5.04,35.48-35.4V2.13h-24.05v53.69Z"/>
+      <path class="bsl5" d="M435.7,35.7c-5.66-1.5-11.07-2.7-15.83-4.26-1.49-.49-5.86-2.49-4.15-7.14,1.07-2.9,3.66-4.47,12.09-3.05,5.66.95,11.3,2.53,16.82,5.11,0,0,1.31.58,3,1.46l5.01-21.24c-6.46-2.91-13.14-4.85-20.34-5.89-26.11-3.79-34.84,8.87-37.71,16.76-5.99,16.44,4.5,29.5,17.95,33.91,5.61,1.84,11.71,3.24,17.57,4.76,6.03,1.56,5.96,4.92,5.46,6.42-1.85,5.6-13.44,3.58-14.76,3.33-6.8-1.28-14.32-3.79-20.12-6.7,0,0-1.58-.78-3.43-1.84l-5.05,21.41c7.34,3.44,16.03,6.25,24.22,7.8,3.55.67,6.97,1,10.23,1,14.89,0,26.3-6.82,30.23-18.72,2.22-6.71,1.56-13.36-1.9-19.24-4.66-7.91-12.45-12.06-19.29-13.88Z"/>
+    </svg>
+  </a>
+  <div class="step-pills">
+    <div class="step-pill active" id="pill-1"><span class="step-dot"></span>Udfyld</div>
+    <div class="step-sep">›</div>
+    <div class="step-pill" id="pill-2"><span class="step-dot"></span>Gennemgå</div>
+    <div class="step-sep">›</div>
+    <div class="step-pill" id="pill-3"><span class="step-dot"></span>Afsendt</div>
+  </div>
+</header>
+
+<div class="page">
+
+<!-- ═══ VIEW 1: FORMULAR ═══ -->
+<div class="view active" id="view-form">
+<div class="form-wrap">
+
+  <div class="form-hero">
+    <h1>Bestil tryksager</h1>
+    <p>Vælg produkter, angiv antal og udfyld leveringsinfo — du gennemgår alt inden afsendelse.</p>
+  </div>
+
+  <div class="grid-main">
+    <div class="grid-left">
+
+      <!-- Grundoplysninger -->
+      <div class="card">
+        <div class="card-label">Grundoplysninger</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="field">
+            <label>Butiksnavn <span class="req">*</span></label>
+            <input type="text" id="butiksnavn" placeholder="Navn"/>
+            <div class="field-error" id="err-butiksnavn">Udfyld venligst butiksnavnet</div>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Bestillers navn <span class="req">*</span></label>
+              <input type="text" id="bestiller_navn" placeholder="Fornavn Efternavn"/>
+              <div class="field-error" id="err-bestiller_navn">Udfyld venligst dit navn</div>
+            </div>
+            <div class="field">
+              <label>Din e-mail <span class="req">*</span></label>
+              <input type="email" id="bestiller_email" placeholder="dig@firma.dk"/>
+              <div class="field-error" id="err-bestiller_email">Ugyldig e-mailadresse</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produkter -->
+      <div class="card">
+        <div class="card-label">Produkter</div>
+        <div class="produkt-grid">
+
+          <!-- Plakat -->
+          <div class="produkt-item">
+            <div class="produkt-name">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+              Plakat
+            </div>
+            <div class="produkt-inner">
+              <div class="field">
+                <label>Format</label>
+                <div class="format-group" id="fmt-plakat">
+                  <span class="format-chip" onclick="selectFormat(this,'plakat')">A4</span>
+                  <span class="format-chip" onclick="selectFormat(this,'plakat')">50×70 cm</span>
+                  <span class="format-chip" onclick="selectFormat(this,'plakat')">A3</span>
+                  <span class="format-chip" onclick="selectFormat(this,'plakat')">70×100 cm</span>
+                </div>
+              </div>
+              <div class="qty-row">
+                <span class="qty-label">Antal</span>
+                <div class="qty-stepper">
+                  <button type="button" onclick="stepQty('qty-plakat',-1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <input type="number" id="qty-plakat" value="0" min="0"/>
+                  <button type="button" onclick="stepQty('qty-plakat',1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bordkort -->
+          <div class="produkt-item">
+            <div class="produkt-name">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+              Bordkort
+            </div>
+            <div class="produkt-inner">
+              <div class="qty-row">
+                <span class="qty-label">Antal</span>
+                <div class="qty-stepper">
+                  <button type="button" onclick="stepQty('qty-bordkort',-1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <input type="number" id="qty-bordkort" value="0" min="0"/>
+                  <button type="button" onclick="stepQty('qty-bordkort',1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bordrytter -->
+          <div class="produkt-item">
+            <div class="produkt-name">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5a2 2 0 012-2h14"/><path d="M4 19a2 2 0 002 2h14V7H6a2 2 0 00-2 2v12z"/></svg>
+              Bordrytter
+            </div>
+            <div class="produkt-inner">
+              <div class="qty-row">
+                <span class="qty-label">Antal</span>
+                <div class="qty-stepper">
+                  <button type="button" onclick="stepQty('qty-bordrytter',-1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <input type="number" id="qty-bordrytter" value="0" min="0"/>
+                  <button type="button" onclick="stepQty('qty-bordrytter',1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Banner -->
+          <div class="produkt-item">
+            <div class="produkt-name">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v10H4z"/><path d="M4 14l4 4M4 4v16"/></svg>
+              Banner
+            </div>
+            <div class="produkt-inner">
+              <div class="qty-row">
+                <span class="qty-label">Antal</span>
+                <div class="qty-stepper">
+                  <button type="button" onclick="stepQty('qty-banner',-1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                  <input type="number" id="qty-banner" value="0" min="0"/>
+                  <button type="button" onclick="stepQty('qty-banner',1)">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /produkt-grid -->
+
+        <!-- Andet -->
+        <div class="andet-card">
+          <div class="andet-label">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            Andet
+          </div>
+          <textarea id="andet" placeholder="Beskriv andre tryksager eller særlige ønsker..."></textarea>
+        </div>
+
+      </div><!-- /produkter card -->
+
+    </div><!-- /grid-left -->
+
+    <!-- ── Højre kolonne ── -->
+    <div class="grid-right">
+
+      <!-- Leveringsadresse -->
+      <div class="card">
+        <div class="card-label">Leveringsadresse</div>
+        <div class="addr-tabs">
+          <button class="addr-tab active" id="tab-butik" onclick="setAddrTab('butik')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2h-4a1 1 0 01-1-1v-4a1 1 0 00-1-1h-2a1 1 0 00-1 1v4a1 1 0 01-1 1H5a2 2 0 01-2-2z"/></svg>
+            Butiks-adresse
+          </button>
+          <button class="addr-tab" id="tab-privat" onclick="setAddrTab('privat')">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Privat-adresse
+          </button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="field">
+            <label>Gadenavn/nr <span class="req">*</span></label>
+            <input type="text" id="gade" placeholder="Strandvejen 123"/>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Postnummer</label>
+              <input type="text" id="postnr" placeholder="2100"/>
+            </div>
+            <div class="field">
+              <label>By</label>
+              <input type="text" id="by" placeholder="København"/>
+            </div>
+          </div>
+          <div class="divider" style="margin:2px 0;"></div>
+          <div class="field">
+            <label>Att. (Modtager)</label>
+            <input type="text" id="att" placeholder="Navn på modtager"/>
+          </div>
+          <div class="field">
+            <label>Telefon</label>
+            <input type="text" id="tlf_lev" placeholder="+45 12 34 56 78"/>
+          </div>
+        </div>
+
+        <div class="alt-addr-toggle" id="alt-addr-toggle" onclick="toggleAltAddr()">
+          <div class="toggle-switch"></div>
+          <span class="alt-addr-toggle-label">Levér til en anden adresse</span>
+        </div>
+
+        <div class="alt-addr-fields" id="alt-addr-fields">
+          <div class="field">
+            <label>Gadenavn/nr</label>
+            <input type="text" id="alt_gade" placeholder="Anden adresse"/>
+          </div>
+          <div class="row-2">
+            <div class="field">
+              <label>Postnummer</label>
+              <input type="text" id="alt_postnr" placeholder="1000"/>
+            </div>
+            <div class="field">
+              <label>By</label>
+              <input type="text" id="alt_by" placeholder="København"/>
+            </div>
+          </div>
+          <div class="divider" style="margin:2px 0;"></div>
+          <div class="field">
+            <label>Att. (Modtager)</label>
+            <input type="text" id="alt_att" placeholder="Navn på modtager"/>
+          </div>
+          <div class="field">
+            <label>Telefon</label>
+            <input type="text" id="alt_tlf" placeholder="+45 12 34 56 78"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salgskonsulent -->
+      <div class="card">
+        <div class="card-label">Carlsberg Salgskonsulent</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="field">
+            <label>Navn</label>
+            <input type="text" id="konsulent_navn" placeholder="Konsulentens navn"/>
+          </div>
+          <div class="field">
+            <label>Telefon</label>
+            <input type="text" id="konsulent_tlf" placeholder="+45 12 34 56 78"/>
+          </div>
+          <div class="field">
+            <label>E-mail</label>
+            <input type="email" id="konsulent_email" placeholder="konsulent@carlsberg.dk"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mail-flow -->
+      <button class="collapse-trigger" id="mf-trigger" onclick="toggleMailflow()">
+        <span style="display:flex;align-items:center;gap:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Sådan virker mail-flowet
+        </span>
+        <svg class="collapse-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="collapse-content" id="mf-content">
+        <div class="mailflow">
+          <div class="mf-step">
+            <div class="mf-line"></div>
+            <div class="mf-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 7h8M8 12h8M8 17h4"/></svg></div>
+            <div class="mf-body">
+              <div class="mf-title">Du sender bestillingen</div>
+              <div class="mf-desc">En ordrebekræftelse sendes straks til din e-mail.</div>
+            </div>
+          </div>
+          <div class="mf-step">
+            <div class="mf-line"></div>
+            <div class="mf-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg></div>
+            <div class="mf-body">
+              <div class="mf-title">Godkend eller fortryd</div>
+              <div class="mf-desc">I mailen vælger du:<span style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;"><span class="mf-tag yes">Godkend</span><span class="mf-tag no">Fortryd &amp; ret</span></span></div>
+            </div>
+          </div>
+          <div class="mf-step">
+            <div class="mf-line"></div>
+            <div class="mf-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/></svg></div>
+            <div class="mf-body">
+              <div class="mf-title">Fortryd → Ret &amp; gensend</div>
+              <div class="mf-desc">Du sendes tilbage til udfyldt formular — intet genskrives.</div>
+            </div>
+          </div>
+          <div class="mf-step">
+            <div class="mf-icon"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></div>
+            <div class="mf-body">
+              <div class="mf-title">Godkend → Brandsurface modtager</div>
+              <div class="mf-desc">Ingen dobbelt-ordrer. Vi modtager kun godkendte bestillinger.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid-right -->
+  </div><!-- /grid-main -->
+</div><!-- /form-wrap -->
+
+<div class="bottom-bar">
+  <div class="bottom-bar-info">
+    <div class="bbl">Klar til at gennemgå?</div>
+    <div class="bbs">Du kan rette inden afsendelse</div>
+  </div>
+  <button class="btn-primary" onclick="goToReview()">
+    Gennemgå bestilling
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+</div><!-- /view-form -->
+
+
+<!-- ═══ VIEW 2: GENNEMGÅ ═══ -->
+<div class="view" id="view-review">
+<div class="review-wrap">
+  <h2 class="review-title">Gennemgå bestilling</h2>
+  <p class="review-sub">Tjek alle detaljer — du kan stadig gå tilbage og rette.</p>
+
+  <div class="review-section">
+    <div class="review-section-label">Bestiller</div>
+    <div class="review-grid">
+      <div class="review-field"><div class="rf-label">Butiksnavn</div><div class="rf-val" id="rv-butiksnavn">—</div></div>
+      <div class="review-field"><div class="rf-label">Navn</div><div class="rf-val" id="rv-navn">—</div></div>
+      <div class="review-field full"><div class="rf-label">E-mail (bekræftelse sendes hertil)</div><div class="rf-val" id="rv-email" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:13px;">—</div></div>
+    </div>
+  </div>
+
+  <div class="review-section">
+    <div class="review-section-label">Produkter</div>
+    <div id="rv-products"></div>
+  </div>
+
+  <div class="review-section">
+    <div class="review-section-label">Levering</div>
+    <div class="review-grid">
+      <div class="review-field"><div class="rf-label">Adressetype</div><div class="rf-val" id="rv-addrtype">—</div></div>
+      <div class="review-field"><div class="rf-label">Adresse</div><div class="rf-val" id="rv-addr">—</div></div>
+      <div class="review-field"><div class="rf-label">Modtager</div><div class="rf-val" id="rv-att">—</div></div>
+      <div class="review-field"><div class="rf-label">Telefon</div><div class="rf-val" id="rv-tlf">—</div></div>
+    </div>
+  </div>
+
+  <div class="review-section" id="rv-alt-section" style="display:none;">
+    <div class="review-section-label">Alternativ leveringsadresse</div>
+    <div class="review-grid">
+      <div class="review-field full"><div class="rf-label">Adresse</div><div class="rf-val" id="rv-alt-addr">—</div></div>
+      <div class="review-field"><div class="rf-label">Modtager</div><div class="rf-val" id="rv-alt-att">—</div></div>
+      <div class="review-field"><div class="rf-label">Telefon</div><div class="rf-val" id="rv-alt-tlf">—</div></div>
+    </div>
+  </div>
+
+  <div class="review-section">
+    <div class="review-section-label">Salgskonsulent</div>
+    <div class="review-grid">
+      <div class="review-field"><div class="rf-label">Navn</div><div class="rf-val" id="rv-k-navn">—</div></div>
+      <div class="review-field"><div class="rf-label">Telefon</div><div class="rf-val" id="rv-k-tlf">—</div></div>
+      <div class="review-field full"><div class="rf-label">E-mail</div><div class="rf-val" id="rv-k-email">—</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="bottom-bar">
+  <button class="btn-secondary" onclick="goBack()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Ret bestilling
+  </button>
+  <button class="btn-primary" onclick="submitOrder()">
+    Send bestilling
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
+</div><!-- /view-review -->
+
+
+<!-- ═══ VIEW 3: AFSENDT ═══ -->
+<div class="view" id="view-confirm">
+<div class="confirm-wrap">
+  <div class="confirm-icon">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
+  </div>
+  <h2 class="confirm-title">Bestilling sendt!</h2>
+  <p class="confirm-text">Vi har sendt en ordrebekræftelse til</p>
+  <div class="confirm-email" id="conf-email">—</div>
+  <p class="confirm-text" style="margin-top:4px;">Tjek din indbakke og evt. spam-mappen.</p>
+
+  <div class="confirm-steps">
+    <div class="cs-title">Hvad sker der nu?</div>
+    <div class="cs-item">
+      <div class="cs-num">1</div>
+      <div class="cs-body"><div class="cs-h">Du modtager bekræftelsesmail</div><div class="cs-d">Mailen indeholder et komplet overblik over din bestilling.</div></div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-num">2</div>
+      <div class="cs-body"><div class="cs-h">Godkend eller fortryd</div><div class="cs-d">Klik <strong style="color:var(--success)">Godkend</strong> — eller <strong style="color:var(--error)">Fortryd</strong> for at gå tilbage og rette.</div></div>
+    </div>
+    <div class="cs-item">
+      <div class="cs-num">3</div>
+      <div class="cs-body"><div class="cs-h">Brandsurface modtager ordren</div><div class="cs-d">Vi sætter produktionen i gang så snart du godkender.</div></div>
+    </div>
+  </div>
+
+  <button class="btn-ghost" onclick="resetForm()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Lav ny bestilling
+  </button>
+</div>
+</div><!-- /view-confirm -->
+
+</div><!-- /page -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── State ──
+let addrType = 'butik';
+let altAddrActive = false;
+const selectedFormats = { plakat: null };
+
+// ── Prefill fra ?edit=ordreId (når kunde fortryder via mail-link) ──
+window.__editId = null;
+async function prefillFromOrder(orderId) {
+  try {
+    const res = await fetch('/api/order-data?id=' + orderId);
+    if (!res.ok) return;
+    const d = await res.json();
+
+    window.__editId = orderId;
+
+    // Grundoplysninger
+    if (d.butiksnavn) document.getElementById('butiksnavn').value = d.butiksnavn;
+    if (d.navn)       document.getElementById('bestiller_navn').value = d.navn;
+    if (d.email)      document.getElementById('bestiller_email').value = d.email;
+
+    // Produkter
+    if (Array.isArray(d.produkter)) {
+      const qtyMap = { Plakat:'qty-plakat', Bordkort:'qty-bordkort', Bordrytter:'qty-bordrytter', Banner:'qty-banner' };
+      d.produkter.forEach(p => {
+        const qid = qtyMap[p.type];
+        if (qid) document.getElementById(qid).value = p.antal;
+        if (p.type === 'Plakat' && p.format) {
+          document.querySelectorAll('#fmt-plakat .format-chip').forEach(chip => {
+            if (chip.textContent === p.format) {
+              chip.classList.add('active');
+              selectedFormats.plakat = p.format;
+            }
+          });
+        }
+      });
+    }
+    if (d.andet) document.getElementById('andet').value = d.andet;
+
+    // Levering
+    if (d.addr_type) { addrType = d.addr_type; setAddrTab(d.addr_type); }
+    if (d.gade)   document.getElementById('gade').value = d.gade;
+    if (d.postnr) document.getElementById('postnr').value = d.postnr;
+    if (d.by)     document.getElementById('by').value = d.by;
+    if (d.att)    document.getElementById('att').value = d.att;
+    if (d.tlf)    document.getElementById('tlf_lev').value = d.tlf;
+
+    // Alternativ adresse
+    if (d.alt_active && d.alt_gade) {
+      toggleAltAddr();
+      document.getElementById('alt_gade').value = d.alt_gade || '';
+      document.getElementById('alt_postnr').value = d.alt_postnr || '';
+      document.getElementById('alt_by').value = d.alt_by || '';
+      document.getElementById('alt_att').value = d.alt_att || '';
+      document.getElementById('alt_tlf').value = d.alt_tlf || '';
+    }
+
+    // Konsulent
+    if (d.konsulent_navn)  document.getElementById('konsulent_navn').value = d.konsulent_navn;
+    if (d.konsulent_tlf)   document.getElementById('konsulent_tlf').value = d.konsulent_tlf;
+    if (d.konsulent_email) document.getElementById('konsulent_email').value = d.konsulent_email;
+
+    showToast('Bestilling indlæst — ret og send igen', '');
+  } catch (err) {
+    console.error('Prefill fejl:', err);
+  }
+}
+
+// Tjek om siden er åbnet via ?edit= link fra fortryd-mail
+const urlParams = new URLSearchParams(window.location.search);
+const editId = urlParams.get('edit');
+if (editId) {
+  window.addEventListener('DOMContentLoaded', () => prefillFromOrder(editId));
+}
+
+// ── Format selection ──
+function selectFormat(chip, product) {
+  const group = document.getElementById('fmt-' + product);
+  group.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  selectedFormats[product] = chip.textContent;
+}
+
+// ── Quantity stepper ──
+function stepQty(id, delta) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const val = Math.max(0, (parseInt(el.value) || 0) + delta);
+  el.value = val;
+}
+
+// ── Address tabs ──
+function setAddrTab(type) {
+  addrType = type;
+  document.querySelectorAll('.addr-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + type).classList.add('active');
+}
+
+function toggleAltAddr() {
+  altAddrActive = !altAddrActive;
+  document.getElementById('alt-addr-toggle').classList.toggle('active', altAddrActive);
+  document.getElementById('alt-addr-fields').classList.toggle('show', altAddrActive);
+}
+
+function toggleMailflow() {
+  document.getElementById('mf-trigger').classList.toggle('open');
+  document.getElementById('mf-content').classList.toggle('open');
+}
+
+// ── Validation ──
+function validate() {
+  let ok = true;
+  [
+    { id: 'butiksnavn', err: 'err-butiksnavn' },
+    { id: 'bestiller_navn', err: 'err-bestiller_navn' },
+    { id: 'bestiller_email', err: 'err-bestiller_email' },
+  ].forEach(({ id, err }) => {
+    const el = document.getElementById(id);
+    const errEl = document.getElementById(err);
+    const val = el ? el.value.trim() : '';
+    const isEmail = id === 'bestiller_email';
+    const invalid = isEmail ? !isValidEmail(val) : !val;
+    el.classList.toggle('error', invalid);
+    if (errEl) errEl.classList.toggle('show', invalid);
+    if (invalid) ok = false;
+  });
+
+  // At mindst ét produkt har antal > 0 eller andet er udfyldt
+  const qtyIds = ['qty-plakat', 'qty-bordkort', 'qty-bordrytter', 'qty-banner'];
+  const hasQty = qtyIds.some(id => parseInt(document.getElementById(id)?.value || 0) > 0);
+  const hasAndet = document.getElementById('andet')?.value.trim();
+  if (!hasQty && !hasAndet) {
+    showToast('Vælg mindst ét produkt med antal', 'error');
+    ok = false;
+  }
+  return ok;
+}
+
+function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+// ── Go to review ──
+function goToReview() {
+  if (!validate()) return;
+
+  v('rv-butiksnavn', g('butiksnavn'));
+  v('rv-navn', g('bestiller_navn'));
+  v('rv-email', g('bestiller_email'));
+  v('rv-addrtype', addrType === 'butik' ? 'Butiks-adresse' : 'Privat-adresse');
+  v('rv-addr', [g('gade'), g('postnr'), g('by')].filter(Boolean).join(', ') || '—');
+  v('rv-att', g('att') || '—');
+  v('rv-tlf', g('tlf_lev') || '—');
+  v('rv-k-navn', g('konsulent_navn') || '—');
+  v('rv-k-tlf', g('konsulent_tlf') || '—');
+  v('rv-k-email', g('konsulent_email') || '—');
+
+  // Alt addr
+  const altSec = document.getElementById('rv-alt-section');
+  if (altAddrActive && g('alt_gade')) {
+    altSec.style.display = '';
+    v('rv-alt-addr', [g('alt_gade'), g('alt_postnr'), g('alt_by')].filter(Boolean).join(', '));
+    v('rv-alt-att', g('alt_att') || '—');
+    v('rv-alt-tlf', g('alt_tlf') || '—');
+  } else {
+    altSec.style.display = 'none';
+  }
+
+  // Produkter
+  const rvProd = document.getElementById('rv-products');
+  rvProd.innerHTML = '';
+  const produkter = [
+    { label: 'Plakat', id: 'qty-plakat', extra: () => selectedFormats.plakat ? `Format: ${selectedFormats.plakat}` : null },
+    { label: 'Bordkort', id: 'qty-bordkort', extra: () => null },
+    { label: 'Bordrytter', id: 'qty-bordrytter', extra: () => null },
+    { label: 'Banner', id: 'qty-banner', extra: () => null },
+  ];
+
+  produkter.forEach(({ label, id, extra }) => {
+    const qty = parseInt(document.getElementById(id)?.value || 0);
+    if (qty <= 0) return;
+    const extraStr = extra();
+    const d = document.createElement('div');
+    d.className = 'rv-produkt-row';
+    d.innerHTML = `
+      <div class="rv-produkt-name">${label}</div>
+      <div class="rv-produkt-meta">
+        Antal: ${qty}${extraStr ? '<br>' + extraStr : ''}
+      </div>
+    `;
+    rvProd.appendChild(d);
+  });
+
+  const andet = g('andet');
+  if (andet) {
+    const d = document.createElement('div');
+    d.className = 'rv-produkt-row';
+    d.style.flexDirection = 'column';
+    d.style.alignItems = 'flex-start';
+    d.style.gap = '6px';
+    d.innerHTML = `
+      <div class="rv-produkt-name">Andet</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${andet}</div>
+    `;
+    rvProd.appendChild(d);
+  }
+
+  if (!rvProd.children.length) {
+    rvProd.innerHTML = '<div style="color:var(--text-3);font-size:14px;">—</div>';
+  }
+
+  showView('view-review');
+  setPill(2);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goBack() { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+async function submitOrder() {
+  const btn = document.querySelector('#view-review .btn-primary');
+  const originalHTML = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = 'Sender...';
+
+  // Saml produkter
+  const produkter = [];
+  const qtyMap = [
+    { type: 'Plakat',     id: 'qty-plakat',     formatKey: 'plakat' },
+    { type: 'Bordkort',   id: 'qty-bordkort',   formatKey: null },
+    { type: 'Bordrytter', id: 'qty-bordrytter', formatKey: null },
+    { type: 'Banner',     id: 'qty-banner',      formatKey: null },
+  ];
+  qtyMap.forEach(({ type, id, formatKey }) => {
+    const antal = parseInt(document.getElementById(id)?.value || 0);
+    if (antal > 0) {
+      const entry = { type, antal };
+      if (formatKey && selectedFormats[formatKey]) entry.format = selectedFormats[formatKey];
+      produkter.push(entry);
+    }
+  });
+
+  const payload = {
+    butiksnavn:      g('butiksnavn'),
+    navn:            g('bestiller_navn'),
+    email:           g('bestiller_email'),
+    produkter,
+    andet:           g('andet'),
+    addr_type:       addrType,
+    gade:            g('gade'),
+    postnr:          g('postnr'),
+    by:              g('by'),
+    att:             g('att'),
+    tlf:             g('tlf_lev'),
+    alt_active:      altAddrActive,
+    alt_gade:        g('alt_gade'),
+    alt_postnr:      g('alt_postnr'),
+    alt_by:          g('alt_by'),
+    alt_att:         g('alt_att'),
+    alt_tlf:         g('alt_tlf'),
+    konsulent_navn:  g('konsulent_navn'),
+    konsulent_tlf:   g('konsulent_tlf'),
+    konsulent_email: g('konsulent_email'),
+    previous_id:     window.__editId || null,
+  };
+
+  try {
+    const res = await fetch('/api/order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.error || 'Serverfejl');
+
+    document.getElementById('conf-email').textContent = g('bestiller_email');
+    showView('view-confirm'); setPill(3);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('Bestilling sendt! Tjek din e-mail.', 'success');
+
+    // Ryd edit-state efter succes
+    window.__editId = null;
+    window.history.replaceState({}, '', '/');
+
+  } catch (err) {
+    showToast('Fejl: ' + err.message, 'error');
+    btn.disabled = false;
+    btn.innerHTML = originalHTML;
+  }
+}
+
+function resetForm() {
+  document.querySelectorAll('input[type="text"],input[type="email"]').forEach(el => el.value = '');
+  document.querySelectorAll('input[type="number"]').forEach(el => el.value = 0);
+  document.getElementById('andet').value = '';
+  document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+  selectedFormats.plakat = null;
+  addrType = 'butik'; setAddrTab('butik');
+  if (altAddrActive) toggleAltAddr();
+  showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
+function v(id, val) { const el = document.getElementById(id); if (el) el.textContent = val || '—'; }
+function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+function setPill(n) { document.querySelectorAll('.step-pill').forEach((p, i) => { p.classList.remove('active','done'); if (i+1 < n) p.classList.add('done'); else if (i+1 === n) p.classList.add('active'); }); }
+function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type==='success'?'success':type==='error'?'error-t':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3500); }
+</script>
+</body>
+</html>
