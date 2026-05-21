@@ -1,0 +1,62 @@
+import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/lib/admin-auth'
+
+export const dynamic = 'force-dynamic'
+
+const ADMIN_CSS = `
+.a-body { margin:0; min-height:100vh; background:linear-gradient(160deg,#221f18 0%,#0e0a00 60%); background-attachment:fixed;
+  font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#f0ede8; }
+.a-nav { display:flex; align-items:center; gap:24px; padding:0 28px; height:60px; border-bottom:1px solid #4a4640;
+  background:rgba(14,10,0,0.7); position:sticky; top:0; z-index:10; }
+.a-logo { font-size:18px; font-weight:800; letter-spacing:-0.02em; color:#f1562e; }
+.a-nav-links { display:flex; gap:6px; }
+.a-nav-link { padding:6px 12px; border-radius:999px; font-size:13px; color:#b8b4ae; text-decoration:none; }
+.a-nav-link:hover { color:#f0ede8; background:#242220; }
+.a-nav-link.active { color:#f1562e; background:rgba(241,86,46,0.12); }
+.a-nav-right { margin-left:auto; display:flex; align-items:center; gap:14px; font-size:12px; color:#7a7672; }
+.a-nav-right a { color:#b8b4ae; text-decoration:none; }
+.a-nav-right a:hover { color:#f87171; }
+.a-wrap { max-width:1000px; margin:0 auto; padding:36px 28px 80px; }
+.a-h1 { font-size:28px; font-weight:800; letter-spacing:-0.02em; margin:0 0 6px; }
+.a-sub { color:#b8b4ae; font-size:14px; margin:0 0 28px; }
+.a-card { background:#1e1d1a; border:1px solid #4a4640; border-radius:16px; padding:20px; }
+.a-label { font-family:'DM Mono',monospace; font-size:11px; font-weight:500; letter-spacing:0.1em; text-transform:uppercase; color:#7a7672; }
+.a-input { background:#242220; border:1px solid #4a4640; border-radius:10px; padding:11px 13px; color:#f0ede8; font-size:14px; font-family:inherit; outline:none; width:100%; box-sizing:border-box; }
+.a-btn { padding:11px 22px; background:#f1562e; color:#fff; border:none; border-radius:999px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; }
+.a-btn-2 { padding:8px 16px; background:#242220; color:#f0ede8; border:1px solid #4a4640; border-radius:999px; font-size:13px; font-weight:500; cursor:pointer; font-family:inherit; }
+.a-btn-danger { padding:7px 14px; background:transparent; color:#f87171; border:1px solid rgba(248,113,113,0.35); border-radius:999px; font-size:12px; cursor:pointer; font-family:inherit; }
+.a-table { width:100%; border-collapse:collapse; }
+.a-table th { text-align:left; font-family:'DM Mono',monospace; font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#7a7672; padding:0 14px 12px; font-weight:500; }
+.a-table td { padding:14px; border-top:1px solid #2e2e2e; font-size:14px; color:#f0ede8; vertical-align:top; }
+.a-badge { display:inline-block; padding:2px 10px; border-radius:999px; font-family:'DM Mono',monospace; font-size:11px; }
+.a-badge.pending { background:rgba(241,86,46,0.12); color:#f1562e; }
+.a-badge.confirmed { background:rgba(74,222,128,0.1); color:#4ade80; }
+.a-badge.cancelled { background:rgba(248,113,113,0.1); color:#f87171; }
+.a-note { font-size:13px; border-radius:10px; padding:10px 14px; margin-bottom:18px; }
+.a-note.ok { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; }
+.a-note.err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; }
+`
+
+export default async function DashLayout({ children }) {
+  const user = await getCurrentUser()
+  if (!user) redirect('/admin/login')
+
+  return (
+    <div className="a-body">
+      <style dangerouslySetInnerHTML={{ __html: ADMIN_CSS }} />
+      <nav className="a-nav">
+        <span className="a-logo">brandsurface</span>
+        <div className="a-nav-links">
+          <a className="a-nav-link" href="/admin">Orders</a>
+          <a className="a-nav-link" href="/admin/settings">Settings</a>
+          {user.is_master && <a className="a-nav-link" href="/admin/users">Users</a>}
+        </div>
+        <div className="a-nav-right">
+          <span>{user.email}</span>
+          <a href="/api/admin/logout">Log out</a>
+        </div>
+      </nav>
+      <div className="a-wrap">{children}</div>
+    </div>
+  )
+}
