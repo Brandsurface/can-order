@@ -622,6 +622,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
               <input type="text" id="by" placeholder="København"/>
             </div>
           </div>
+          <div class="field">
+            <label>Land</label>
+            <input type="text" id="land" placeholder="Danmark"/>
+          </div>
           <div class="divider" style="margin:2px 0;"></div>
           <div class="field">
             <label>Att. (Modtager)</label>
@@ -844,6 +848,7 @@ async function prefillFromOrder(orderId) {
     if (d.gade)   document.getElementById('gade').value = d.gade;
     if (d.postnr) document.getElementById('postnr').value = d.postnr;
     if (d.by)     document.getElementById('by').value = d.by;
+    if (d.land)   document.getElementById('land').value = d.land;
     if (d.att)    document.getElementById('att').value = d.att;
     if (d.tlf)    document.getElementById('tlf_lev').value = d.tlf;
 
@@ -946,7 +951,7 @@ function goToReview() {
   v('rv-navn', g('bestiller_navn'));
   v('rv-email', g('bestiller_email'));
   v('rv-addrtype', addrType === 'butik' ? 'Butiks-adresse' : 'Privat-adresse');
-  v('rv-addr', [g('gade'), g('postnr'), g('by')].filter(Boolean).join(', ') || '—');
+  v('rv-addr', [g('gade'), g('postnr'), g('by'), g('land')].filter(Boolean).join(', ') || '—');
   v('rv-att', g('att') || '—');
   v('rv-tlf', g('tlf_lev') || '—');
   v('rv-k-navn', g('konsulent_navn') || '—');
@@ -1047,6 +1052,7 @@ async function submitOrder() {
     gade:            g('gade'),
     postnr:          g('postnr'),
     by:              g('by'),
+    land:            g('land'),
     att:             g('att'),
     tlf:             g('tlf_lev'),
     alt_active:      altAddrActive,
