@@ -13,6 +13,7 @@ export async function GET(request) {
     return Response.json({ error: 'Manglende ordre-id' }, { status: 400 })
   }
 
+  // Hent ordren
   const { data: order, error: fetchError } = await supabase
     .from('orders')
     .select('*')
@@ -24,6 +25,7 @@ export async function GET(request) {
   }
 
   if (order.status === 'confirmed') {
+    // Allerede godkendt — vis bekræftelsesside
     redirect(`/order/bekraeftet?id=${id}`)
   }
 
@@ -31,6 +33,7 @@ export async function GET(request) {
     return Response.json({ error: 'Ordren er annulleret' }, { status: 410 })
   }
 
+  // Opdater status til confirmed
   const { error: updateError } = await supabase
     .from('orders')
     .update({ status: 'confirmed' })
@@ -41,6 +44,7 @@ export async function GET(request) {
     return Response.json({ error: 'Kunne ikke bekræfte ordre' }, { status: 500 })
   }
 
+  // Send mail til Brandsurface
   const { subject, html } = buildBrandsurfaceEmail({ order })
 
   await resend.emails.send({
@@ -51,5 +55,6 @@ export async function GET(request) {
     html,
   })
 
+  // Redirect til bekræftelsesside
   redirect(`/order/bekraeftet?id=${id}`)
 }

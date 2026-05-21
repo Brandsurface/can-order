@@ -8,6 +8,7 @@ export async function POST(request) {
   try {
     const body = await request.json()
 
+    // Validering
     if (!body.butiksnavn || !body.navn || !body.email) {
       return Response.json({ error: 'Manglende påkrævede felter' }, { status: 400 })
     }
@@ -15,6 +16,7 @@ export async function POST(request) {
       return Response.json({ error: 'Ugyldig e-mailadresse' }, { status: 400 })
     }
 
+    // Gem ordre i Supabase
     const { data: order, error: dbError } = await supabase
       .from('orders')
       .insert({
@@ -49,6 +51,7 @@ export async function POST(request) {
       return Response.json({ error: 'Database fejl' }, { status: 500 })
     }
 
+    // Byg og send bekræftelsesmail til kunden
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL
     const { subject, html } = buildConfirmEmail({ order, baseUrl })
 
@@ -61,6 +64,7 @@ export async function POST(request) {
 
     if (mailError) {
       console.error('Resend fejl:', mailError)
+      // Vi returnerer stadig success — ordren er gemt, mailen kan sendes igen
     }
 
     return Response.json({ success: true, orderId: order.id })

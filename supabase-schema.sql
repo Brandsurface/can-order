@@ -9,13 +9,17 @@ create table if not exists orders (
   status        text not null default 'pending'
                 check (status in ('pending', 'confirmed', 'cancelled')),
 
+  -- Bestiller
   butiksnavn    text not null,
   navn          text not null,
   email         text not null,
 
+  -- Produkter (JSON array)
+  -- Eksempel: [{"type":"Plakat","format":"A4","antal":10},{"type":"Bordkort","antal":50}]
   produkter     jsonb not null default '[]',
   andet         text,
 
+  -- Leveringsadresse (primær)
   addr_type     text default 'butik',
   gade          text,
   postnr        text,
@@ -23,6 +27,7 @@ create table if not exists orders (
   att           text,
   tlf           text,
 
+  -- Alternativ leveringsadresse
   alt_active    boolean default false,
   alt_gade      text,
   alt_postnr    text,
@@ -30,13 +35,16 @@ create table if not exists orders (
   alt_att       text,
   alt_tlf       text,
 
+  -- Salgskonsulent
   konsulent_navn  text,
   konsulent_tlf   text,
   konsulent_email text,
 
+  -- Revision counter (antal gange kunden har fortrudt og rettet)
   revision      integer default 0
 );
 
+-- Automatisk updated_at
 create or replace function set_updated_at()
 returns trigger as $$
 begin
@@ -50,4 +58,6 @@ create trigger orders_updated_at
   before update on orders
   for each row execute procedure set_updated_at();
 
+-- Row Level Security: ingen offentlig adgang
+-- Al adgang sker via Vercel Functions med service_role nøglen
 alter table orders enable row level security;

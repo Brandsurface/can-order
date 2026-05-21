@@ -18,6 +18,8 @@ export async function GET(request) {
     return Response.json({ error: 'Ikke fundet' }, { status: 404 })
   }
 
+  // Returner kun de felter der er nødvendige for at genopfylde formularen
+  // (vi eksponerer ikke interne felter som status, revision, etc.)
   return Response.json({
     butiksnavn:       order.butiksnavn,
     navn:             order.navn,
