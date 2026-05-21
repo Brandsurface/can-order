@@ -1,8 +1,21 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { buildCustomerConfirmEmail } from '@/lib/emails'
+import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
 
 export const dynamic = 'force-dynamic'
+
+async function getSettings() {
+  const { data } = await supabase
+    .from('app_settings')
+    .select('key, value')
+    .in('key', ['brandsurface_email', 'confirm_delay_minutes'])
+  const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
+  const delay = parseInt(map.confirm_delay_minutes, 10)
+  return {
+    recipient: (map.brandsurface_email || process.env.BRANDSURFACE_EMAIL || '').trim(),
+    delayMinutes: Number.isFinite(delay) && delay >= 0 ? delay : 10,
+  }
+}
 
 export async function POST(request) {
   try {
@@ -16,15 +29,23 @@ export async function POST(request) {
       return Response.json({ error: 'Ugyldig e-mailadresse' }, { status: 400 })
     }
 
-    // Bestem revision
+    const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
+
+    // Bestem revision + annullér tidligere planlagt afsendelse ved redigering
     let revision = 0
     if (body.previous_id) {
       const { data: prev } = await supabase
         .from('orders')
-        .select('revision')
+        .select('revision, scheduled_email_id')
         .eq('id', body.previous_id)
         .single()
-      if (prev) revision = (prev.revision || 0) + 1
+      if (prev) {
+        revision = (prev.revision || 0) + 1
+        if (resend && prev.scheduled_email_id) {
+          try { await resend.emails.cancel(prev.scheduled_email_id) } catch (e) { console.warn('Kunne ikke annullere tidligere planlagt mail:', e?.message) }
+        }
+        await supabase.from('orders').update({ status: 'cancelled' }).eq('id', body.previous_id)
+      }
     }
 
     // Gem ordre i Supabase
@@ -62,35 +83,57 @@ export async function POST(request) {
       return Response.json({ error: 'Database fejl' }, { status: 500 })
     }
 
-    // Send bekræftelsesmail til kunden
-    if (!process.env.RESEND_API_KEY) {
+    if (!resend) {
       console.error('RESEND_API_KEY mangler')
       return Response.json({ error: 'Mail-service ikke konfigureret' }, { status: 500 })
     }
-    const resend = new Resend(process.env.RESEND_API_KEY)
+
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin
     const fromAddress = process.env.RESEND_FROM || 'onboarding@resend.dev'
+    const { recipient, delayMinutes } = await getSettings()
 
-    const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl })
-
+    // 1) Send ordrebekræftelse til kunden med det samme
+    const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
     const { error: mailError } = await resend.emails.send({
-      from:    `Brandsurface <${fromAddress}>`,
-      to:      order.email,
+      from: `Brandsurface <${fromAddress}>`,
+      to: order.email,
       subject,
       html,
     })
-
     if (mailError) {
-      console.error('Resend fejl:', mailError)
-      // Ordre er gemt — vi returnerer success men advarer
-      return Response.json({
-        success: true,
-        orderId: order.id,
-        warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes'
-      })
+      console.error('Resend fejl (kundebekræftelse):', mailError)
+      return Response.json({ success: true, orderId: order.id, warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes' })
     }
 
-    return Response.json({ success: true, orderId: order.id })
+    // 2) Planlæg ordremailen til Brandsurface efter forsinkelsen
+    if (recipient) {
+      const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
+      try {
+        const bs = buildBrandsurfaceEmail({ order })
+        const { data: scheduled, error: schedErr } = await resend.emails.send({
+          from: `Brandsurface Ordre <${fromAddress}>`,
+          to: recipient,
+          replyTo: order.email,
+          scheduledAt: sendAfter.toISOString(),
+          subject: bs.subject,
+          html: bs.html,
+        })
+        if (schedErr) {
+          console.error('Resend planlægning fejl:', schedErr)
+        } else {
+          await supabase
+            .from('orders')
+            .update({ send_after: sendAfter.toISOString(), scheduled_email_id: scheduled?.id || null })
+            .eq('id', order.id)
+        }
+      } catch (e) {
+        console.error('Planlægning af Brandsurface-mail fejlede:', e?.message)
+      }
+    } else {
+      console.warn('Ingen Brandsurface-modtager konfigureret — ingen ordremail planlagt')
+    }
+
+    return Response.json({ success: true, orderId: order.id, delayMinutes })
 
   } catch (err) {
     console.error('Uventet fejl i /api/order:', err)

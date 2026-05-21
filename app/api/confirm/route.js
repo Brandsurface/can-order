@@ -55,6 +55,12 @@ export async function GET(request) {
     if (process.env.RESEND_API_KEY && recipient) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       const fromAddress = process.env.RESEND_FROM || 'onboarding@resend.dev'
+
+      // Sending now — cancel any pending scheduled send to avoid a duplicate
+      if (order.scheduled_email_id) {
+        try { await resend.emails.cancel(order.scheduled_email_id) } catch (e) { console.warn('Kunne ikke annullere planlagt mail:', e?.message) }
+      }
+
       const { subject, html } = buildBrandsurfaceEmail({ order })
 
       await resend.emails.send({
