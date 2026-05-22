@@ -89,7 +89,7 @@ export async function POST(request) {
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin
-    const fromAddress = process.env.RESEND_FROM || 'onboarding@resend.dev'
+    const fromAddress = process.env.RESEND_FROM || 'no-reply@brandsurface.dk'
     const { recipient, delayMinutes } = await getSettings()
 
     // 1) Send ordrebekræftelse til kunden med det samme
