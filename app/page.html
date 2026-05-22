@@ -796,13 +796,15 @@ async function prefillFromOrder(orderId) {
           cfg.groups.forEach((name, gi) => {
             const val = opts[name];
             if (val == null) return;
+            const wanted = Array.isArray(val) ? val : [val];
+            const sel = [];
             document.querySelectorAll('#opt-' + cfg.pid + '-' + gi + ' .format-chip').forEach(chip => {
-              if (chip.textContent === val) {
-                chip.classList.add('active');
-                selectedOptions[cfg.pid] = selectedOptions[cfg.pid] || {};
-                selectedOptions[cfg.pid][name] = val;
-              }
+              if (wanted.includes(chip.textContent)) { chip.classList.add('active'); sel.push(chip.textContent); }
             });
+            if (sel.length) {
+              selectedOptions[cfg.pid] = selectedOptions[cfg.pid] || {};
+              selectedOptions[cfg.pid][name] = sel;
+            }
           });
         }
         if (p.comment) { const c = document.getElementById(cfg.cmt); if (c) c.value = p.comment; }
@@ -856,15 +858,14 @@ function toggleProduct(pid, forceOpen) {
   else body.parentElement.classList.toggle('open');
 }
 
-// ── Option selection (one choice per group) ──
+// ── Option selection (multiple choices per group) ──
 function selectOption(chip, pid, groupIndex) {
-  chip.parentElement.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
-  chip.classList.add('active');
+  chip.classList.toggle('active');
   const prod = PRODUCTS.find(p => p.pid === pid);
   const name = prod && prod.groups[groupIndex];
   if (!name) return;
   selectedOptions[pid] = selectedOptions[pid] || {};
-  selectedOptions[pid][name] = chip.textContent;
+  selectedOptions[pid][name] = Array.from(chip.parentElement.querySelectorAll('.format-chip.active')).map(c => c.textContent);
 }
 
 // ── Quantity stepper ──
@@ -974,7 +975,11 @@ function goToReview() {
     const qty = parseInt(document.getElementById(qtyId)?.value || 0);
     if (qty <= 0) return;
     const opts = selectedOptions[pid] || {};
-    const optStr = groups.map(n => opts[n] ? `${escHtml(n)}: ${escHtml(opts[n])}` : null).filter(Boolean).join(' · ');
+    const optStr = groups.map(n => {
+      const v = opts[n];
+      if (!v || (Array.isArray(v) && !v.length)) return null;
+      return `${escHtml(n)}: ${escHtml(Array.isArray(v) ? v.join(', ') : v)}`;
+    }).filter(Boolean).join(' · ');
     const comment = document.getElementById(cmt)?.value.trim();
     const meta = [`Qty: ${qty}`, optStr || null, comment ? `Comment: ${escHtml(comment)}` : null].filter(Boolean).join('<br>');
     const d = document.createElement('div');
@@ -1044,7 +1049,7 @@ async function submitOrder() {
     if (antal <= 0) return;
     const entry = { type, antal };
     const opts = {};
-    groups.forEach(n => { if (selectedOptions[pid] && selectedOptions[pid][n]) opts[n] = selectedOptions[pid][n]; });
+    groups.forEach(n => { const v = selectedOptions[pid] && selectedOptions[pid][n]; if (Array.isArray(v) ? v.length : v) opts[n] = v; });
     if (Object.keys(opts).length) entry.options = opts;
     const comment = document.getElementById(cmt)?.value.trim();
     if (comment) entry.comment = comment;

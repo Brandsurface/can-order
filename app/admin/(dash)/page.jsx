@@ -31,7 +31,9 @@ function productSummary(produkter) {
   if (!Array.isArray(produkter) || !produkter.length) return '—'
   return produkter.map(p => {
     const qty = p.antal != null ? ` ×${p.antal}` : ''
-    const opts = p.options ? Object.values(p.options) : (p.format ? [p.format] : [])
+    const opts = p.options
+      ? Object.values(p.options).map(v => Array.isArray(v) ? v.join('/') : v)
+      : (p.format ? [p.format] : [])
     const extra = opts.length ? ` (${opts.join(', ')})` : ''
     return `${p.type}${extra}${qty}`
   }).join(', ')

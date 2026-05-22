@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
 import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
+import { dispatchToBrandsurface } from '@/lib/dispatch'
 
 export const dynamic = 'force-dynamic'
 
@@ -105,29 +106,34 @@ export async function POST(request) {
       return Response.json({ success: true, orderId: order.id, warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes' })
     }
 
-    // 2) Planlæg ordremailen til Brandsurface efter forsinkelsen
+    // 2) Forward to Brandsurface — immediately when no delay, otherwise scheduled
     if (recipient) {
-      const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
-      try {
-        const bs = buildBrandsurfaceEmail({ order })
-        const { data: scheduled, error: schedErr } = await resend.emails.send({
-          from: `Brandsurface Ordre <${fromAddress}>`,
-          to: recipient,
-          replyTo: order.email,
-          scheduledAt: sendAfter.toISOString(),
-          subject: bs.subject,
-          html: bs.html,
-        })
-        if (schedErr) {
-          console.error('Resend planlægning fejl:', schedErr)
-        } else {
-          await supabase
-            .from('orders')
-            .update({ send_after: sendAfter.toISOString(), scheduled_email_id: scheduled?.id || null })
-            .eq('id', order.id)
+      if (delayMinutes <= 0) {
+        // scheduledAt must be in the future, so send right away instead
+        await dispatchToBrandsurface(order)
+      } else {
+        const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
+        try {
+          const bs = buildBrandsurfaceEmail({ order })
+          const { data: scheduled, error: schedErr } = await resend.emails.send({
+            from: `Brandsurface Ordre <${fromAddress}>`,
+            to: recipient,
+            replyTo: order.email,
+            scheduledAt: sendAfter.toISOString(),
+            subject: bs.subject,
+            html: bs.html,
+          })
+          if (schedErr) {
+            console.error('Resend planlægning fejl:', schedErr)
+          } else {
+            await supabase
+              .from('orders')
+              .update({ send_after: sendAfter.toISOString(), scheduled_email_id: scheduled?.id || null })
+              .eq('id', order.id)
+          }
+        } catch (e) {
+          console.error('Planlægning af Brandsurface-mail fejlede:', e?.message)
         }
-      } catch (e) {
-        console.error('Planlægning af Brandsurface-mail fejlede:', e?.message)
       }
     } else {
       console.warn('Ingen Brandsurface-modtager konfigureret — ingen ordremail planlagt')
