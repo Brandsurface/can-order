@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
 import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
-import { dispatchToBrandsurface } from '@/lib/dispatch'
+import { dispatchToBrandsurface, buildUploadLinks } from '@/lib/dispatch'
 
 export const dynamic = 'force-dynamic'
 
@@ -73,6 +73,7 @@ export async function POST(request) {
         konsulent_navn:  body.konsulent_navn || null,
         konsulent_tlf:   body.konsulent_tlf || null,
         konsulent_email: body.konsulent_email || null,
+        uploads:         Array.isArray(body.uploads) ? body.uploads : [],
         status:          'pending',
         revision,
       })
@@ -114,7 +115,8 @@ export async function POST(request) {
       } else {
         const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
         try {
-          const bs = buildBrandsurfaceEmail({ order })
+          const uploadLinks = await buildUploadLinks(order)
+          const bs = buildBrandsurfaceEmail({ order: { ...order, uploadLinks } })
           const { data: scheduled, error: schedErr } = await resend.emails.send({
             from: `Brandsurface Ordre <${fromAddress}>`,
             to: recipient,

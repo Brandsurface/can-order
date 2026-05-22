@@ -27,6 +27,9 @@ export async function POST(req) {
 
   if (action === 'delete') {
     await cancelScheduledSend(order)
+    if (Array.isArray(order.uploads) && order.uploads.length) {
+      try { await supabase.storage.from('order-uploads').remove(order.uploads.map(u => u.path)) } catch (e) { console.warn('Kunne ikke slette filer:', e?.message) }
+    }
     const { error } = await supabase.from('orders').delete().eq('id', id)
     return back(req, error ? 'error' : 'deleted')
   }
