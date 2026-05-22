@@ -96,6 +96,14 @@ insert into products (grp, label, option_groups, sort)
 select 'some', 'Video', '[{"name":"Aspect ratio","options":["1:1","9:16","4:5"]}]'::jsonb, 120
 where not exists (select 1 from products where label = 'Video');
 
+-- File uploads attached to an order (paths in the order-uploads bucket)
+alter table orders add column if not exists uploads jsonb not null default '[]';
+
+-- Private storage bucket for order file uploads, 50 MB per file
+insert into storage.buckets (id, name, public, file_size_limit)
+values ('order-uploads', 'order-uploads', false, 52428800)
+on conflict (id) do update set public = false, file_size_limit = 52428800;
+
 -- No public access — all access goes through Vercel functions
 -- using the service_role key (which bypasses RLS).
 alter table admin_users  enable row level security;

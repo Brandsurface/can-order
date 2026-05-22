@@ -41,6 +41,7 @@ export async function GET(request) {
     konsulent_navn:  order.konsulent_navn,
     konsulent_tlf:   order.konsulent_tlf,
     konsulent_email: order.konsulent_email,
+    uploads:         order.uploads,
     revision:        order.revision,
   })
 }

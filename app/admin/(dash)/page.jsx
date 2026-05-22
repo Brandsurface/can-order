@@ -54,7 +54,7 @@ function statusBadge(o) {
 export default async function AdminOrders({ searchParams }) {
   const { data: orders, error } = await supabase
     .from('orders')
-    .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after')
+    .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after, uploads')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -95,7 +95,12 @@ export default async function AdminOrders({ searchParams }) {
                     {o.navn || '—'}
                     <div style={{ color: '#7a7672', fontSize: 12 }}>{o.email}</div>
                   </td>
-                  <td style={{ color: '#b8b4ae', fontSize: 13, maxWidth: 320 }}>{productSummary(o.produkter)}</td>
+                  <td style={{ color: '#b8b4ae', fontSize: 13, maxWidth: 320 }}>
+                    {productSummary(o.produkter)}
+                    {Array.isArray(o.uploads) && o.uploads.length > 0 && (
+                      <div style={{ color: '#7a7672', fontSize: 12, marginTop: 4 }}>📎 {o.uploads.length} file{o.uploads.length > 1 ? 's' : ''}</div>
+                    )}
+                  </td>
                   <td><span className={`a-badge ${b.cls}`}>{b.text}</span></td>
                   <td>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
