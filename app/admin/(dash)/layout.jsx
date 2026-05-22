@@ -58,6 +58,7 @@ export default async function DashLayout({ children }) {
         </div>
       </nav>
       <div className="a-wrap">{children}</div>
+      <script dangerouslySetInnerHTML={{ __html: "document.addEventListener('submit',function(e){var b=e.submitter;if(b&&b.dataset.confirm&&!window.confirm(b.dataset.confirm))e.preventDefault();});" }} />
     </div>
   )
 }

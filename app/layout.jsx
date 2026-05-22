@@ -1,7 +1,7 @@
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
-  title: 'Order print materials — Brandsurface',
+  title: 'POS materials — Brandsurface',
   description: 'Online ordering of print materials from Brandsurface',
 }
 

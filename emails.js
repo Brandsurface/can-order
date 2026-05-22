@@ -32,7 +32,7 @@ export function buildConfirmEmail({ order, baseUrl }) {
     : ''
 
   return {
-    subject: `Confirm your order — ${order.butiksnavn}${order.revision > 0 ? ` (rev. ${order.revision})` : ''}`,
+    subject: `Order confirmation — ${order.butiksnavn}${order.revision > 0 ? ` (rev. ${order.revision})` : ''}`,
     html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>

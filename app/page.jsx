@@ -68,12 +68,13 @@ function renderItem(p) {
 async function buildProducts() {
   let products = []
   try {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('products')
-      .select('id, grp, label, description, formats, option_groups, sort')
+      .select('*')
       .eq('active', true)
       .order('grp', { ascending: true })
       .order('sort', { ascending: true })
+    if (error) console.error('Produkt-hentning fejl:', error.message)
     products = data || []
   } catch (e) {
     console.error('Kunne ikke hente produkter:', e?.message)
