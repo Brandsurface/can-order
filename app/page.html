@@ -199,6 +199,24 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 }
 .qty-stepper input:focus { box-shadow: none; }
 
+/* ── Product accordion ── */
+.produkt-acc { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s; }
+.produkt-acc:hover { border-color: var(--border-light); }
+.produkt-acc-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: none; border: none; cursor: pointer; color: var(--text); font-family: inherit; text-align: left; }
+.acc-right { display: flex; align-items: center; gap: 10px; color: var(--text-3); flex-shrink: 0; }
+.acc-qty { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); }
+.acc-chevron { transition: transform 0.25s ease; flex-shrink: 0; }
+.produkt-acc.open .acc-chevron { transform: rotate(180deg); }
+.produkt-acc-body { display: none; padding: 2px 16px 16px; flex-direction: column; gap: 14px; }
+.produkt-acc.open .produkt-acc-body { display: flex; animation: fadeUp 0.25s ease; }
+.acc-desc { font-size: 13px; color: var(--text-2); line-height: 1.5; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; }
+.opt-group { display: flex; flex-direction: column; gap: 8px; }
+.opt-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); }
+.opt-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.acc-row { display: flex; align-items: center; gap: 12px; }
+.acc-comment { display: flex; flex-direction: column; gap: 8px; }
+.acc-comment textarea { min-height: 52px; }
+
 /* Other field */
 .andet-card {
   background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg);
@@ -728,8 +746,7 @@ let wetransferRequested = false;
 // Products are injected from the database (see app/page.jsx)
 /*PRODUCTS_JSON*/
 const PRODUCTS = window.__PRODUCTS || [];
-const selectedFormats = {};
-PRODUCTS.forEach(p => { if (p.fmt) selectedFormats[p.fmt] = null; });
+const selectedOptions = {}; // { pid: { groupName: value } }
 const ARTWORK_TYPE = 'Artwork';
 const WETRANSFER_TYPE = 'WeTransfer upload link';
 
@@ -761,16 +778,25 @@ async function prefillFromOrder(orderId) {
         }
         const cfg = PRODUCTS.find(x => x.type === p.type);
         if (!cfg) return;
-        const qtyEl = document.getElementById(cfg.id);
-        if (qtyEl && p.antal != null) qtyEl.value = p.antal;
-        if (cfg.fmt && p.format) {
-          document.querySelectorAll('#fmt-' + cfg.fmt + ' .format-chip').forEach(chip => {
-            if (chip.textContent === p.format) {
-              chip.classList.add('active');
-              selectedFormats[cfg.fmt] = p.format;
-            }
+        const qtyEl = document.getElementById(cfg.qty);
+        if (qtyEl && p.antal != null) { qtyEl.value = p.antal; updateQtyBadge(cfg.pid); }
+        // Restore selected options (new) or legacy single format
+        const opts = p.options || (p.format ? { [cfg.groups[0]]: p.format } : null);
+        if (opts) {
+          cfg.groups.forEach((name, gi) => {
+            const val = opts[name];
+            if (val == null) return;
+            document.querySelectorAll('#opt-' + cfg.pid + '-' + gi + ' .format-chip').forEach(chip => {
+              if (chip.textContent === val) {
+                chip.classList.add('active');
+                selectedOptions[cfg.pid] = selectedOptions[cfg.pid] || {};
+                selectedOptions[cfg.pid][name] = val;
+              }
+            });
           });
         }
+        if (p.comment) { const c = document.getElementById(cfg.cmt); if (c) c.value = p.comment; }
+        if (p.antal > 0 || opts || p.comment) toggleProduct(cfg.pid, true);
       });
     }
     if (d.andet) document.getElementById('andet').value = d.andet;
@@ -812,20 +838,40 @@ if (editId) {
   window.addEventListener('DOMContentLoaded', () => prefillFromOrder(editId));
 }
 
-// ── Format selection ──
-function selectFormat(chip, product) {
-  const group = document.getElementById('fmt-' + product);
-  group.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+// ── Accordion expand/collapse ──
+function toggleProduct(pid, forceOpen) {
+  const body = document.getElementById('accbody-' + pid);
+  if (!body || !body.parentElement) return;
+  if (forceOpen === true) body.parentElement.classList.add('open');
+  else body.parentElement.classList.toggle('open');
+}
+
+// ── Option selection (one choice per group) ──
+function selectOption(chip, pid, groupIndex) {
+  chip.parentElement.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-  selectedFormats[product] = chip.textContent;
+  const prod = PRODUCTS.find(p => p.pid === pid);
+  const name = prod && prod.groups[groupIndex];
+  if (!name) return;
+  selectedOptions[pid] = selectedOptions[pid] || {};
+  selectedOptions[pid][name] = chip.textContent;
 }
 
 // ── Quantity stepper ──
 function stepQty(id, delta) {
   const el = document.getElementById(id);
   if (!el) return;
-  const val = Math.max(0, (parseInt(el.value) || 0) + delta);
-  el.value = val;
+  el.value = Math.max(0, (parseInt(el.value) || 0) + delta);
+  updateQtyBadge(id.replace(/^qty-/, ''));
+}
+
+// Show the chosen quantity on the collapsed accordion header
+function updateQtyBadge(pid) {
+  const el = document.getElementById('qty-' + pid);
+  const badge = document.getElementById('accqty-' + pid);
+  if (!el || !badge) return;
+  const v = parseInt(el.value) || 0;
+  badge.textContent = v > 0 ? ('× ' + v) : '';
 }
 
 // ── Address tabs ──
@@ -873,7 +919,7 @@ function validate() {
   });
 
   // At least one product (qty > 0), the Other field, or a request toggle is needed
-  const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.id)?.value || 0) > 0);
+  const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
   const hasAndet = document.getElementById('andet')?.value.trim();
   if (!hasQty && !hasAndet && !artworkRequested && !wetransferRequested) {
     showToast('Please select at least one product, fill in Other, or request artwork help', 'error');
@@ -914,17 +960,18 @@ function goToReview() {
   const rvProd = document.getElementById('rv-products');
   rvProd.innerHTML = '';
 
-  PRODUCTS.forEach(({ type, id, fmt }) => {
-    const qty = parseInt(document.getElementById(id)?.value || 0);
+  PRODUCTS.forEach(({ type, pid, qty: qtyId, cmt, groups }) => {
+    const qty = parseInt(document.getElementById(qtyId)?.value || 0);
     if (qty <= 0) return;
-    const extraStr = fmt && selectedFormats[fmt] ? `Format: ${selectedFormats[fmt]}` : null;
+    const opts = selectedOptions[pid] || {};
+    const optStr = groups.map(n => opts[n] ? `${escHtml(n)}: ${escHtml(opts[n])}` : null).filter(Boolean).join(' · ');
+    const comment = document.getElementById(cmt)?.value.trim();
+    const meta = [`Qty: ${qty}`, optStr || null, comment ? `Comment: ${escHtml(comment)}` : null].filter(Boolean).join('<br>');
     const d = document.createElement('div');
     d.className = 'rv-produkt-row';
     d.innerHTML = `
-      <div class="rv-produkt-name">${type}</div>
-      <div class="rv-produkt-meta">
-        Qty: ${qty}${extraStr ? '<br>' + extraStr : ''}
-      </div>
+      <div class="rv-produkt-name">${escHtml(type)}</div>
+      <div class="rv-produkt-meta">${meta}</div>
     `;
     rvProd.appendChild(d);
   });
@@ -938,7 +985,7 @@ function goToReview() {
     d.style.gap = '6px';
     d.innerHTML = `
       <div class="rv-produkt-name">Other</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${andet}</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${escHtml(andet)}</div>
     `;
     rvProd.appendChild(d);
   }
@@ -982,13 +1029,16 @@ async function submitOrder() {
 
   // Collect products
   const produkter = [];
-  PRODUCTS.forEach(({ type, id, fmt }) => {
-    const antal = parseInt(document.getElementById(id)?.value || 0);
-    if (antal > 0) {
-      const entry = { type, antal };
-      if (fmt && selectedFormats[fmt]) entry.format = selectedFormats[fmt];
-      produkter.push(entry);
-    }
+  PRODUCTS.forEach(({ type, pid, qty: qtyId, cmt, groups }) => {
+    const antal = parseInt(document.getElementById(qtyId)?.value || 0);
+    if (antal <= 0) return;
+    const entry = { type, antal };
+    const opts = {};
+    groups.forEach(n => { if (selectedOptions[pid] && selectedOptions[pid][n]) opts[n] = selectedOptions[pid][n]; });
+    if (Object.keys(opts).length) entry.options = opts;
+    const comment = document.getElementById(cmt)?.value.trim();
+    if (comment) entry.comment = comment;
+    produkter.push(entry);
   });
   if (artworkRequested) produkter.push({ type: ARTWORK_TYPE, note: 'Help with key visual requested' });
   if (wetransferRequested) produkter.push({ type: WETRANSFER_TYPE, note: 'Request Files link wanted · uploads up to 3 GB' });
@@ -1053,9 +1103,11 @@ function closePage() {
 function resetForm() {
   document.querySelectorAll('input[type="text"],input[type="email"]').forEach(el => el.value = '');
   document.querySelectorAll('input[type="number"]').forEach(el => el.value = 0);
-  document.getElementById('andet').value = '';
+  document.querySelectorAll('textarea').forEach(el => el.value = '');
   document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
-  Object.keys(selectedFormats).forEach(k => { selectedFormats[k] = null; });
+  document.querySelectorAll('.produkt-acc.open').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.acc-qty').forEach(b => b.textContent = '');
+  Object.keys(selectedOptions).forEach(k => delete selectedOptions[k]);
   addrType = 'butik'; setAddrTab('butik');
   if (altAddrActive) toggleAltAddr();
   if (artworkRequested) toggleArtwork();
@@ -1064,6 +1116,7 @@ function resetForm() {
 }
 
 function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
+function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function v(id, val) { const el = document.getElementById(id); if (el) el.textContent = val || '—'; }
 function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function setPill(n) { document.querySelectorAll('.step-pill').forEach((p, i) => { p.classList.remove('active','done'); if (i+1 < n) p.classList.add('done'); else if (i+1 === n) p.classList.add('active'); }); }

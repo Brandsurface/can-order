@@ -6,11 +6,17 @@ export const dynamic = 'force-dynamic'
 
 const back = (req, status) => NextResponse.redirect(new URL(`/admin/products?status=${status}`, req.url), 303)
 
-// "A4, 50×70 cm" → ["A4","50×70 cm"]
-function parseFormats(raw) {
+// One group per line:  "Format: A4, 50×70 cm, A3"
+function parseOptionGroups(raw) {
   return String(raw || '')
-    .split(',')
-    .map(s => s.trim())
+    .split('\n')
+    .map(line => {
+      const i = line.indexOf(':')
+      if (i < 0) return null
+      const name = line.slice(0, i).trim()
+      const options = line.slice(i + 1).split(',').map(s => s.trim()).filter(Boolean)
+      return name && options.length ? { name, options } : null
+    })
     .filter(Boolean)
 }
 
@@ -21,31 +27,25 @@ export async function POST(req) {
   const form = await req.formData()
   const action = String(form.get('action') || '')
 
-  if (action === 'create') {
+  if (action === 'create' || action === 'update') {
     const label = String(form.get('label') || '').trim()
-    const grp = String(form.get('grp') || 'print')
     if (!label) return back(req, 'invalid')
-    const { error } = await supabase.from('products').insert({
+    const fields = {
       label,
-      grp: grp === 'some' ? 'some' : 'print',
-      formats: parseFormats(form.get('formats')),
+      grp: String(form.get('grp') || 'print') === 'some' ? 'some' : 'print',
+      description: String(form.get('description') || '').trim() || null,
+      option_groups: parseOptionGroups(form.get('option_groups')),
+      formats: [], // option_groups is the single source of truth going forward
       sort: parseInt(form.get('sort'), 10) || 0,
-    })
-    return back(req, error ? 'error' : 'created')
-  }
-
-  if (action === 'update') {
+    }
+    if (action === 'create') {
+      const { error } = await supabase.from('products').insert(fields)
+      return back(req, error ? 'error' : 'created')
+    }
     const id = String(form.get('id') || '')
-    const label = String(form.get('label') || '').trim()
-    const grp = String(form.get('grp') || 'print')
-    if (!id || !label) return back(req, 'invalid')
-    const { error } = await supabase.from('products').update({
-      label,
-      grp: grp === 'some' ? 'some' : 'print',
-      formats: parseFormats(form.get('formats')),
-      sort: parseInt(form.get('sort'), 10) || 0,
-      active: form.get('active') === 'on',
-    }).eq('id', id)
+    if (!id) return back(req, 'invalid')
+    fields.active = form.get('active') === 'on'
+    const { error } = await supabase.from('products').update(fields).eq('id', id)
     return back(req, error ? 'error' : 'saved')
   }
 
