@@ -484,6 +484,16 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
               <div class="field-error" id="err-bestiller_email">Invalid email address</div>
             </div>
           </div>
+
+          <div id="consent-container">
+            <div class="consent-wrap">
+              <input type="checkbox" id="gdpr-consent" onchange="onConsentChange()"/>
+              <label for="gdpr-consent">
+                I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
+              </label>
+            </div>
+            <div class="consent-error" id="consent-error">You must accept the terms before submitting.</div>
+          </div>
         </div>
       </div>
 
@@ -723,16 +733,6 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
       <div class="review-field"><div class="rf-label">Phone</div><div class="rf-val" id="rv-k-tlf">—</div></div>
       <div class="review-field full"><div class="rf-label">Email</div><div class="rf-val" id="rv-k-email">—</div></div>
     </div>
-  </div>
-
-  <div id="consent-container" style="margin-top:28px;">
-    <div class="consent-wrap">
-      <input type="checkbox" id="gdpr-consent" onchange="onConsentChange()"/>
-      <label for="gdpr-consent">
-        I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
-      </label>
-    </div>
-    <div class="consent-error" id="consent-error">You must accept the terms before submitting.</div>
   </div>
 </div>
 
@@ -1018,6 +1018,16 @@ function validate() {
     showToast('Please select at least one product, fill in Other, or request artwork help', 'error');
     ok = false;
   }
+
+  // GDPR consent must be accepted
+  const consent = document.getElementById('gdpr-consent');
+  const consentErr = document.getElementById('consent-error');
+  if (!consent.checked) {
+    consentErr.classList.add('visible');
+    ok = false;
+  } else {
+    consentErr.classList.remove('visible');
+  }
   return ok;
 }
 
@@ -1116,27 +1126,15 @@ function goToReview() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function goBack() {
-  document.getElementById('gdpr-consent').checked = false;
-  document.getElementById('consent-error').classList.remove('visible');
-  document.querySelector('#view-review .btn-primary').style.opacity = '';
-  showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+function goBack() { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
 function onConsentChange() {
-  const checked = document.getElementById('gdpr-consent').checked;
-  document.getElementById('consent-error').classList.toggle('visible', false);
-  document.querySelector('#view-review .btn-primary').style.opacity = checked ? '' : '0.5';
+  if (document.getElementById('gdpr-consent').checked) {
+    document.getElementById('consent-error').classList.remove('visible');
+  }
 }
 
 async function submitOrder() {
-  const consent = document.getElementById('gdpr-consent');
-  if (!consent.checked) {
-    document.getElementById('consent-error').classList.add('visible');
-    consent.closest('.consent-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    return;
-  }
-
   const btn = document.querySelector('#view-review .btn-primary');
   const originalHTML = btn.innerHTML;
   btn.disabled = true;
