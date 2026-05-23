@@ -21,8 +21,8 @@ export default function AdminLogin({ searchParams }) {
         width: '100%', maxWidth: 380, background: '#1e1d1a', border: '1px solid #4a4640',
         borderRadius: 22, padding: 32,
       }}>
-        <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: '#f1562e', marginBottom: 24 }}>
-          brandsurface
+        <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '0.02em', color: '#f1562e', marginBottom: 24 }}>
+          BRANDSURFACE
         </div>
         <h1 style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 6px' }}>Admin login</h1>
         <p style={{ fontSize: 13, color: '#b8b4ae', margin: '0 0 22px', lineHeight: 1.5 }}>

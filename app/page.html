@@ -398,7 +398,6 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   header { padding: 0 20px; }
   .step-pills { display: none; }
   .form-wrap, .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
-  #consent-container { padding: 0 20px 16px; }
   .bottom-bar { padding: 14px 20px; }
   .row-2 { grid-template-columns: 1fr; }
   .review-grid { grid-template-columns: 1fr; }
@@ -725,16 +724,16 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
       <div class="review-field full"><div class="rf-label">Email</div><div class="rf-val" id="rv-k-email">—</div></div>
     </div>
   </div>
-</div>
 
-<div style="padding: 0 40px 20px;" id="consent-container">
-  <div class="consent-wrap">
-    <input type="checkbox" id="gdpr-consent" onchange="onConsentChange()"/>
-    <label for="gdpr-consent">
-      I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
-    </label>
+  <div id="consent-container" style="margin-top:28px;">
+    <div class="consent-wrap">
+      <input type="checkbox" id="gdpr-consent" onchange="onConsentChange()"/>
+      <label for="gdpr-consent">
+        I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
+      </label>
+    </div>
+    <div class="consent-error" id="consent-error">You must accept the terms before submitting.</div>
   </div>
-  <div class="consent-error" id="consent-error">You must accept the terms before submitting.</div>
 </div>
 
 <div class="bottom-bar">
