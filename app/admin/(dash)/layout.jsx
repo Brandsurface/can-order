@@ -8,7 +8,7 @@ const ADMIN_CSS = `
   font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#f0ede8; }
 .a-nav { display:flex; align-items:center; gap:24px; padding:0 28px; height:60px; border-bottom:1px solid #4a4640;
   background:rgba(14,10,0,0.7); position:sticky; top:0; z-index:10; }
-.a-logo { font-size:18px; font-weight:800; letter-spacing:-0.02em; color:#f1562e; }
+.a-logo { font-size:18px; font-weight:800; letter-spacing:0.02em; color:#f1562e; }
 .a-nav-links { display:flex; gap:6px; }
 .a-nav-link { padding:6px 12px; border-radius:999px; font-size:13px; color:#b8b4ae; text-decoration:none; }
 .a-nav-link:hover { color:#f0ede8; background:#242220; }
@@ -45,7 +45,7 @@ export default async function DashLayout({ children }) {
     <div className="a-body">
       <style dangerouslySetInnerHTML={{ __html: ADMIN_CSS }} />
       <nav className="a-nav">
-        <span className="a-logo">brandsurface</span>
+        <span className="a-logo">BRANDSURFACE</span>
         <div className="a-nav-links">
           <a className="a-nav-link" href="/admin">Orders</a>
           <a className="a-nav-link" href="/admin/products">Products</a>
