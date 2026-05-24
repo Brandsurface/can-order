@@ -1039,6 +1039,18 @@ function toggleMailflow() {
   document.getElementById('mf-content').classList.toggle('open');
 }
 
+function flashError() {
+  const reviewBtn = document.querySelector('#view-form .btn-primary');
+  reviewBtn.classList.remove('btn-shake');
+  void reviewBtn.offsetWidth;
+  reviewBtn.classList.add('btn-shake');
+  reviewBtn.addEventListener('animationend', () => reviewBtn.classList.remove('btn-shake'), { once: true });
+  const overlay = document.getElementById('legal-overlay');
+  overlay.classList.remove('flash');
+  void overlay.offsetWidth;
+  overlay.classList.add('flash');
+}
+
 // ── Validation ──
 function validate() {
   let ok = true;
@@ -1068,22 +1080,10 @@ function validate() {
   // GDPR consent must be accepted
   const legalActive = document.getElementById('legal-toggle').classList.contains('active');
   const consentErr = document.getElementById('consent-error');
-  if (!legalActive) {
-    consentErr.classList.add('visible');
-    ok = false;
-    // Shake the Review order button + flash red overlay
-    const reviewBtn = document.querySelector('#view-form .btn-primary');
-    reviewBtn.classList.remove('btn-shake');
-    void reviewBtn.offsetWidth; // restart animation
-    reviewBtn.classList.add('btn-shake');
-    reviewBtn.addEventListener('animationend', () => reviewBtn.classList.remove('btn-shake'), { once: true });
-    const overlay = document.getElementById('legal-overlay');
-    overlay.classList.remove('flash');
-    void overlay.offsetWidth;
-    overlay.classList.add('flash');
-  } else {
-    consentErr.classList.remove('visible');
-  }
+  consentErr.classList.toggle('visible', !legalActive);
+  if (!legalActive) ok = false;
+
+  if (!ok) flashError();
   return ok;
 }
 
