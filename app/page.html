@@ -83,6 +83,29 @@ header {
 .view.active { display: block; }
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
 
+/* ── Legal consent feedback ── */
+@keyframes legalShake {
+  0%,100% { transform:translateX(0); }
+  15%     { transform:translateX(-7px); }
+  30%     { transform:translateX(7px); }
+  45%     { transform:translateX(-5px); }
+  60%     { transform:translateX(5px); }
+  75%     { transform:translateX(-3px); }
+  90%     { transform:translateX(3px); }
+}
+.btn-shake { animation: legalShake 0.5s ease !important; }
+@keyframes legalFlash {
+  0%   { opacity:0; }
+  15%  { opacity:1; }
+  65%  { opacity:1; }
+  100% { opacity:0; }
+}
+#legal-overlay {
+  position: fixed; inset: 0; z-index: 90; pointer-events: none;
+  background: rgba(220,38,38,0.30); opacity: 0;
+}
+#legal-overlay.flash { animation: legalFlash 0.7s ease forwards; }
+
 /* ── Form wrap ── */
 .form-wrap { max-width: 1100px; margin: 0 auto; padding: 52px 40px 160px; }
 .form-hero { margin-bottom: 52px; }
@@ -789,6 +812,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 </footer>
 
 </div><!-- /page -->
+<div id="legal-overlay"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1021,6 +1045,16 @@ function validate() {
   if (!legalActive) {
     consentErr.classList.add('visible');
     ok = false;
+    // Shake the Review order button + flash red overlay
+    const reviewBtn = document.querySelector('#view-form .btn-primary');
+    reviewBtn.classList.remove('btn-shake');
+    void reviewBtn.offsetWidth; // restart animation
+    reviewBtn.classList.add('btn-shake');
+    reviewBtn.addEventListener('animationend', () => reviewBtn.classList.remove('btn-shake'), { once: true });
+    const overlay = document.getElementById('legal-overlay');
+    overlay.classList.remove('flash');
+    void overlay.offsetWidth;
+    overlay.classList.add('flash');
   } else {
     consentErr.classList.remove('visible');
   }
