@@ -52,6 +52,14 @@ function statusBadge(o) {
 }
 
 export default async function AdminOrders({ searchParams }) {
+  // Mark any scheduled orders as confirmed if their send_after time has passed
+  await supabase
+    .from('orders')
+    .update({ status: 'confirmed' })
+    .eq('status', 'pending')
+    .not('send_after', 'is', null)
+    .lte('send_after', new Date().toISOString())
+
   const { data: orders, error } = await supabase
     .from('orders')
     .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after, uploads')
@@ -83,7 +91,7 @@ export default async function AdminOrders({ searchParams }) {
           <tbody>
             {(orders || []).map(o => {
               const b = statusBadge(o)
-              const isPending = o.status === 'pending'
+              const isPending = o.status === 'pending' && (!o.send_after || new Date(o.send_after).getTime() > Date.now())
               return (
                 <tr key={o.id}>
                   <td style={{ whiteSpace: 'nowrap', color: '#b8b4ae' }}>{fmtDate(o.created_at)}</td>
