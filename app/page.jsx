@@ -90,6 +90,7 @@ async function buildProducts() {
                 `        <div class="produkt-list">${rows.map(renderItem).join('')}\n        </div>\n\n`
   }
 
+  const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
   const arr = products.map(p => ({
     type: p.label,
     pid: p.id,
@@ -98,7 +99,7 @@ async function buildProducts() {
     groups: effectiveGroups(p).map(g => g.name),
   }))
   const json = JSON.stringify(arr).replace(/</g, '\\u003c')
-  return { sections, dataScript: `window.__PRODUCTS = ${json};` }
+  return { sections, dataScript: `window.__PRODUCTS = ${json}; window.__SUPABASE_URL = ${JSON.stringify(supabaseUrl)};` }
 }
 
 export default async function Home() {

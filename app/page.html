@@ -405,6 +405,27 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .consent-error { display: none; font-size: 12px; color: #f87171; margin-top: 6px; }
 .consent-error.visible { display: block; }
 
+/* ── Attached files review cards ── */
+.rv-files-grid { display: flex; flex-direction: column; gap: 8px; }
+.rv-file-card {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px; overflow: hidden;
+}
+.rv-file-thumb {
+  width: 44px; height: 44px; border-radius: 6px; flex-shrink: 0;
+  object-fit: cover; background: var(--surface-3); border: 1px solid var(--border);
+}
+.rv-file-badge {
+  width: 44px; height: 44px; border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace; font-size: 9px; font-weight: 600;
+  letter-spacing: 0.04em; text-transform: uppercase;
+}
+.rv-file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.rv-file-name { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rv-file-size { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-3); }
+
 /* ── Toast ── */
 .toast { position: fixed; top: 80px; right: 24px; z-index: 200; background: var(--surface-3); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px; font-size: 14px; color: var(--text); box-shadow: 0 8px 32px rgba(0,0,0,0.5); transform: translateX(120%); transition: transform 0.3s ease; max-width: 300px; }
 .toast.show { transform: translateX(0); }
@@ -753,6 +774,11 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
       <div class="review-field full"><div class="rf-label">Email</div><div class="rf-val" id="rv-k-email">—</div></div>
     </div>
   </div>
+
+  <div class="review-section" id="rv-uploads-section" style="display:none;">
+    <div class="review-section-label">Attached files</div>
+    <div class="rv-files-grid" id="rv-files"></div>
+  </div>
 </div>
 
 <div class="bottom-bar">
@@ -1013,6 +1039,18 @@ function toggleMailflow() {
   document.getElementById('mf-content').classList.toggle('open');
 }
 
+function flashError() {
+  const reviewBtn = document.querySelector('#view-form .btn-primary');
+  reviewBtn.classList.remove('btn-shake');
+  void reviewBtn.offsetWidth;
+  reviewBtn.classList.add('btn-shake');
+  reviewBtn.addEventListener('animationend', () => reviewBtn.classList.remove('btn-shake'), { once: true });
+  const overlay = document.getElementById('legal-overlay');
+  overlay.classList.remove('flash');
+  void overlay.offsetWidth;
+  overlay.classList.add('flash');
+}
+
 // ── Validation ──
 function validate() {
   let ok = true;
@@ -1042,26 +1080,61 @@ function validate() {
   // GDPR consent must be accepted
   const legalActive = document.getElementById('legal-toggle').classList.contains('active');
   const consentErr = document.getElementById('consent-error');
-  if (!legalActive) {
-    consentErr.classList.add('visible');
-    ok = false;
-    // Shake the Review order button + flash red overlay
-    const reviewBtn = document.querySelector('#view-form .btn-primary');
-    reviewBtn.classList.remove('btn-shake');
-    void reviewBtn.offsetWidth; // restart animation
-    reviewBtn.classList.add('btn-shake');
-    reviewBtn.addEventListener('animationend', () => reviewBtn.classList.remove('btn-shake'), { once: true });
-    const overlay = document.getElementById('legal-overlay');
-    overlay.classList.remove('flash');
-    void overlay.offsetWidth;
-    overlay.classList.add('flash');
-  } else {
-    consentErr.classList.remove('visible');
-  }
+  consentErr.classList.toggle('visible', !legalActive);
+  if (!legalActive) ok = false;
+
+  if (!ok) flashError();
   return ok;
 }
 
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+function fmtSize(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function fileCardHtml(f) {
+  const ext = (f.name.split('.').pop() || '').toLowerCase();
+  const isImg = ['png','jpg','jpeg','gif','webp','tif','tiff'].includes(ext);
+  const supaUrl = (window.__SUPABASE_URL || '').replace(/\/+$/, '');
+  const pubUrl = supaUrl ? `${supaUrl}/storage/v1/object/public/order-uploads/${f.path}` : '';
+
+  const BADGE = {
+    pdf:  { bg: 'rgba(239,68,68,0.15)',  color: '#f87171' },
+    ai:   { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
+    eps:  { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
+    svg:  { bg: 'rgba(167,139,250,0.15)', color: '#a78bfa' },
+    psd:  { bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
+    indd: { bg: 'rgba(96,165,250,0.15)',  color: '#60a5fa' },
+    zip:  { bg: 'rgba(245,158,11,0.15)',  color: '#fbbf24' },
+  };
+  const imgBadge = { bg: 'rgba(241,86,46,0.12)', color: '#f1562e' };
+  const defBadge = { bg: 'var(--surface-3)', color: 'var(--text-3)' };
+  const badge = isImg ? imgBadge : (BADGE[ext] || defBadge);
+
+  const visual = (isImg && pubUrl)
+    ? `<img class="rv-file-thumb" src="${pubUrl}" alt="${escHtml(f.name)}" onerror="this.replaceWith(makeBadge('${ext}','${badge.bg}','${badge.color}'))"/>`
+    : `<div class="rv-file-badge" style="background:${badge.bg};color:${badge.color};">${escHtml(ext.slice(0,4) || '?')}</div>`;
+
+  return `<div class="rv-file-card">
+    ${visual}
+    <div class="rv-file-info">
+      <div class="rv-file-name">${escHtml(f.name)}</div>
+      ${f.size ? `<div class="rv-file-size">${fmtSize(f.size)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+function makeBadge(ext, bg, color) {
+  const el = document.createElement('div');
+  el.className = 'rv-file-badge';
+  el.style.background = bg; el.style.color = color;
+  el.textContent = ext.slice(0,4) || '?';
+  return el;
+}
 
 // ── Go to review ──
 function goToReview() {
@@ -1149,6 +1222,16 @@ function goToReview() {
 
   if (!rvProd.children.length) {
     rvProd.innerHTML = '<div style="color:var(--text-3);font-size:14px;">—</div>';
+  }
+
+  // Uploaded files
+  const rvUpSec = document.getElementById('rv-uploads-section');
+  const rvFiles = document.getElementById('rv-files');
+  if (uploadedFiles.length) {
+    rvFiles.innerHTML = uploadedFiles.map(fileCardHtml).join('');
+    rvUpSec.style.display = '';
+  } else {
+    rvUpSec.style.display = 'none';
   }
 
   showView('view-review');
