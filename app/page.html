@@ -1094,11 +1094,11 @@ function validate() {
     }
   });
 
-  // At least one product, Other, or request toggle needed
+  // Products or Other field always required — artwork/wetransfer toggles are add-ons, not substitutes
   const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
   const hasAndet = document.getElementById('andet')?.value.trim();
   const prodErrEl = document.getElementById('err-products');
-  if (!hasQty && !hasAndet && !artworkRequested && !wetransferRequested) {
+  if (!hasQty && !hasAndet) {
     if (prodErrEl) prodErrEl.classList.add('show');
     ok = false;
   } else {
