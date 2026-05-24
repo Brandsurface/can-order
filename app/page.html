@@ -370,20 +370,15 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .site-footer a:hover { text-decoration: underline; }
 
 /* ── Consent checkbox ── */
-.consent-wrap {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 16px 20px; margin-bottom: 0;
+.legal-expand {
+  display: none; flex-direction: column; gap: 0;
+  margin-top: 0; padding: 14px 16px;
   background: var(--surface-2); border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-top: none; border-radius: 0 0 var(--radius) var(--radius);
+  font-size: 13px; color: var(--text-2); line-height: 1.6;
 }
-.consent-wrap input[type="checkbox"] {
-  width: 18px; height: 18px; min-width: 18px; margin-top: 2px;
-  accent-color: var(--accent); cursor: pointer;
-}
-.consent-wrap label {
-  font-size: 13px; line-height: 1.55; color: var(--text-2); cursor: pointer;
-}
-.consent-wrap label strong { color: var(--text); font-weight: 600; }
+.legal-expand.show { display: flex; animation: fadeUp 0.25s ease; }
+.legal-expand strong { color: var(--text); font-weight: 600; }
 .consent-error { display: none; font-size: 12px; color: #f87171; margin-top: 6px; }
 .consent-error.visible { display: block; }
 
@@ -486,13 +481,14 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
           </div>
 
           <div id="consent-container">
-            <div class="consent-wrap">
-              <input type="checkbox" id="gdpr-consent" onchange="onConsentChange()"/>
-              <label for="gdpr-consent">
-                I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
-              </label>
+            <div class="alt-addr-toggle" id="legal-toggle" onclick="toggleLegal()" style="margin-top:0;">
+              <div class="toggle-switch"></div>
+              <span class="alt-addr-toggle-label">Legal</span>
             </div>
-            <div class="consent-error" id="consent-error">You must accept the terms before submitting.</div>
+            <div class="legal-expand" id="legal-expand">
+              I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
+            </div>
+            <div class="consent-error" id="consent-error">You must accept the terms to continue.</div>
           </div>
         </div>
       </div>
@@ -1020,9 +1016,9 @@ function validate() {
   }
 
   // GDPR consent must be accepted
-  const consent = document.getElementById('gdpr-consent');
+  const legalActive = document.getElementById('legal-toggle').classList.contains('active');
   const consentErr = document.getElementById('consent-error');
-  if (!consent.checked) {
+  if (!legalActive) {
     consentErr.classList.add('visible');
     ok = false;
   } else {
@@ -1128,10 +1124,12 @@ function goToReview() {
 
 function goBack() { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-function onConsentChange() {
-  if (document.getElementById('gdpr-consent').checked) {
-    document.getElementById('consent-error').classList.remove('visible');
-  }
+function toggleLegal() {
+  const toggle = document.getElementById('legal-toggle');
+  const expand = document.getElementById('legal-expand');
+  const active = toggle.classList.toggle('active');
+  expand.classList.toggle('show', active);
+  if (active) document.getElementById('consent-error').classList.remove('visible');
 }
 
 async function submitOrder() {
