@@ -558,9 +558,9 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
             <span class="alt-addr-toggle-label">I want help creating artwork</span>
           </div>
           <p class="artwork-note">BrandSurface will contact you for further information about the key visual, after which you'll receive a price estimate for the work.</p>
-          <div class="alt-addr-toggle" id="wetransfer-toggle" onclick="toggleWetransfer()">
+          <div class="alt-addr-toggle" id="smash-toggle" onclick="toggleSmash()">
             <div class="toggle-switch"></div>
-            <span class="alt-addr-toggle-label">Please send me a "Request Files" link via WeTransfer.com for file uploads up to 3 GB</span>
+            <span class="alt-addr-toggle-label">Please send me a Smash upload link for large file uploads (via brandsurface.fromsmash.com)</span>
           </div>
         </div>
 
@@ -572,7 +572,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             Attach files
           </label>
-          <p class="artwork-note">Max 50 MB per file. PDF, AI, EPS, PSD, PNG, JPG, ZIP, etc. For larger files use the WeTransfer option above.</p>
+          <p class="artwork-note">Max 50 MB per file. PDF, AI, EPS, PSD, PNG, JPG, ZIP, etc. For larger files use the Smash option above.</p>
           <div id="upload-list" class="upload-list"></div>
         </div>
 
@@ -847,7 +847,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 let addrType = 'butik';
 let altAddrActive = false;
 let artworkRequested = false;
-let wetransferRequested = false;
+let smashRequested = false;
 let uploadedFiles = []; // { path, name, size }
 
 // Products are injected from the database (see app/page.jsx)
@@ -855,7 +855,7 @@ let uploadedFiles = []; // { path, name, size }
 const PRODUCTS = window.__PRODUCTS || [];
 const selectedOptions = {}; // { pid: { groupName: value } }
 const ARTWORK_TYPE = 'Artwork';
-const WETRANSFER_TYPE = 'WeTransfer upload link';
+const SMASH_TYPE = 'Smash upload link';
 
 // ── Prefill fra ?edit=ordreId (når kunde fortryder via mail-link) ──
 window.__editId = null;
@@ -879,8 +879,8 @@ async function prefillFromOrder(orderId) {
           if (!artworkRequested) toggleArtwork();
           return;
         }
-        if (p.type === WETRANSFER_TYPE) {
-          if (!wetransferRequested) toggleWetransfer();
+        if (p.type === SMASH_TYPE) {
+          if (!smashRequested) toggleSmash();
           return;
         }
         const cfg = PRODUCTS.find(x => x.type === p.type);
@@ -1037,9 +1037,9 @@ function toggleArtwork() {
   document.getElementById('artwork-toggle').classList.toggle('active', artworkRequested);
 }
 
-function toggleWetransfer() {
-  wetransferRequested = !wetransferRequested;
-  document.getElementById('wetransfer-toggle').classList.toggle('active', wetransferRequested);
+function toggleSmash() {
+  smashRequested = !smashRequested;
+  document.getElementById('smash-toggle').classList.toggle('active', smashRequested);
 }
 
 function toggleMailflow() {
@@ -1094,7 +1094,7 @@ function validate() {
     }
   });
 
-  // Products or Other field always required — artwork/wetransfer toggles are add-ons, not substitutes
+  // Products or Other field always required — artwork/smash toggles are add-ons, not substitutes
   const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
   const hasAndet = document.getElementById('andet')?.value.trim();
   const prodErrEl = document.getElementById('err-products');
@@ -1238,12 +1238,12 @@ function goToReview() {
     rvProd.appendChild(d);
   }
 
-  if (wetransferRequested) {
+  if (smashRequested) {
     const d = document.createElement('div');
     d.className = 'rv-produkt-row';
     d.innerHTML = `
-      <div class="rv-produkt-name">WeTransfer upload link</div>
-      <div class="rv-produkt-meta">Requested · up to 3 GB</div>
+      <div class="rv-produkt-name">Smash upload link</div>
+      <div class="rv-produkt-meta">Requested · brandsurface.fromsmash.com</div>
     `;
     rvProd.appendChild(d);
   }
@@ -1297,7 +1297,7 @@ async function submitOrder() {
     produkter.push(entry);
   });
   if (artworkRequested) produkter.push({ type: ARTWORK_TYPE, note: 'Help with key visual requested' });
-  if (wetransferRequested) produkter.push({ type: WETRANSFER_TYPE, note: 'Request Files link wanted · uploads up to 3 GB' });
+  if (smashRequested) produkter.push({ type: SMASH_TYPE, note: 'Smash upload link wanted · brandsurface.fromsmash.com' });
 
   const payload = {
     butiksnavn:      g('butiksnavn'),
@@ -1369,7 +1369,7 @@ function resetForm() {
   addrType = 'butik'; setAddrTab('butik');
   if (altAddrActive) toggleAltAddr();
   if (artworkRequested) toggleArtwork();
-  if (wetransferRequested) toggleWetransfer();
+  if (smashRequested) toggleSmash();
   showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
