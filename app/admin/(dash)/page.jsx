@@ -128,15 +128,13 @@ export default async function AdminOrders({ searchParams }) {
                   <td>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       {isPending && (
-                        <>
-                          <form method="POST" action="/api/admin/orders">
-                            <input type="hidden" name="action" value="approve" />
-                            <input type="hidden" name="id" value={o.id} />
-                            <button type="submit" className="a-btn-2" data-confirm="Approve now and send this order to Brandsurface?">Approve now</button>
-                          </form>
-                          <a className="a-btn-2" href={`/?edit=${o.id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Edit</a>
-                        </>
+                        <form method="POST" action="/api/admin/orders">
+                          <input type="hidden" name="action" value="approve" />
+                          <input type="hidden" name="id" value={o.id} />
+                          <button type="submit" className="a-btn-2" data-confirm="Approve now and send this order to Brandsurface?">Approve now</button>
+                        </form>
                       )}
+                      <a className="a-btn-2" href={`/?edit=${o.id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Edit</a>
                       <form method="POST" action="/api/admin/orders">
                         <input type="hidden" name="action" value="delete" />
                         <input type="hidden" name="id" value={o.id} />
