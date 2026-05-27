@@ -112,8 +112,9 @@ async function buildHelpBox() {
     if (error) { console.error('[help_box] DB error:', error.message); return '' }
     const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
     console.log('[help_box] active:', map.help_box_active, 'html length:', map.help_box_html?.length)
-    // temp: always show box to test rendering pipeline
-    const content = map.help_box_html || 'Need help? Contact Brandsurface.'
+    if (map.help_box_active !== '1') return ''
+    const content = map.help_box_html || ''
+    if (!content) return ''
     return `
       <div class="card" style="margin-top:16px;">
         <div class="card-label">Need help?</div>

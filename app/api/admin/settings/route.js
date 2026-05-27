@@ -16,15 +16,21 @@ export async function POST(req) {
   const helpHtml = String(form.get('help_box_html') || '').trim()
 
   const now = new Date().toISOString()
-  const { error } = await supabase
+  const { error: e1 } = await supabase
     .from('app_settings')
     .upsert([
       { key: 'brandsurface_email', value: email, updated_at: now },
       { key: 'confirm_delay_minutes', value: String(delay), updated_at: now },
+    ], { onConflict: 'key' })
+
+  const { error: e2 } = await supabase
+    .from('app_settings')
+    .upsert([
       { key: 'help_box_active', value: helpActive, updated_at: now },
       { key: 'help_box_html', value: helpHtml, updated_at: now },
     ], { onConflict: 'key' })
 
+  const error = e1 || e2
   if (error) console.error('[settings] upsert error:', error.message)
   const status = error ? 'error' : 'saved'
   return NextResponse.redirect(new URL(`/admin/settings?status=${status}`, req.url), 303)
