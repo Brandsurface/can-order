@@ -19,7 +19,7 @@ export default async function AdminSettings({ searchParams }) {
       <h1 className="a-h1">Settings</h1>
       <p className="a-sub">Order forwarding to Brandsurface.</p>
 
-      {status === 'saved' && <div className="a-note ok">Saved. (help_box_active={map.help_box_active ?? 'not set'}, content length={map.help_box_html?.length ?? 0})</div>}
+      {status === 'saved' && <div className="a-note ok">Saved.</div>}
       {status === 'error' && <div className="a-note err">Could not save. Please try again.</div>}
 
       <div className="a-card" style={{ maxWidth: 520 }}>
