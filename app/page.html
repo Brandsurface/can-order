@@ -956,9 +956,11 @@ function toggleProduct(pid, forceOpen) {
   else body.parentElement.classList.toggle('open');
 }
 
-// ── Option selection (multiple choices per group) ──
+// ── Option selection (one choice per group) ──
 function selectOption(chip, pid, groupIndex) {
-  chip.classList.toggle('active');
+  const wasActive = chip.classList.contains('active');
+  chip.parentElement.querySelectorAll('.format-chip.active').forEach(c => c.classList.remove('active'));
+  if (!wasActive) chip.classList.add('active');
   const prod = PRODUCTS.find(p => p.pid === pid);
   const name = prod && prod.groups[groupIndex];
   if (!name) return;
@@ -1077,14 +1079,19 @@ function validate() {
     if (invalid) ok = false;
   });
 
-  // Open accordions must have qty > 0
+  // Open accordions with qty > 0 must be valid; open accordions with qty 0 only
+  // block submission if no other product has been filled in.
+  const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
+  const hasAndet = document.getElementById('andet')?.value.trim();
+  const hasAnyProduct = hasQty || hasAndet;
+
   PRODUCTS.forEach(({ pid, qty: qtyId }) => {
     const body = document.getElementById('accbody-' + pid);
     const isOpen = body && body.parentElement.classList.contains('open');
     const qtyEl = document.getElementById(qtyId);
     const qty = parseInt(qtyEl?.value || 0);
     const errEl = document.getElementById('err-qty-' + pid);
-    if (isOpen && qty <= 0) {
+    if (isOpen && qty <= 0 && !hasAnyProduct) {
       if (qtyEl) qtyEl.classList.add('error');
       if (errEl) errEl.classList.add('show');
       ok = false;
@@ -1093,10 +1100,6 @@ function validate() {
       if (errEl) errEl.classList.remove('show');
     }
   });
-
-  // Products or Other field always required — artwork/smash toggles are add-ons, not substitutes
-  const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
-  const hasAndet = document.getElementById('andet')?.value.trim();
   const prodErrEl = document.getElementById('err-products');
   if (!hasQty && !hasAndet) {
     if (prodErrEl) prodErrEl.classList.add('show');
