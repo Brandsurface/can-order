@@ -112,11 +112,12 @@ async function buildHelpBox() {
     if (error) { console.error('[help_box] DB error:', error.message); return '' }
     const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
     console.log('[help_box] active:', map.help_box_active, 'html length:', map.help_box_html?.length)
-    if (map.help_box_active !== '1' || !map.help_box_html) return ''
+    // temp: always show box to test rendering pipeline
+    const content = map.help_box_html || 'Need help? Contact Brandsurface.'
     return `
       <div class="card" style="margin-top:16px;">
         <div class="card-label">Need help?</div>
-        <div class="help-box-content">${map.help_box_html}</div>
+        <div class="help-box-content">${content}</div>
       </div>`
   } catch (e) {
     console.error('[help_box] exception:', e?.message)
