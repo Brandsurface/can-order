@@ -103,13 +103,32 @@ async function buildProducts() {
   return { sections, dataScript: `window.__PRODUCTS = ${json}; window.__SUPABASE_URL = ${JSON.stringify(supabaseUrl)};` }
 }
 
+async function buildHelpBox() {
+  try {
+    const { data } = await supabase
+      .from('app_settings')
+      .select('key, value')
+      .in('key', ['help_box_active', 'help_box_html'])
+    const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
+    if (map.help_box_active !== '1' || !map.help_box_html) return ''
+    return `
+      <div class="card" style="margin-top:16px;">
+        <div class="card-label">Need help?</div>
+        <div class="help-box-content">${map.help_box_html}</div>
+      </div>`
+  } catch {
+    return ''
+  }
+}
+
 export default async function Home() {
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const { sections, dataScript } = await buildProducts()
+  const [{ sections, dataScript }, helpBox] = await Promise.all([buildProducts(), buildHelpBox()])
   html = html.replace('        <!--PRODUCTS_SECTIONS-->', sections)
   html = html.replace('/*PRODUCTS_JSON*/', dataScript)
+  html = html.replace('      <!--HELP_BOX-->', helpBox)
 
   const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i)
   const headContent = headMatch ? headMatch[1] : ''

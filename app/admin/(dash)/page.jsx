@@ -21,7 +21,7 @@ function fmtDate(iso) {
 
 function fmtTime(iso) {
   try {
-    return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
+    return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Copenhagen' })
   } catch {
     return ''
   }
