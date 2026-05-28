@@ -63,16 +63,25 @@ const BUILDER_SCRIPT = `(function(){
       wrap.appendChild(row);
     });
   }
-  function sync(b){ b.querySelector('input[type=hidden]').value=JSON.stringify(b._groups); }
-  document.querySelectorAll('.og-builder').forEach(function(b){
-    var hidden=b.querySelector('input[type=hidden]');
-    try{ b._groups=JSON.parse(hidden.value||'[]'); }catch(e){ b._groups=[]; }
-    if(!Array.isArray(b._groups)) b._groups=[];
-    draw(b);
-    b.querySelector('.og-add-group').addEventListener('click',function(){
-      b._groups.push({name:'',options:['']}); draw(b); sync(b);
+  function sync(b){ b.querySelector('input[name=option_groups]').value=JSON.stringify(b._groups); }
+  function initBuilders(){
+    document.querySelectorAll('.og-builder').forEach(function(b){
+      if(b._init) return;
+      b._init=true;
+      var hidden=b.querySelector('input[name=option_groups]');
+      try{ b._groups=JSON.parse(hidden.value||'[]'); }catch(e){ b._groups=[]; }
+      if(!Array.isArray(b._groups)) b._groups=[];
+      draw(b);
+      b.querySelector('.og-add-group').addEventListener('click',function(){
+        b._groups.push({name:'',options:['']}); draw(b); sync(b);
+      });
     });
-  });
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initBuilders);
+  } else {
+    initBuilders();
+  }
 })();`
 
 export default async function AdminProducts({ searchParams }) {
