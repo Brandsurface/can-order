@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import OptionGroupsBuilder from './OptionGroupsBuilder'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,68 +22,6 @@ function groupsToJson(p) {
   if (Array.isArray(p?.formats) && p.formats.length) return [{ name: 'Format', options: p.formats }]
   return []
 }
-
-function OptionGroupsBuilder({ groups }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label className="a-label">Option groups (multiple choice)</label>
-      <div className="og-builder">
-        <input type="hidden" name="option_groups" defaultValue={JSON.stringify(groups)} />
-        <div className="og-groups" />
-        <button type="button" className="og-add-group">+ Add option group</button>
-      </div>
-    </div>
-  )
-}
-
-const BUILDER_SCRIPT = `(function(){
-  function draw(b){
-    var wrap=b.querySelector('.og-groups');
-    wrap.innerHTML='';
-    (b._groups||[]).forEach(function(g,gi){
-      var row=document.createElement('div'); row.className='og-group';
-      var head=document.createElement('div'); head.className='og-group-head';
-      var nameIn=document.createElement('input'); nameIn.className='a-input'; nameIn.placeholder='Group name (e.g. Format)'; nameIn.value=g.name||'';
-      nameIn.addEventListener('input',function(){g.name=nameIn.value;sync(b);});
-      var delG=document.createElement('button'); delG.type='button'; delG.className='og-del'; delG.title='Remove group'; delG.textContent='\\u00d7';
-      delG.addEventListener('click',function(){b._groups.splice(gi,1);draw(b);sync(b);});
-      head.appendChild(nameIn); head.appendChild(delG); row.appendChild(head);
-      var opts=document.createElement('div'); opts.className='og-opts';
-      (g.options||[]).forEach(function(opt,oi){
-        var o=document.createElement('div'); o.className='og-opt';
-        var oin=document.createElement('input'); oin.className='a-input'; oin.placeholder='Option value'; oin.value=opt;
-        oin.addEventListener('input',function(){g.options[oi]=oin.value;sync(b);});
-        var od=document.createElement('button'); od.type='button'; od.className='og-del'; od.title='Remove option'; od.textContent='\\u00d7';
-        od.addEventListener('click',function(){g.options.splice(oi,1);draw(b);sync(b);});
-        o.appendChild(oin); o.appendChild(od); opts.appendChild(o);
-      });
-      row.appendChild(opts);
-      var addOpt=document.createElement('button'); addOpt.type='button'; addOpt.className='og-add-opt'; addOpt.textContent='+ Add option';
-      addOpt.addEventListener('click',function(){g.options=g.options||[];g.options.push('');draw(b);sync(b);});
-      row.appendChild(addOpt);
-      wrap.appendChild(row);
-    });
-  }
-  function sync(b){ b.querySelector('input[name=option_groups]').value=JSON.stringify(b._groups); }
-  function initBuilders(){
-    document.querySelectorAll('.og-builder').forEach(function(b){
-      if(b._init) return;
-      b._init=true;
-      var hidden=b.querySelector('input[name=option_groups]');
-      try{ b._groups=JSON.parse(hidden.value||'[]'); }catch(e){ b._groups=[]; }
-      if(!Array.isArray(b._groups)) b._groups=[];
-      draw(b);
-      b.querySelector('.og-add-group').addEventListener('click',function(){
-        b._groups.push({name:'',options:['']}); draw(b); sync(b);
-      });
-    });
-  }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',initBuilders);
-  } else {
-    initBuilders();
-  }
-})();`
 
 export default async function AdminProducts({ searchParams }) {
   const { data: products } = await supabase
@@ -123,7 +62,7 @@ export default async function AdminProducts({ searchParams }) {
             <label className="a-label">Description (optional)</label>
             <input className="a-input" name="description" placeholder="Spec text shown when expanded" />
           </div>
-          <OptionGroupsBuilder groups={[]} />
+          <OptionGroupsBuilder initial={[]} />
           <button type="submit" className="a-btn" style={{ alignSelf: 'flex-start' }}>Add product</button>
         </form>
       </div>
@@ -157,7 +96,7 @@ export default async function AdminProducts({ searchParams }) {
                 <label className="a-label">Description</label>
                 <input className="a-input" name="description" defaultValue={p.description || ''} placeholder="—" />
               </div>
-              <OptionGroupsBuilder groups={groupsToJson(p)} />
+              <OptionGroupsBuilder initial={groupsToJson(p)} />
               <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>Save</button>
             </form>
             <form method="POST" action="/api/admin/products" style={{ marginTop: 10 }}>
@@ -171,8 +110,6 @@ export default async function AdminProducts({ searchParams }) {
           <div className="a-card" style={{ color: '#7a7672' }}>No products yet — add one above.</div>
         )}
       </div>
-
-      <script dangerouslySetInnerHTML={{ __html: BUILDER_SCRIPT }} />
     </>
   )
 }
