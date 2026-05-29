@@ -34,6 +34,14 @@ export async function POST(req) {
   const { data: order } = await supabase.from('orders').select('*').eq('id', id).single()
   if (!order) return back(req, 'notfound')
 
+  if (action === 'set-pm-status') {
+    const valid = ['haster', 'til_godkendelse', 'info_mangler', 'faerdig']
+    const raw = String(form.get('pm_status') || '')
+    const val = valid.includes(raw) ? raw : null
+    const { error } = await supabase.from('orders').update({ pm_status: val }).eq('id', id)
+    return error ? back(req, 'error') : NextResponse.redirect(new URL('/admin', req.url), 303)
+  }
+
   if (action === 'approve') {
     if (order.status !== 'pending') return back(req, 'notpending')
     await dispatchToBrandsurface(order)

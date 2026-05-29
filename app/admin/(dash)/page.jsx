@@ -62,7 +62,7 @@ export default async function AdminOrders({ searchParams }) {
 
   const { data: orders, error } = await supabase
     .from('orders')
-    .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after, uploads')
+    .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after, uploads, pm_status')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -97,6 +97,7 @@ export default async function AdminOrders({ searchParams }) {
               <th>Orderer</th>
               <th>Products</th>
               <th>Status</th>
+              <th>PM</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -126,6 +127,20 @@ export default async function AdminOrders({ searchParams }) {
                   </td>
                   <td><span className={`a-badge ${b.cls}`}>{b.text}</span></td>
                   <td>
+                    <form method="POST" action="/api/admin/orders" style={{ display: 'inline' }}>
+                      <input type="hidden" name="action" value="set-pm-status" />
+                      <input type="hidden" name="id" value={o.id} />
+                      <select name="pm_status" className={`pm-select${o.pm_status ? ` ${o.pm_status}` : ''}`}
+                        onChange="this.form.submit()" defaultValue={o.pm_status || ''}>
+                        <option value="">—</option>
+                        <option value="haster">🔴 Haster</option>
+                        <option value="til_godkendelse">🟡 Til godkendelse</option>
+                        <option value="info_mangler">🔵 Info mangler</option>
+                        <option value="faerdig">🟢 Færdig</option>
+                      </select>
+                    </form>
+                  </td>
+                  <td>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       {isPending && (
                         <form method="POST" action="/api/admin/orders">
@@ -146,7 +161,7 @@ export default async function AdminOrders({ searchParams }) {
               )
             })}
             {(!orders || orders.length === 0) && !error && (
-              <tr><td colSpan={7} style={{ color: '#7a7672' }}>No orders yet.</td></tr>
+              <tr><td colSpan={8} style={{ color: '#7a7672' }}>No orders yet.</td></tr>
             )}
           </tbody>
         </table>
