@@ -35,7 +35,7 @@ export async function POST(req) {
   if (!order) return back(req, 'notfound')
 
   if (action === 'set-pm-status') {
-    const valid = ['haster', 'til_godkendelse', 'info_mangler', 'faerdig']
+    const valid = ['not_handled', 'quote_approval', 'awaiting_info', 'taken_further', 'completed']
     const raw = String(form.get('pm_status') || '')
     const val = valid.includes(raw) ? raw : null
     const { error } = await supabase.from('orders').update({ pm_status: val }).eq('id', id)

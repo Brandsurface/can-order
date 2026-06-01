@@ -133,10 +133,11 @@ export default async function AdminOrders({ searchParams }) {
                       <select name="pm_status" className={`pm-select${o.pm_status ? ` ${o.pm_status}` : ''}`}
                         onChange="this.form.submit()" defaultValue={o.pm_status || ''}>
                         <option value="">—</option>
-                        <option value="haster">🔴 Haster</option>
-                        <option value="til_godkendelse">🟡 Til godkendelse</option>
-                        <option value="info_mangler">🔵 Info mangler</option>
-                        <option value="faerdig">🟢 Færdig</option>
+                        <option value="not_handled">🟡 Not handled</option>
+                        <option value="quote_approval">🟠 Quote for approval</option>
+                        <option value="awaiting_info">🔴 Awaiting info</option>
+                        <option value="taken_further">🔵 Taken further – Podio</option>
+                        <option value="completed">🟢 Completed</option>
                       </select>
                     </form>
                   </td>

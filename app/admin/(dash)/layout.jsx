@@ -37,10 +37,11 @@ const ADMIN_CSS = `
 .a-note.err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; }
 .pm-select { background:#1a1917; border:1px solid #3a3733; border-radius:8px; padding:4px 8px; color:#b8b4ae; font-size:12px; font-family:'DM Mono',monospace; cursor:pointer; outline:none; }
 .pm-select:hover { border-color:#5a5650; }
-.pm-select.haster { border-color:rgba(248,113,113,0.5); color:#f87171; background:rgba(248,113,113,0.08); }
-.pm-select.til_godkendelse { border-color:rgba(251,191,36,0.5); color:#fbbf24; background:rgba(251,191,36,0.08); }
-.pm-select.info_mangler { border-color:rgba(96,165,250,0.5); color:#60a5fa; background:rgba(96,165,250,0.08); }
-.pm-select.faerdig { border-color:rgba(74,222,128,0.4); color:#4ade80; background:rgba(74,222,128,0.08); }
+.pm-select.not_handled    { border-color:rgba(251,191,36,0.5);  color:#fbbf24; background:rgba(251,191,36,0.08); }
+.pm-select.quote_approval { border-color:rgba(249,115,22,0.5);  color:#f97316; background:rgba(249,115,22,0.08); }
+.pm-select.awaiting_info  { border-color:rgba(248,113,113,0.5); color:#f87171; background:rgba(248,113,113,0.08); }
+.pm-select.taken_further  { border-color:rgba(96,165,250,0.5);  color:#60a5fa; background:rgba(96,165,250,0.08); }
+.pm-select.completed      { border-color:rgba(74,222,128,0.4);  color:#4ade80; background:rgba(74,222,128,0.08); }
 .og-builder { display:flex; flex-direction:column; gap:10px; }
 .og-group { border:1px solid #4a4640; border-radius:10px; padding:12px; display:flex; flex-direction:column; gap:8px; background:#242220; }
 .og-group-head { display:flex; gap:8px; align-items:center; }
