@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 const GROUP_LABELS = { print: 'Print materials', some: 'SoMe assets' }
 
-const ICON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>'
+const ICON = '<span class="prod-icon"><svg class="prod-icon-empty" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><svg class="prod-icon-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 12 11 15 16 9"/></svg></span>'
 const MINUS = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
 const PLUS = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
 const CHEVRON = '<svg class="acc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
@@ -55,7 +55,7 @@ function renderItem(p) {
           <div class="produkt-acc" id="prodacc-${pid}">
             <button type="button" class="produkt-acc-head" onclick="toggleProduct('${pid}')">
               <span class="produkt-name">${ICON}${esc(p.label)}</span>
-              <span class="acc-right"><span class="acc-check" id="acccheck-${pid}" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="acc-qty" id="accqty-${pid}"></span>${CHEVRON}</span>
+              <span class="acc-right"><span class="acc-qty" id="accqty-${pid}"></span>${CHEVRON}</span>
             </button>
             <div class="produkt-acc-body" id="accbody-${pid}">
               ${desc}${groupsHtml}
@@ -72,9 +72,9 @@ function renderItem(p) {
                 <span class="opt-label">Comment</span>
                 <textarea id="${cid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
               </div>
+              ${addBtn}
             </div>
           </div>
-          ${addBtn}
           </div>`
 }
 

@@ -244,6 +244,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .produkt-group { display: flex; flex-direction: column; gap: 6px; }
 .add-instance-btn {
   display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  margin-top: 4px;
   padding: 7px 14px; background: transparent;
   border: 1px dashed var(--border); border-radius: var(--radius-lg);
   color: var(--text-2); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s;
@@ -259,9 +260,11 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .remove-instance-btn:hover { color: #f87171; }
 .produkt-acc { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s; }
 .produkt-acc:hover { border-color: var(--border-light); }
-.produkt-acc.filled { border-color: rgba(74,222,128,0.45); }
-.acc-check { display: none; width: 20px; height: 20px; border-radius: 50%; background: #4ade80; color: #0e0a00; align-items: center; justify-content: center; flex-shrink: 0; }
-.produkt-acc.filled .acc-check { display: inline-flex; }
+.produkt-acc.filled { border-color: rgba(74,222,128,0.45); background: rgba(74,222,128,0.06); }
+.prod-icon { display: inline-flex; align-items: center; color: var(--accent); }
+.prod-icon-check { display: none; color: #4ade80; }
+.produkt-acc.filled .prod-icon-empty { display: none; }
+.produkt-acc.filled .prod-icon-check { display: inline-block; }
 .produkt-acc-head { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: none; border: none; cursor: pointer; color: var(--text); font-family: inherit; text-align: left; }
 .acc-right { display: flex; align-items: center; gap: 10px; color: var(--text-3); flex-shrink: 0; }
 .acc-qty { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--accent); }
@@ -937,7 +940,7 @@ const customFormats = {};   // { pid: string }
 const productInstances = {}; // { basePid: count }
 const extraEntries = [];     // duplicate product entries
 
-const _ICON  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+const _ICON  = '<span class="prod-icon"><svg class="prod-icon-empty" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg><svg class="prod-icon-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><polyline points="8 12 11 15 16 9"/></svg></span>';
 const _MINUS = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const _PLUS  = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 const _CHEV  = '<svg class="acc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
@@ -955,7 +958,7 @@ function renderInstanceHTML(cfg, spid, n) {
     <div class="produkt-acc-head-row">
       <button type="button" class="produkt-acc-head" onclick="toggleProduct('${spid}')">
         <span class="produkt-name">${_ICON}${_esc(cfg.type)} <span style="color:var(--text-3);font-size:11px;font-family:'DM Mono',monospace;margin-left:4px;">#${n}</span></span>
-        <span class="acc-right"><span class="acc-check" id="acccheck-${spid}" aria-hidden="true">${_CHECK}</span><span class="acc-qty" id="accqty-${spid}"></span>${_CHEV}</span>
+        <span class="acc-right"><span class="acc-qty" id="accqty-${spid}"></span>${_CHEV}</span>
       </button>
       <button type="button" class="remove-instance-btn" onclick="removeProductInstance('${spid}')" title="Remove">×</button>
     </div>
@@ -985,8 +988,8 @@ function addProductInstance(pid) {
   const n = productInstances[pid];
   const spid = pid + '__' + n;
   const html = renderInstanceHTML(cfg, spid, n);
-  const addBtn = document.querySelector('#prodgrp-' + pid + ' .add-instance-btn');
-  if (addBtn) addBtn.insertAdjacentHTML('beforebegin', html);
+  const grp = document.getElementById('prodgrp-' + pid);
+  if (grp) grp.insertAdjacentHTML('beforeend', html);
   extraEntries.push({ type: cfg.type, pid: spid, qty: 'qty-' + spid, cmt: 'cmt-' + spid, groups: cfg.groups, groupDefs: cfg.groupDefs, customFormat: cfg.customFormat });
 }
 
