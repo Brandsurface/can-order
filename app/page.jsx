@@ -59,6 +59,10 @@ function renderItem(p) {
             </button>
             <div class="produkt-acc-body" id="accbody-${pid}">
               ${desc}${groupsHtml}
+              <div class="alt-addr-toggle self-print-toggle" id="selfprint-toggle-${pid}" onclick="toggleSelfPrint('${pid}')">
+                <div class="toggle-switch"></div>
+                <span class="alt-addr-toggle-label">I will handle the print process myself.</span>
+              </div>
               <div class="acc-row">
                 <span class="opt-label">Quantity</span>
                 <div class="qty-stepper">
