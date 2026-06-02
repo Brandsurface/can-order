@@ -46,8 +46,13 @@ function renderItem(p) {
               </div>`
   }).join('')
 
+  const addBtn = p.allow_duplicate
+    ? `<button type="button" class="add-instance-btn" onclick="addProductInstance('${pid}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> ${esc(p.label)}</button>`
+    : ''
+
   return `
-          <div class="produkt-acc">
+          <div class="produkt-group" id="prodgrp-${pid}">
+          <div class="produkt-acc" id="prodacc-${pid}">
             <button type="button" class="produkt-acc-head" onclick="toggleProduct('${pid}')">
               <span class="produkt-name">${ICON}${esc(p.label)}</span>
               <span class="acc-right"><span class="acc-check" id="acccheck-${pid}" aria-hidden="true"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="acc-qty" id="accqty-${pid}"></span>${CHEVRON}</span>
@@ -68,6 +73,8 @@ function renderItem(p) {
                 <textarea id="${cid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
               </div>
             </div>
+          </div>
+          ${addBtn}
           </div>`
 }
 
@@ -103,7 +110,9 @@ async function buildProducts() {
     qty: 'qty-' + p.id,
     cmt: 'cmt-' + p.id,
     groups: effectiveGroups(p).map(g => g.name),
+    groupDefs: effectiveGroups(p),
     customFormat: !!p.allow_custom_format,
+    allowDuplicate: !!p.allow_duplicate,
   }))
   const json = JSON.stringify(arr).replace(/</g, '\\u003c')
   return { sections, dataScript: `window.__PRODUCTS = ${json}; window.__SUPABASE_URL = ${JSON.stringify(supabaseUrl)};` }
