@@ -921,6 +921,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     </div>
   </div>
 
+  <button class="btn-secondary btn-grey" onclick="editSubmittedOrder()" style="margin:0 auto 14px;">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Edit order
+  </button>
   <button class="btn-primary" onclick="closePage()" style="margin:0 auto 14px;">
     Done — Thank You!
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1460,6 +1464,10 @@ function goToReview() {
 }
 
 function goBack() { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function editSubmittedOrder() {
+  if (window.__submittedOrderId) window.location.href = '/?edit=' + window.__submittedOrderId;
+  else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+}
 
 function toggleLegal() {
   const toggle = document.getElementById('legal-toggle');
@@ -1533,6 +1541,7 @@ async function submitOrder() {
 
     if (!res.ok) throw new Error(data.error || 'Server error');
 
+    window.__submittedOrderId = data.orderId;
     document.getElementById('conf-email').textContent = g('bestiller_email');
     showView('view-confirm'); setPill(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
