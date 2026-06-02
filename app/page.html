@@ -311,14 +311,14 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .form-outer { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; }
 .form-guide-panel { position: sticky; top: 80px; }
 .orderhelp { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); overflow: hidden; transition: border-color 0.2s; }
-.orderhelp:hover { border-color: rgba(241,86,46,0.35); }
+.orderhelp:hover { border-color: var(--border-light); }
 .orderhelp-trigger {
   width: 100%; padding: 18px 20px;
   background: transparent; border: none; border-radius: 0;
   color: var(--text); cursor: pointer; display: flex; align-items: center;
   justify-content: space-between; gap: 10px; transition: background 0.2s; text-align: left;
 }
-.orderhelp-trigger:hover { background: var(--accent-dim2); }
+.orderhelp-trigger:hover { background: var(--surface-2); }
 .orderhelp-trigger .collapse-chevron { color: var(--text-2); flex-shrink: 0; transition: transform 0.2s; }
 .orderhelp-trigger.open .collapse-chevron { transform: rotate(180deg); color: var(--accent); }
 .orderhelp-head { display: flex; align-items: center; gap: 12px; }
