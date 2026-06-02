@@ -63,6 +63,7 @@ export async function POST(req) {
     if (!id) return back(req, 'invalid')
     fields.active = form.get('active') === 'on'
     fields.allow_custom_format = form.get('allow_custom_format') === 'on'
+    fields.allow_duplicate = form.get('allow_duplicate') === 'on'
     const { error } = await supabase.from('products').update(fields).eq('id', id)
     return back(req, error ? 'error' : 'saved')
   }

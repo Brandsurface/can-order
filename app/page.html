@@ -241,6 +241,22 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .qty-stepper input:focus { box-shadow: none; }
 
 /* ── Product accordion ── */
+.produkt-group { display: flex; flex-direction: column; gap: 6px; }
+.add-instance-btn {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 7px 14px; background: transparent;
+  border: 1px dashed var(--border); border-radius: var(--radius-lg);
+  color: var(--text-2); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s;
+}
+.add-instance-btn:hover { border-color: var(--accent); color: var(--accent); }
+.produkt-acc-head-row { display: flex; align-items: stretch; }
+.produkt-acc-head-row .produkt-acc-head { flex: 1; }
+.remove-instance-btn {
+  background: transparent; border: none; border-left: 1px solid var(--border);
+  color: var(--text-3); font-size: 18px; line-height: 1; padding: 0 14px;
+  cursor: pointer; font-family: inherit; transition: color 0.15s; flex-shrink: 0;
+}
+.remove-instance-btn:hover { color: #f87171; }
 .produkt-acc { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s; }
 .produkt-acc:hover { border-color: var(--border-light); }
 .produkt-acc.filled { border-color: rgba(74,222,128,0.45); }
@@ -918,6 +934,69 @@ let uploadedFiles = []; // { path, name, size }
 const PRODUCTS = window.__PRODUCTS || [];
 const selectedOptions = {}; // { pid: { groupName: value } }
 const customFormats = {};   // { pid: string }
+const productInstances = {}; // { basePid: count }
+const extraEntries = [];     // duplicate product entries
+
+const _ICON  = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+const _MINUS = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const _PLUS  = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const _CHEV  = '<svg class="acc-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+const _CHECK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function _esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderInstanceHTML(cfg, spid, n) {
+  const groupsHtml = (cfg.groupDefs || []).map((g, gi) => {
+    const chips = (g.options || []).map(o => `<span class="format-chip" onclick="selectOption(this,'${spid}',${gi})">${_esc(o)}</span>`).join('');
+    const cfmt = cfg.customFormat ? `<input type="text" id="cfmt-${spid}" class="custom-fmt-input" placeholder="Other format in mm" oninput="updateCustomFmt('${spid}',this)"/>` : '';
+    return `<div class="opt-group"><span class="opt-label">${_esc(g.name)}</span><div class="opt-chips" id="opt-${spid}-${gi}">${chips}${cfmt}</div></div>`;
+  }).join('');
+  return `<div class="produkt-acc open" id="prodacc-${spid}">
+    <div class="produkt-acc-head-row">
+      <button type="button" class="produkt-acc-head" onclick="toggleProduct('${spid}')">
+        <span class="produkt-name">${_ICON}${_esc(cfg.type)} <span style="color:var(--text-3);font-size:11px;font-family:'DM Mono',monospace;margin-left:4px;">#${n}</span></span>
+        <span class="acc-right"><span class="acc-check" id="acccheck-${spid}" aria-hidden="true">${_CHECK}</span><span class="acc-qty" id="accqty-${spid}"></span>${_CHEV}</span>
+      </button>
+      <button type="button" class="remove-instance-btn" onclick="removeProductInstance('${spid}')" title="Remove">×</button>
+    </div>
+    <div class="produkt-acc-body open" id="accbody-${spid}">
+      ${groupsHtml}
+      <div class="acc-row">
+        <span class="opt-label">Quantity</span>
+        <div class="qty-stepper">
+          <button type="button" onclick="stepQty('qty-${spid}',-1)">${_MINUS}</button>
+          <input type="number" id="qty-${spid}" value="0" min="0" oninput="updateQtyBadge('${spid}')"/>
+          <button type="button" onclick="stepQty('qty-${spid}',1)">${_PLUS}</button>
+        </div>
+      </div>
+      <div class="field-error" id="err-qty-${spid}">Please enter a quantity greater than 0</div>
+      <div class="acc-comment">
+        <span class="opt-label">Comment</span>
+        <textarea id="cmt-${spid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
+      </div>
+    </div>
+  </div>`;
+}
+
+function addProductInstance(pid) {
+  const cfg = PRODUCTS.find(p => p.pid === pid);
+  if (!cfg) return;
+  productInstances[pid] = (productInstances[pid] || 1) + 1;
+  const n = productInstances[pid];
+  const spid = pid + '__' + n;
+  const html = renderInstanceHTML(cfg, spid, n);
+  const addBtn = document.querySelector('#prodgrp-' + pid + ' .add-instance-btn');
+  if (addBtn) addBtn.insertAdjacentHTML('beforebegin', html);
+  extraEntries.push({ type: cfg.type, pid: spid, qty: 'qty-' + spid, cmt: 'cmt-' + spid, groups: cfg.groups, groupDefs: cfg.groupDefs, customFormat: cfg.customFormat });
+}
+
+function removeProductInstance(spid) {
+  document.getElementById('prodacc-' + spid)?.remove();
+  const i = extraEntries.findIndex(e => e.pid === spid);
+  if (i >= 0) extraEntries.splice(i, 1);
+  delete selectedOptions[spid];
+  delete customFormats[spid];
+}
 
 function updateCustomFmt(pid, el) {
   const v = el.value.trim();
@@ -927,7 +1006,7 @@ function updateCustomFmt(pid, el) {
   if (v) {
     const chips = el.parentElement ? el.parentElement.querySelectorAll('.format-chip.active') : [];
     chips.forEach(c => c.classList.remove('active'));
-    const prod = PRODUCTS.find(p => p.pid === pid);
+    const prod = PRODUCTS.find(p => p.pid === pid) || extraEntries.find(e => e.pid === pid);
     if (prod && prod.groups[0]) {
       selectedOptions[pid] = selectedOptions[pid] || {};
       delete selectedOptions[pid][prod.groups[0]];
@@ -1164,11 +1243,12 @@ function validate() {
 
   // Open accordions with qty > 0 must be valid; open accordions with qty 0 only
   // block submission if no other product has been filled in.
-  const hasQty = PRODUCTS.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
+  const allEntries = [...PRODUCTS, ...extraEntries];
+  const hasQty = allEntries.some(p => parseInt(document.getElementById(p.qty)?.value || 0) > 0);
   const hasAndet = document.getElementById('andet')?.value.trim();
   const hasAnyProduct = hasQty || hasAndet;
 
-  PRODUCTS.forEach(({ pid, qty: qtyId }) => {
+  allEntries.forEach(({ pid, qty: qtyId }) => {
     const body = document.getElementById('accbody-' + pid);
     const isOpen = body && body.parentElement.classList.contains('open');
     const qtyEl = document.getElementById(qtyId);
@@ -1280,7 +1360,7 @@ function goToReview() {
   const rvProd = document.getElementById('rv-products');
   rvProd.innerHTML = '';
 
-  PRODUCTS.forEach(({ type, pid, qty: qtyId, cmt, groups, customFormat }) => {
+  [...PRODUCTS, ...extraEntries].forEach(({ type, pid, qty: qtyId, cmt, groups, customFormat }) => {
     const qty = parseInt(document.getElementById(qtyId)?.value || 0);
     if (qty <= 0) return;
     const opts = selectedOptions[pid] || {};
@@ -1373,7 +1453,7 @@ async function submitOrder() {
 
   // Collect products
   const produkter = [];
-  PRODUCTS.forEach(({ type, pid, qty: qtyId, cmt, groups, customFormat }) => {
+  [...PRODUCTS, ...extraEntries].forEach(({ type, pid, qty: qtyId, cmt, groups, customFormat }) => {
     const antal = parseInt(document.getElementById(qtyId)?.value || 0);
     if (antal <= 0) return;
     const entry = { type, antal };
@@ -1460,6 +1540,9 @@ function resetForm() {
   document.querySelectorAll('.acc-qty').forEach(b => b.textContent = '');
   Object.keys(selectedOptions).forEach(k => delete selectedOptions[k]);
   Object.keys(customFormats).forEach(k => delete customFormats[k]);
+  Object.keys(productInstances).forEach(k => delete productInstances[k]);
+  extraEntries.length = 0;
+  document.querySelectorAll('.produkt-acc[id^="prodacc-"][id*="__"]').forEach(el => el.remove());
   document.querySelectorAll('.custom-fmt-input').forEach(el => { el.value = ''; el.classList.remove('active'); });
   uploadedFiles = []; renderUploads();
   addrType = 'butik'; setAddrTab('butik');
