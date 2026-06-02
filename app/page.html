@@ -994,7 +994,7 @@ function renderInstanceHTML(cfg, spid, n) {
         <span class="opt-label">Comment</span>
         <textarea id="cmt-${spid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
       </div>
-      <button type="button" class="add-instance-btn" onclick="addProductInstance('${pid}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> ${_esc(cfg.type)}</button>
+      <button type="button" class="add-instance-btn" onclick="addProductInstance('${cfg.pid}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> ${_esc(cfg.type)}</button>
     </div>
   </div>`;
 }
