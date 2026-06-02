@@ -107,7 +107,7 @@ header {
 #legal-overlay.flash { animation: legalFlash 0.7s ease forwards; }
 
 /* ── Form wrap ── */
-.form-wrap { max-width: 1360px; margin: 0 auto; padding: 52px 40px 160px; }
+.form-wrap { max-width: 1360px; margin: 0 auto; padding: 52px 40px 60px; }
 .form-hero { margin-bottom: 52px; }
 .form-hero h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.0; color: #f1562e; }
 .form-hero p { margin-top: 14px; color: var(--text-2); font-size: 16px; font-weight: 300; line-height: 1.6; }
@@ -419,6 +419,8 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
 }
 .btn-secondary:hover { background: var(--surface-3); border-color: var(--border-light); }
+.btn-secondary.btn-grey { background: #2a2823; color: #b8b4ae; border-color: #3a3733; }
+.btn-secondary.btn-grey:hover { background: #34322d; color: #f0ede8; border-color: #5a5650; }
 .btn-ghost {
   padding: 12px 22px; background: transparent; color: var(--text-2);
   border: none; border-radius: 999px; font-family: 'Manrope', sans-serif;
@@ -515,7 +517,8 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   .grid-main { grid-template-columns: 1fr; }
   header { padding: 0 20px; }
   .step-pills { display: none; }
-  .form-wrap, .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
+  .form-wrap { padding: 32px 20px 60px; }
+  .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
   .bottom-bar { padding: 14px 20px; }
   .row-2 { grid-template-columns: 1fr; }
   .review-grid { grid-template-columns: 1fr; }
@@ -807,22 +810,17 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!--HELP_BOX-->
 
+      <button class="btn-primary" onclick="goToReview()" style="width:100%;justify-content:center;">
+        Review order
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
     </div><!-- /grid-right -->
   </div><!-- /grid-main -->
   </div><!-- /form-main-panel -->
   </div><!-- /form-outer -->
 </div><!-- /form-wrap -->
 
-<div class="bottom-bar">
-  <div class="bottom-bar-info">
-    <div class="bbl">Ready to review?</div>
-    <div class="bbs">You can make changes before submitting</div>
-  </div>
-  <button class="btn-primary" onclick="goToReview()">
-    Review order
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</div>
 </div><!-- /view-form -->
 
 
@@ -881,8 +879,9 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   </div>
 </div>
 
-<div class="bottom-bar">
-  <button class="btn-secondary" onclick="goBack()">
+<div class="bottom-bar" style="justify-content:flex-end;">
+  <div style="display:flex;gap:12px;align-items:center;">
+  <button class="btn-secondary btn-grey" onclick="goBack()">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     Edit order
   </button>
@@ -890,6 +889,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     Submit order
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
+  </div>
 </div>
 </div><!-- /view-review -->
 
@@ -921,6 +921,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     </div>
   </div>
 
+  <button class="btn-secondary btn-grey" onclick="editSubmittedOrder()" style="margin:0 auto 14px;">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Edit order
+  </button>
   <button class="btn-primary" onclick="closePage()" style="margin:0 auto 14px;">
     Done — Thank You!
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1460,6 +1464,10 @@ function goToReview() {
 }
 
 function goBack() { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function editSubmittedOrder() {
+  if (window.__submittedOrderId) window.location.href = '/?edit=' + window.__submittedOrderId;
+  else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+}
 
 function toggleLegal() {
   const toggle = document.getElementById('legal-toggle');
@@ -1533,6 +1541,7 @@ async function submitOrder() {
 
     if (!res.ok) throw new Error(data.error || 'Server error');
 
+    window.__submittedOrderId = data.orderId;
     document.getElementById('conf-email').textContent = g('bestiller_email');
     showView('view-confirm'); setPill(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
