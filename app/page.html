@@ -107,7 +107,7 @@ header {
 #legal-overlay.flash { animation: legalFlash 0.7s ease forwards; }
 
 /* ── Form wrap ── */
-.form-wrap { max-width: 1360px; margin: 0 auto; padding: 52px 40px 160px; }
+.form-wrap { max-width: 1360px; margin: 0 auto; padding: 52px 40px 60px; }
 .form-hero { margin-bottom: 52px; }
 .form-hero h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.0; color: #f1562e; }
 .form-hero p { margin-top: 14px; color: var(--text-2); font-size: 16px; font-weight: 300; line-height: 1.6; }
@@ -515,7 +515,8 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   .grid-main { grid-template-columns: 1fr; }
   header { padding: 0 20px; }
   .step-pills { display: none; }
-  .form-wrap, .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
+  .form-wrap { padding: 32px 20px 60px; }
+  .review-wrap, .confirm-wrap { padding: 32px 20px 140px; }
   .bottom-bar { padding: 14px 20px; }
   .row-2 { grid-template-columns: 1fr; }
   .review-grid { grid-template-columns: 1fr; }
@@ -807,22 +808,17 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!--HELP_BOX-->
 
+      <button class="btn-primary" onclick="goToReview()" style="width:100%;justify-content:center;">
+        Review order
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+
     </div><!-- /grid-right -->
   </div><!-- /grid-main -->
   </div><!-- /form-main-panel -->
   </div><!-- /form-outer -->
 </div><!-- /form-wrap -->
 
-<div class="bottom-bar">
-  <div class="bottom-bar-info">
-    <div class="bbl">Ready to review?</div>
-    <div class="bbs">You can make changes before submitting</div>
-  </div>
-  <button class="btn-primary" onclick="goToReview()">
-    Review order
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</div>
 </div><!-- /view-form -->
 
 
