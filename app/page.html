@@ -678,10 +678,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
       <div class="card">
         <div class="card-label"><span class="card-num">2</span>Key Visual / Artwork</div>
 
-        <!-- Other -->
-        <div class="produkt-section-label" style="margin-top:0;">Other</div>
+        <!-- Brief -->
+        <div class="produkt-section-label" style="margin-top:0;">Brief</div>
         <div class="andet-card">
-          <textarea id="andet" placeholder="Describe other print materials or special requests..."></textarea>
+          <textarea id="andet" placeholder="Describe your needs for visual and artwork or special requests"></textarea>
         </div>
 
         <!-- Artwork -->
@@ -1414,7 +1414,7 @@ function goToReview() {
     d.style.alignItems = 'flex-start';
     d.style.gap = '6px';
     d.innerHTML = `
-      <div class="rv-produkt-name">Other</div>
+      <div class="rv-produkt-name">Brief</div>
       <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${escHtml(andet)}</div>
     `;
     rvProd.appendChild(d);
