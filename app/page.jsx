@@ -72,9 +72,9 @@ function renderItem(p) {
                 <span class="opt-label">Comment</span>
                 <textarea id="${cid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
               </div>
+              ${addBtn}
             </div>
           </div>
-          ${addBtn}
           </div>`
 }
 

@@ -244,6 +244,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .produkt-group { display: flex; flex-direction: column; gap: 6px; }
 .add-instance-btn {
   display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  margin-top: 4px;
   padding: 7px 14px; background: transparent;
   border: 1px dashed var(--border); border-radius: var(--radius-lg);
   color: var(--text-2); font-size: 12px; font-family: inherit; cursor: pointer; transition: all 0.2s;
@@ -987,8 +988,8 @@ function addProductInstance(pid) {
   const n = productInstances[pid];
   const spid = pid + '__' + n;
   const html = renderInstanceHTML(cfg, spid, n);
-  const addBtn = document.querySelector('#prodgrp-' + pid + ' .add-instance-btn');
-  if (addBtn) addBtn.insertAdjacentHTML('beforebegin', html);
+  const grp = document.getElementById('prodgrp-' + pid);
+  if (grp) grp.insertAdjacentHTML('beforeend', html);
   extraEntries.push({ type: cfg.type, pid: spid, qty: 'qty-' + spid, cmt: 'cmt-' + spid, groups: cfg.groups, groupDefs: cfg.groupDefs, customFormat: cfg.customFormat });
 }
 
