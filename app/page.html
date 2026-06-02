@@ -130,6 +130,13 @@ header {
   display: flex; align-items: center; gap: 8px; margin-bottom: 24px;
 }
 .card-label::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+.card-num {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  background: var(--accent); color: #fff; font-family: 'Manrope', sans-serif;
+  font-size: 13px; font-weight: 800; letter-spacing: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-right: 4px;
+}
 
 /* ── Fields ── */
 .field { display: flex; flex-direction: column; gap: 6px; }
@@ -582,7 +589,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!-- Grundoplysninger -->
       <div class="card">
-        <div class="card-label">Basic information</div>
+        <div class="card-label"><span class="card-num">1</span>Basic information</div>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div class="field">
             <label>Campaign <span class="req">*</span></label>
@@ -615,15 +622,12 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
         </div>
       </div>
 
-      <!-- Produkter -->
+      <!-- Artwork / files (step 2) -->
       <div class="card">
-        <div class="card-label">Products</div>
-        <div class="field-error" id="err-products" style="margin-bottom:4px;">Please select at least one product and set a quantity</div>
-
-        <!--PRODUCTS_SECTIONS-->
+        <div class="card-label"><span class="card-num">2</span>Artwork</div>
 
         <!-- Other -->
-        <div class="produkt-section-label">Other</div>
+        <div class="produkt-section-label" style="margin-top:0;">Other</div>
         <div class="andet-card">
           <textarea id="andet" placeholder="Describe other print materials or special requests..."></textarea>
         </div>
@@ -653,7 +657,14 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
           <p class="artwork-note">Max 50 MB per file. PDF, AI, EPS, PSD, PNG, JPG, ZIP, etc. For larger files use the Smash option above.</p>
           <div id="upload-list" class="upload-list"></div>
         </div>
+      </div><!-- /artwork card -->
 
+      <!-- Produkter (step 3) -->
+      <div class="card">
+        <div class="card-label"><span class="card-num">3</span>Products</div>
+        <div class="field-error" id="err-products" style="margin-bottom:4px;">Please select at least one product and set a quantity</div>
+
+        <!--PRODUCTS_SECTIONS-->
       </div><!-- /produkter card -->
 
     </div><!-- /grid-left -->
