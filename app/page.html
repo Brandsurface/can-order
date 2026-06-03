@@ -115,7 +115,8 @@ header {
 /* ── Layout grid ── */
 .grid-main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
 .grid-left { display: flex; flex-direction: column; gap: 20px; }
-.grid-right { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 20px; align-self: start; }
+.grid-right { display: flex; flex-direction: column; gap: 20px; }
+.review-order-btn { position: sticky; bottom: 20px; }
 
 /* ── Card ── */
 .card {
@@ -819,7 +820,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!--HELP_BOX-->
 
-      <button class="btn-primary" onclick="goToReview()" style="width:100%;justify-content:center;">
+      <button class="btn-primary review-order-btn" onclick="goToReview()" style="width:100%;justify-content:center;">
         Review order
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
