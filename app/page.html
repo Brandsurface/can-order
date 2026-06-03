@@ -1624,34 +1624,36 @@ function showView(id) { document.querySelectorAll('.view').forEach(v => v.classL
 function setPill(n) { document.querySelectorAll('.step-pill').forEach((p, i) => { p.classList.remove('active','done'); if (i+1 < n) p.classList.add('done'); else if (i+1 === n) p.classList.add('active'); }); }
 function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type==='success'?'success':type==='error'?'error-t':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3500); }
 
-// Keep the "Review order" button visible: it sits under Need Help in normal
-// flow, and once the page scrolls past it, it pins to the bottom of the viewport.
+// Keep the "Review order" button visible at the bottom of the viewport so it
+// rides along smoothly while scrolling the form (no jump).
 (function () {
   const btn = document.querySelector('.review-order-btn');
   if (!btn) return;
-  const marker = document.createElement('div');   // 0-height anchor for natural position
-  marker.setAttribute('aria-hidden', 'true');
-  btn.parentNode.insertBefore(marker, btn);
+  const ph = document.createElement('div');   // reserves the button's slot in the column
+  ph.setAttribute('aria-hidden', 'true');
+  ph.style.display = 'none';
+  btn.parentNode.insertBefore(ph, btn);
 
   function sync() {
     const col = btn.closest('.grid-right');
     const onForm = document.getElementById('view-form')?.classList.contains('active');
     if (!col || !onForm || window.innerWidth <= 900) { unpin(); return; }
-    const naturalTop = marker.getBoundingClientRect().top;
-    if (naturalTop < 20) {        // button's home position has scrolled above the viewport
-      const r = col.getBoundingClientRect();
-      btn.style.left = r.left + 'px';
-      btn.style.width = r.width + 'px';
+    if (!btn.classList.contains('pinned')) {
+      ph.style.height = btn.offsetHeight + 'px';
+      ph.style.display = 'block';
       btn.classList.add('pinned');
-    } else {
-      unpin();
     }
+    const r = col.getBoundingClientRect();
+    btn.style.left = r.left + 'px';
+    btn.style.width = r.width + 'px';
   }
   function unpin() {
     if (!btn.classList.contains('pinned')) return;
     btn.classList.remove('pinned');
     btn.style.left = '';
     btn.style.width = '';
+    ph.style.display = 'none';
+    ph.style.height = '';
   }
   window.addEventListener('scroll', sync, { passive: true });
   window.addEventListener('resize', sync);
