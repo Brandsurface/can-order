@@ -75,6 +75,7 @@ export async function POST(request) {
         konsulent_tlf:   body.konsulent_tlf || null,
         konsulent_email: body.konsulent_email || null,
         uploads:         Array.isArray(body.uploads) ? body.uploads : [],
+        language:        ['en', 'da'].includes(body.language) ? body.language : 'en',
         status:          'pending',
         revision,
       })
