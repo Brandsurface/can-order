@@ -116,7 +116,7 @@ header {
 .grid-main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
 .grid-left { display: flex; flex-direction: column; gap: 20px; }
 .grid-right { display: flex; flex-direction: column; gap: 20px; }
-.review-order-btn { position: sticky; bottom: 20px; }
+.review-order-btn.pinned { position: fixed; bottom: 20px; z-index: 50; box-shadow: 0 8px 28px rgba(0,0,0,0.45); }
 
 /* ── Card ── */
 .card {
@@ -1622,6 +1622,40 @@ function v(id, val) { const el = document.getElementById(id); if (el) el.textCon
 function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function setPill(n) { document.querySelectorAll('.step-pill').forEach((p, i) => { p.classList.remove('active','done'); if (i+1 < n) p.classList.add('done'); else if (i+1 === n) p.classList.add('active'); }); }
 function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type==='success'?'success':type==='error'?'error-t':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3500); }
+
+// Keep the "Review order" button visible: it sits under Need Help in normal
+// flow, and once the page scrolls past it, it pins to the bottom of the viewport.
+(function () {
+  const btn = document.querySelector('.review-order-btn');
+  if (!btn) return;
+  const marker = document.createElement('div');   // 0-height anchor for natural position
+  marker.setAttribute('aria-hidden', 'true');
+  btn.parentNode.insertBefore(marker, btn);
+
+  function sync() {
+    const col = btn.closest('.grid-right');
+    const onForm = document.getElementById('view-form')?.classList.contains('active');
+    if (!col || !onForm || window.innerWidth <= 900) { unpin(); return; }
+    const naturalTop = marker.getBoundingClientRect().top;
+    if (naturalTop < 20) {        // button's home position has scrolled above the viewport
+      const r = col.getBoundingClientRect();
+      btn.style.left = r.left + 'px';
+      btn.style.width = r.width + 'px';
+      btn.classList.add('pinned');
+    } else {
+      unpin();
+    }
+  }
+  function unpin() {
+    if (!btn.classList.contains('pinned')) return;
+    btn.classList.remove('pinned');
+    btn.style.left = '';
+    btn.style.width = '';
+  }
+  window.addEventListener('scroll', sync, { passive: true });
+  window.addEventListener('resize', sync);
+  sync();
+})();
 </script>
 </body>
 </html>
