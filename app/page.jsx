@@ -1,6 +1,8 @@
 import fs from 'fs'
 import path from 'path'
+import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabase'
+import { translations } from '@/lib/translations'
 
 export const dynamic = 'force-dynamic'
 
@@ -28,7 +30,7 @@ function effectiveGroups(p) {
   return []
 }
 
-function renderItem(p) {
+function renderItem(p, t) {
   const pid = p.id
   const qid = 'qty-' + pid
   const cid = 'cmt-' + pid
@@ -37,7 +39,7 @@ function renderItem(p) {
   const desc = p.description ? `<p class="acc-desc">${esc(p.description)}</p>` : ''
   const groupsHtml = groups.map((g, gi) => {
     const cfmtInput = (p.allow_custom_format && gi === 0)
-      ? `<input type="text" id="cfmt-${pid}" class="custom-fmt-input" placeholder="Other format in mm" oninput="updateCustomFmt('${pid}',this)"/>`
+      ? `<input type="text" id="cfmt-${pid}" class="custom-fmt-input" placeholder="${esc(t.custom_fmt_ph)}" oninput="updateCustomFmt('${pid}',this)"/>`
       : ''
     return `
               <div class="opt-group">
@@ -61,20 +63,20 @@ function renderItem(p) {
               ${desc}${groupsHtml}
               <div class="alt-addr-toggle self-print-toggle" id="selfprint-toggle-${pid}" onclick="toggleSelfPrint('${pid}')">
                 <div class="toggle-switch"></div>
-                <span class="alt-addr-toggle-label">I will handle the print process myself.</span>
+                <span class="alt-addr-toggle-label">${esc(t.self_print_toggle)}</span>
               </div>
               <div class="acc-row">
-                <span class="opt-label">Quantity</span>
+                <span class="opt-label">${esc(t.qty_label)}</span>
                 <div class="qty-stepper">
                   <button type="button" onclick="stepQty('${qid}',-1)">${MINUS}</button>
                   <input type="number" id="${qid}" value="0" min="0" oninput="updateQtyBadge('${pid}')"/>
                   <button type="button" onclick="stepQty('${qid}',1)">${PLUS}</button>
                 </div>
               </div>
-              <div class="field-error" id="err-qty-${pid}">Please enter a quantity greater than 0</div>
+              <div class="field-error" id="err-qty-${pid}">${esc(t.qty_err)}</div>
               <div class="acc-comment">
-                <span class="opt-label">Comment</span>
-                <textarea id="${cid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
+                <span class="opt-label">${esc(t.comment_label)}</span>
+                <textarea id="${cid}" rows="2" placeholder="${esc(t.comment_ph)}"></textarea>
               </div>
               ${addBtn}
             </div>
@@ -82,7 +84,7 @@ function renderItem(p) {
           </div>`
 }
 
-async function buildProducts() {
+async function buildProducts(t) {
   let products = []
   try {
     const { data, error } = await supabase
@@ -104,7 +106,7 @@ async function buildProducts() {
     const rows = products.filter(p => p.grp === g)
     if (!rows.length) continue
     sections += `        <div class="produkt-section-label">${esc(GROUP_LABELS[g] || g)}</div>\n` +
-                `        <div class="produkt-list">${rows.map(renderItem).join('')}\n        </div>\n\n`
+                `        <div class="produkt-list">${rows.map(p => renderItem(p, t)).join('')}\n        </div>\n\n`
   }
 
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
@@ -146,13 +148,23 @@ async function buildHelpBox() {
 }
 
 export default async function Home() {
+  const lang = (await cookies()).get('lang')?.value === 'da' ? 'da' : 'en'
+  const t = translations[lang]
+
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const [{ sections, dataScript }, helpBox] = await Promise.all([buildProducts(), buildHelpBox()])
+  const [{ sections, dataScript }, helpBox] = await Promise.all([buildProducts(t), buildHelpBox()])
   html = html.replace('        <!--PRODUCTS_SECTIONS-->', sections)
-  html = html.replace('/*PRODUCTS_JSON*/', dataScript)
+
+  // Inject products data + translations for client-side JS
+  const tJson = JSON.stringify(t).replace(/</g, '\\u003c')
+  html = html.replace('/*PRODUCTS_JSON*/', dataScript + ` window.__T=${tJson}; window.__LANG=${JSON.stringify(lang)};`)
+
   html = html.replace(/\s*<!--HELP_BOX-->/, helpBox)
+
+  // Apply server-side translations — replace all {{key}} markers
+  html = html.replace(/\{\{(\w+)\}\}/g, (_, key) => t[key] ?? '')
 
   const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i)
   const headContent = headMatch ? headMatch[1] : ''

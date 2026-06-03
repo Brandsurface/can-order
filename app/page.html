@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>POS materials — Brandsurface</title>
+<title>{{page_title}}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -522,6 +522,13 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .toast.success { border-color: rgba(74,222,128,0.3); }
 .toast.error-t { border-color: rgba(248,113,113,0.3); }
 
+/* ── Language switcher ── */
+.lang-switcher { display: flex; align-items: center; gap: 6px; }
+.lang-btn { background: none; border: none; color: var(--text-3); font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; cursor: pointer; padding: 4px 6px; border-radius: 4px; transition: color 0.15s; }
+.lang-btn:hover { color: var(--text-2); }
+.lang-btn.active { color: var(--accent); }
+.lang-sep { color: var(--border); font-size: 12px; }
+
 @media (max-width: 900px) {
   .form-outer { grid-template-columns: 1fr; }
   .form-guide-panel { position: static; }
@@ -573,11 +580,17 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     </svg>
   </a>
   <div class="step-pills">
-    <div class="step-pill active" id="pill-1"><span class="step-dot"></span>Fill in</div>
+    <div class="step-pill active" id="pill-1"><span class="step-dot"></span>{{step_fill_in}}</div>
     <div class="step-sep">›</div>
-    <div class="step-pill" id="pill-2"><span class="step-dot"></span>Review</div>
+    <div class="step-pill" id="pill-2"><span class="step-dot"></span>{{step_review}}</div>
     <div class="step-sep">›</div>
-    <div class="step-pill" id="pill-3"><span class="step-dot"></span>Sent</div>
+    <div class="step-pill" id="pill-3"><span class="step-dot"></span>{{step_sent}}</div>
+  </div>
+  <div class="lang-switcher">
+    <button type="button" class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+    <span class="lang-sep">|</span>
+    <button type="button" class="lang-btn" id="lang-da" onclick="setLang('da')">DA</button>
+  </div>
   </div>
 </header>
 
@@ -588,8 +601,8 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 <div class="form-wrap">
 
   <div class="form-hero">
-    <h1>POS materials - Brief</h1>
-    <p>Select products, enter quantities and fill in delivery details — you'll review everything before submitting.</p>
+    <h1>{{hero_title}}</h1>
+    <p>{{hero_sub}}</p>
   </div>
 
   <!-- Order process guide + form in outer grid -->
@@ -597,7 +610,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     <div class="form-guide-panel">
       <div class="orderhelp">
         <button type="button" class="orderhelp-trigger open" id="oh-trigger" onclick="toggleOrderHelp()">
-          <span class="orderhelp-trigger-label">Order Process</span>
+          <span class="orderhelp-trigger-label">{{order_process_label}}</span>
           <svg class="collapse-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
         </button>
     <div class="orderhelp-content open" id="oh-content">
@@ -605,38 +618,38 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
         <div class="oh-step">
           <div class="oh-badge">1</div>
           <div class="oh-text">
-            <div class="oh-step-title">Enter your details</div>
-            <p>Enter your contact information and campaign name.</p>
-            <p>Please remember to accept the <strong>Legal Terms</strong> before proceeding.</p>
+            <div class="oh-step-title">{{oh_step1_title}}</div>
+            <p>{{oh_step1_p1}}</p>
+            <p>{{oh_step1_p2}}</p>
           </div>
         </div>
         <div class="oh-step">
           <div class="oh-badge">2</div>
           <div class="oh-text">
-            <div class="oh-step-title">Artwork</div>
-            <p>Choose whether you would like Brandsurface to create the artwork for you, or if you prefer to upload your own artwork.</p>
-            <p>If you upload your own files, please ensure they are supplied at <strong>300 DPI</strong> and <strong>100% final size</strong>.</p>
-            <p>You may also add comments, instructions, or a brief project description.</p>
+            <div class="oh-step-title">{{oh_step2_title}}</div>
+            <p>{{oh_step2_p1}}</p>
+            <p>{{oh_step2_p2}}</p>
+            <p>{{oh_step2_p3}}</p>
           </div>
         </div>
         <div class="oh-step">
           <div class="oh-badge">3</div>
           <div class="oh-text">
-            <div class="oh-step-title">Select products</div>
-            <p>Select the products you wish to order.</p>
-            <p>Products that are part of the standard assortment are highlighted in green.</p>
+            <div class="oh-step-title">{{oh_step3_title}}</div>
+            <p>{{oh_step3_p1}}</p>
+            <p>{{oh_step3_p2}}</p>
           </div>
         </div>
         <div class="oh-step">
           <div class="oh-badge oh-badge-final">✓</div>
           <div class="oh-text">
-            <div class="oh-step-title">Review &amp; Submit</div>
-            <p>Click <strong>Review Order</strong> to check your selections before submitting. You can easily return to any step and make changes before placing your order.</p>
-            <p>After submission, you will receive a confirmation email. The email includes an <strong>edit link</strong>, allowing you to make changes to your order during the grace period. If everything looks correct, no further action is required.</p>
+            <div class="oh-step-title">{{oh_step4_title}}</div>
+            <p>{{oh_step4_p1}}</p>
+            <p>{{oh_step4_p2}}</p>
           </div>
         </div>
       </div>
-      <div class="oh-highlight-box">You will receive a quotation from Brandsurface within approximately <strong>2 business days</strong> — no production is initiated until budget has been approved.</div>
+      <div class="oh-highlight-box">{{oh_quotation}}</div>
       </div>
     </div><!-- /orderhelp -->
     </div><!-- /form-guide-panel -->
@@ -647,85 +660,85 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!-- Grundoplysninger -->
       <div class="card">
-        <div class="card-label"><span class="card-num">1</span>Basic information</div>
+        <div class="card-label"><span class="card-num">1</span>{{card1_label}}</div>
         <div style="display:flex;flex-direction:column;gap:16px;">
           <div class="field">
-            <label>Campaign <span class="req">*</span></label>
-            <input type="text" id="butiksnavn" placeholder="Campaign name"/>
-            <div class="field-error" id="err-butiksnavn">Please fill in campaign name</div>
+            <label>{{campaign_label}} <span class="req">*</span></label>
+            <input type="text" id="butiksnavn" placeholder="{{campaign_ph}}"/>
+            <div class="field-error" id="err-butiksnavn">{{campaign_err}}</div>
           </div>
           <div class="row-2">
             <div class="field">
-              <label>Your name <span class="req">*</span></label>
-              <input type="text" id="bestiller_navn" placeholder="First Last"/>
-              <div class="field-error" id="err-bestiller_navn">Please enter your name</div>
+              <label>{{name_label}} <span class="req">*</span></label>
+              <input type="text" id="bestiller_navn" placeholder="{{name_ph}}"/>
+              <div class="field-error" id="err-bestiller_navn">{{name_err}}</div>
             </div>
             <div class="field">
-              <label>Your email <span class="req">*</span></label>
-              <input type="email" id="bestiller_email" placeholder="you@company.com"/>
-              <div class="field-error" id="err-bestiller_email">Invalid email address</div>
+              <label>{{email_label}} <span class="req">*</span></label>
+              <input type="email" id="bestiller_email" placeholder="{{email_ph}}"/>
+              <div class="field-error" id="err-bestiller_email">{{email_err}}</div>
             </div>
           </div>
 
           <div class="field">
-            <label>Delivery date</label>
+            <label>{{delivery_date_label}}</label>
             <input type="date" id="delivery_date"/>
           </div>
 
           <div id="consent-container">
             <div class="alt-addr-toggle" id="legal-toggle" onclick="toggleLegal()" style="margin-top:0;">
               <div class="toggle-switch"></div>
-              <span class="alt-addr-toggle-label">Legal</span>
+              <span class="alt-addr-toggle-label">{{legal_label}}</span>
             </div>
             <div class="legal-expand" id="legal-expand">
-              I confirm that I have read and agree to the storage of my <strong>name, email address, and order details</strong> in Brandsurface's systems for the purpose of processing this order. Data is handled in accordance with applicable data protection legislation (GDPR).
+              {{legal_text}}
             </div>
-            <div class="consent-error" id="consent-error">You must accept the terms to continue.</div>
+            <div class="consent-error" id="consent-error">{{consent_err}}</div>
           </div>
         </div>
       </div>
 
       <!-- Artwork / files (step 2) -->
       <div class="card">
-        <div class="card-label"><span class="card-num">2</span>Key Visual / Artwork</div>
+        <div class="card-label"><span class="card-num">2</span>{{card2_label}}</div>
 
         <!-- Brief -->
-        <div class="produkt-section-label" style="margin-top:0;">Brief</div>
+        <div class="produkt-section-label" style="margin-top:0;">{{brief_section}}</div>
         <div class="andet-card">
-          <textarea id="andet" placeholder="Describe your needs for visual and artwork or special requests"></textarea>
+          <textarea id="andet" placeholder="{{brief_ph}}"></textarea>
         </div>
 
         <!-- Artwork -->
-        <div class="produkt-section-label">Key Visual / Artwork</div>
+        <div class="produkt-section-label">{{artwork_section}}</div>
         <div class="artwork-card">
           <div class="alt-addr-toggle" id="artwork-toggle" onclick="toggleArtwork()">
             <div class="toggle-switch"></div>
-            <span class="alt-addr-toggle-label">I want help creating artwork</span>
+            <span class="alt-addr-toggle-label">{{artwork_toggle}}</span>
           </div>
-          <p class="artwork-note">Brandsurface will contact you for further information about the key visual, after which you'll receive a price estimate for the work.</p>
+          <p class="artwork-note">{{artwork_note}}</p>
           <div class="alt-addr-toggle" id="smash-toggle" onclick="toggleSmash()">
             <div class="toggle-switch"></div>
-            <span class="alt-addr-toggle-label">Please send me a Smash upload link for large file uploads (via brandsurface.fromsmash.com)</span>
+            <span class="alt-addr-toggle-label">{{smash_toggle}}</span>
           </div>
         </div>
 
         <!-- Attachments -->
-        <div class="produkt-section-label">Attachments</div>
+        <div class="produkt-section-label">{{attachments_section}}</div>
         <div class="artwork-card">
           <label class="upload-btn">
             <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this)"/>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-            Attach files
+            {{attach_btn}}
           </label>
-          <p class="artwork-note">Max 50 MB per file. PDF, AI, EPS, PSD, PNG, JPG, ZIP, etc. For larger files use the Smash option above.</p>
+          <p class="artwork-note">{{attach_note}}</p>
           <div id="upload-list" class="upload-list"></div>
         </div>
       </div><!-- /artwork card -->
 
       <!-- Produkter (step 3) -->
       <div class="card">
-        <div class="card-label"><span class="card-num">3</span>Products</div>
-        <div class="field-error" id="err-products" style="margin-bottom:4px;">Please select at least one product and set a quantity</div>
+        <div class="card-label"><span class="card-num">3</span>{{card3_label}}</div>
+        <div class="field-error" id="err-products" style="margin-bottom:4px;">{{products_err}}</div>
 
         <!--PRODUCTS_SECTIONS-->
       </div><!-- /produkter card -->
@@ -737,84 +750,84 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
       <!-- Leveringsadresse -->
       <div class="card">
-        <div class="card-label">Delivery address</div>
+        <div class="card-label">{{delivery_card_label}}</div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div class="field">
-            <label>Street address <span class="req">*</span></label>
-            <input type="text" id="gade" placeholder="Street name 123"/>
+            <label>{{street_label}} <span class="req">*</span></label>
+            <input type="text" id="gade" placeholder="{{street_ph}}"/>
           </div>
           <div class="row-2">
             <div class="field">
-              <label>Postcode</label>
-              <input type="text" id="postnr" placeholder="2100"/>
+              <label>{{postcode_label}}</label>
+              <input type="text" id="postnr" placeholder="{{postcode_ph}}"/>
             </div>
             <div class="field">
-              <label>City</label>
-              <input type="text" id="by" placeholder="Copenhagen"/>
+              <label>{{city_label}}</label>
+              <input type="text" id="by" placeholder="{{city_ph}}"/>
             </div>
           </div>
           <div class="field">
-            <label>Country</label>
-            <input type="text" id="land" placeholder="Denmark"/>
+            <label>{{country_label}}</label>
+            <input type="text" id="land" placeholder="{{country_ph}}"/>
           </div>
           <div class="divider" style="margin:2px 0;"></div>
           <div class="field">
-            <label>Attn. (Recipient)</label>
-            <input type="text" id="att" placeholder="Recipient name"/>
+            <label>{{attn_label}}</label>
+            <input type="text" id="att" placeholder="{{attn_ph}}"/>
           </div>
           <div class="field">
-            <label>Phone</label>
-            <input type="text" id="tlf_lev" placeholder="+45 12 34 56 78"/>
+            <label>{{phone_label}}</label>
+            <input type="text" id="tlf_lev" placeholder="{{phone_ph}}"/>
           </div>
         </div>
 
         <div class="alt-addr-toggle" id="alt-addr-toggle" onclick="toggleAltAddr()">
           <div class="toggle-switch"></div>
-          <span class="alt-addr-toggle-label">Deliver to a different address</span>
+          <span class="alt-addr-toggle-label">{{alt_addr_toggle}}</span>
         </div>
 
         <div class="alt-addr-fields" id="alt-addr-fields">
           <div class="field">
-            <label>Street address</label>
-            <input type="text" id="alt_gade" placeholder="Alternative address"/>
+            <label>{{street_label}}</label>
+            <input type="text" id="alt_gade" placeholder="{{alt_street_ph}}"/>
           </div>
           <div class="row-2">
             <div class="field">
-              <label>Postcode</label>
-              <input type="text" id="alt_postnr" placeholder="1000"/>
+              <label>{{postcode_label}}</label>
+              <input type="text" id="alt_postnr" placeholder="{{alt_postcode_ph}}"/>
             </div>
             <div class="field">
-              <label>City</label>
-              <input type="text" id="alt_by" placeholder="Copenhagen"/>
+              <label>{{city_label}}</label>
+              <input type="text" id="alt_by" placeholder="{{alt_city_ph}}"/>
             </div>
           </div>
           <div class="divider" style="margin:2px 0;"></div>
           <div class="field">
-            <label>Attn. (Recipient)</label>
-            <input type="text" id="alt_att" placeholder="Recipient name"/>
+            <label>{{attn_label}}</label>
+            <input type="text" id="alt_att" placeholder="{{alt_attn_ph}}"/>
           </div>
           <div class="field">
-            <label>Phone</label>
-            <input type="text" id="alt_tlf" placeholder="+45 12 34 56 78"/>
+            <label>{{phone_label}}</label>
+            <input type="text" id="alt_tlf" placeholder="{{phone_ph}}"/>
           </div>
         </div>
       </div>
 
       <!-- Salgskonsulent -->
       <div class="card">
-        <div class="card-label">Sales Consultant</div>
+        <div class="card-label">{{consultant_label}}</div>
         <div style="display:flex;flex-direction:column;gap:12px;">
           <div class="field">
-            <label>Name</label>
-            <input type="text" id="konsulent_navn" placeholder="Consultant's name"/>
+            <label>{{consultant_name_label}}</label>
+            <input type="text" id="konsulent_navn" placeholder="{{consultant_name_ph}}"/>
           </div>
           <div class="field">
-            <label>Phone</label>
-            <input type="text" id="konsulent_tlf" placeholder="+45 12 34 56 78"/>
+            <label>{{phone_label}}</label>
+            <input type="text" id="konsulent_tlf" placeholder="{{phone_ph}}"/>
           </div>
           <div class="field">
-            <label>Email</label>
-            <input type="email" id="konsulent_email" placeholder="consultant@example.com"/>
+            <label>{{email_label}}</label>
+            <input type="email" id="konsulent_email" placeholder="{{consultant_email_ph}}"/>
           </div>
         </div>
       </div>
@@ -822,7 +835,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
       <!--HELP_BOX-->
 
       <button class="btn-primary review-order-btn" onclick="goToReview()" style="width:100%;justify-content:center;">
-        Review order
+        {{review_btn}}
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
 
@@ -838,54 +851,54 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 <!-- ═══ VIEW 2: GENNEMGÅ ═══ -->
 <div class="view" id="view-review">
 <div class="review-wrap">
-  <h2 class="review-title">Review order</h2>
-  <p class="review-sub">Check all details — you can still go back and make changes.</p>
+  <h2 class="review-title">{{review_title}}</h2>
+  <p class="review-sub">{{review_sub}}</p>
 
   <div class="review-section">
-    <div class="review-section-label">Orderer</div>
+    <div class="review-section-label">{{review_orderer}}</div>
     <div class="review-grid">
-      <div class="review-field"><div class="rf-label">Campaign</div><div class="rf-val" id="rv-butiksnavn">—</div></div>
-      <div class="review-field"><div class="rf-label">Name</div><div class="rf-val" id="rv-navn">—</div></div>
-      <div class="review-field full"><div class="rf-label">Email (confirmation sent here)</div><div class="rf-val" id="rv-email" style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:13px;">—</div></div>
-      <div class="review-field full"><div class="rf-label">Delivery date</div><div class="rf-val" id="rv-delivery-date">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_campaign_label}}</div><div class="rf-val" id="rv-butiksnavn">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_name_label}}</div><div class="rf-val" id="rv-navn">—</div></div>
+      <div class="review-field full"><div class="rf-label">{{review_email_label}}</div><div class="rf-val" id="rv-email" style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:13px;">—</div></div>
+      <div class="review-field full"><div class="rf-label">{{review_date_label}}</div><div class="rf-val" id="rv-delivery-date">—</div></div>
     </div>
   </div>
 
   <div class="review-section">
-    <div class="review-section-label">Products</div>
+    <div class="review-section-label">{{review_products}}</div>
     <div id="rv-products"></div>
   </div>
 
   <div class="review-section">
-    <div class="review-section-label">Delivery</div>
+    <div class="review-section-label">{{review_delivery}}</div>
     <div class="review-grid">
-      <div class="review-field"><div class="rf-label">Address type</div><div class="rf-val" id="rv-addrtype">—</div></div>
-      <div class="review-field"><div class="rf-label">Address</div><div class="rf-val" id="rv-addr">—</div></div>
-      <div class="review-field"><div class="rf-label">Recipient</div><div class="rf-val" id="rv-att">—</div></div>
-      <div class="review-field"><div class="rf-label">Phone</div><div class="rf-val" id="rv-tlf">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_addrtype_label}}</div><div class="rf-val" id="rv-addrtype">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_addr_label}}</div><div class="rf-val" id="rv-addr">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_recipient_label}}</div><div class="rf-val" id="rv-att">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-tlf">—</div></div>
     </div>
   </div>
 
   <div class="review-section" id="rv-alt-section" style="display:none;">
-    <div class="review-section-label">Alternative delivery address</div>
+    <div class="review-section-label">{{review_alt_delivery}}</div>
     <div class="review-grid">
-      <div class="review-field full"><div class="rf-label">Address</div><div class="rf-val" id="rv-alt-addr">—</div></div>
-      <div class="review-field"><div class="rf-label">Recipient</div><div class="rf-val" id="rv-alt-att">—</div></div>
-      <div class="review-field"><div class="rf-label">Phone</div><div class="rf-val" id="rv-alt-tlf">—</div></div>
+      <div class="review-field full"><div class="rf-label">{{review_addr_label}}</div><div class="rf-val" id="rv-alt-addr">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_recipient_label}}</div><div class="rf-val" id="rv-alt-att">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-alt-tlf">—</div></div>
     </div>
   </div>
 
   <div class="review-section">
-    <div class="review-section-label">Sales consultant</div>
+    <div class="review-section-label">{{review_consultant}}</div>
     <div class="review-grid">
-      <div class="review-field"><div class="rf-label">Name</div><div class="rf-val" id="rv-k-navn">—</div></div>
-      <div class="review-field"><div class="rf-label">Phone</div><div class="rf-val" id="rv-k-tlf">—</div></div>
-      <div class="review-field full"><div class="rf-label">Email</div><div class="rf-val" id="rv-k-email">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_name_label}}</div><div class="rf-val" id="rv-k-navn">—</div></div>
+      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-k-tlf">—</div></div>
+      <div class="review-field full"><div class="rf-label">{{email_label}}</div><div class="rf-val" id="rv-k-email">—</div></div>
     </div>
   </div>
 
   <div class="review-section" id="rv-uploads-section" style="display:none;">
-    <div class="review-section-label">Attached files</div>
+    <div class="review-section-label">{{review_files}}</div>
     <div class="rv-files-grid" id="rv-files"></div>
   </div>
 </div>
@@ -893,10 +906,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 <div style="display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:20px;">
   <button class="btn-secondary btn-grey" onclick="goBack()">
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Edit order
+    {{edit_order_btn}}
   </button>
   <button class="btn-primary" onclick="submitOrder()">
-    Submit order
+    {{submit_order_btn}}
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
 </div>
@@ -909,34 +922,34 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
   <div class="confirm-icon">
     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 4l-10 8L2 4"/></svg>
   </div>
-  <h2 class="confirm-title">Order submitted!</h2>
-  <p class="confirm-text">We've sent an order confirmation to</p>
+  <h2 class="confirm-title">{{confirm_title}}</h2>
+  <p class="confirm-text">{{confirm_text1}}</p>
   <div class="confirm-email" id="conf-email">—</div>
-  <p class="confirm-text" style="margin-top:4px;">Check your inbox and possible spam folder.</p>
+  <p class="confirm-text" style="margin-top:4px;">{{confirm_text2}}</p>
 
   <div class="confirm-steps">
-    <div class="cs-title">What happens next?</div>
+    <div class="cs-title">{{confirm_next}}</div>
     <div class="cs-item">
       <div class="cs-num">1</div>
-      <div class="cs-body"><div class="cs-h">You receive a confirmation email</div><div class="cs-d">The email contains a complete overview of your order.</div></div>
+      <div class="cs-body"><div class="cs-h">{{confirm_step1_h}}</div><div class="cs-d">{{confirm_step1_d}}</div></div>
     </div>
     <div class="cs-item">
       <div class="cs-num">2</div>
-      <div class="cs-body"><div class="cs-h">A few minutes to make changes</div><div class="cs-d">Need to edit? Use the <strong style="color:var(--accent)">Edit order</strong> link in the email — a new confirmation is sent and the timer restarts.</div></div>
+      <div class="cs-body"><div class="cs-h">{{confirm_step2_h}}</div><div class="cs-d">{{confirm_step2_d}}</div></div>
     </div>
     <div class="cs-item">
       <div class="cs-num">3</div>
-      <div class="cs-body"><div class="cs-h">Brandsurface receives the order</div><div class="cs-d">If you make no changes, your order is automatically forwarded after a short delay.</div></div>
+      <div class="cs-body"><div class="cs-h">{{confirm_step3_h}}</div><div class="cs-d">{{confirm_step3_d}}</div></div>
     </div>
   </div>
 
   <div style="display:flex;flex-direction:column;gap:12px;align-items:stretch;width:100%;max-width:320px;margin:0 auto;">
     <button class="btn-secondary btn-grey" onclick="editSubmittedOrder()" style="width:100%;justify-content:center;">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Edit order
+      {{edit_order_btn}}
     </button>
     <button class="btn-primary" onclick="closePage()" style="width:100%;justify-content:center;">
-      Done — Thank You!
+      {{confirm_done_btn}}
       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3.5 3.5L13 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
   </div>
@@ -944,8 +957,8 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 </div><!-- /view-confirm -->
 
 <footer class="site-footer">
-  Developed by Brand Surface · Need a digital tool, web app, or website?<br>
-  Contact us at <a href="mailto:info@brandsurface.dk">info@brandsurface.dk</a>
+  {{footer_text}}<br>
+  {{footer_contact}} <a href="mailto:info@brandsurface.dk">info@brandsurface.dk</a>
 </footer>
 
 </div><!-- /page -->
@@ -980,9 +993,10 @@ function _esc(s) { return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</
 function renderInstanceHTML(cfg, spid, n) {
   const groupsHtml = (cfg.groupDefs || []).map((g, gi) => {
     const chips = (g.options || []).map(o => `<span class="format-chip" onclick="selectOption(this,'${spid}',${gi})">${_esc(o)}</span>`).join('');
-    const cfmt = cfg.customFormat ? `<input type="text" id="cfmt-${spid}" class="custom-fmt-input" placeholder="Other format in mm" oninput="updateCustomFmt('${spid}',this)"/>` : '';
+    const cfmt = cfg.customFormat ? `<input type="text" id="cfmt-${spid}" class="custom-fmt-input" placeholder="${_esc((window.__T||{}).custom_fmt_ph||'Other format in mm')}" oninput="updateCustomFmt('${spid}',this)"/>` : '';
     return `<div class="opt-group"><span class="opt-label">${_esc(g.name)}</span><div class="opt-chips" id="opt-${spid}-${gi}">${chips}${cfmt}</div></div>`;
   }).join('');
+  const _t = window.__T || {};
   return `<div class="produkt-acc open" id="prodacc-${spid}">
     <div class="produkt-acc-head-row">
       <button type="button" class="produkt-acc-head" onclick="toggleProduct('${spid}')">
@@ -995,20 +1009,20 @@ function renderInstanceHTML(cfg, spid, n) {
       ${groupsHtml}
       <div class="alt-addr-toggle self-print-toggle" id="selfprint-toggle-${spid}" onclick="toggleSelfPrint('${spid}')">
         <div class="toggle-switch"></div>
-        <span class="alt-addr-toggle-label">I will handle the print process myself.</span>
+        <span class="alt-addr-toggle-label">${_esc(_t.self_print_toggle || 'I will handle the print process myself.')}</span>
       </div>
       <div class="acc-row">
-        <span class="opt-label">Quantity</span>
+        <span class="opt-label">${_esc(_t.qty_label || 'Quantity')}</span>
         <div class="qty-stepper">
           <button type="button" onclick="stepQty('qty-${spid}',-1)">${_MINUS}</button>
           <input type="number" id="qty-${spid}" value="0" min="0" oninput="updateQtyBadge('${spid}')"/>
           <button type="button" onclick="stepQty('qty-${spid}',1)">${_PLUS}</button>
         </div>
       </div>
-      <div class="field-error" id="err-qty-${spid}">Please enter a quantity greater than 0</div>
+      <div class="field-error" id="err-qty-${spid}">${_esc(_t.qty_err || 'Please enter a quantity greater than 0')}</div>
       <div class="acc-comment">
-        <span class="opt-label">Comment</span>
-        <textarea id="cmt-${spid}" rows="2" placeholder="Notes for this product (optional)…"></textarea>
+        <span class="opt-label">${_esc(_t.comment_label || 'Comment')}</span>
+        <textarea id="cmt-${spid}" rows="2" placeholder="${_esc(_t.comment_ph || 'Notes for this product (optional)…')}"></textarea>
       </div>
       <button type="button" class="add-instance-btn" onclick="addProductInstance('${cfg.pid}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> ${_esc(cfg.type)}</button>
     </div>
@@ -1135,7 +1149,7 @@ async function prefillFromOrder(orderId) {
     if (d.konsulent_tlf)   document.getElementById('konsulent_tlf').value = d.konsulent_tlf;
     if (d.konsulent_email) document.getElementById('konsulent_email').value = d.konsulent_email;
 
-    showToast('Order loaded — edit and resubmit', '');
+    showToast((window.__T?.toast_order_loaded) || 'Order loaded — edit and resubmit', '');
   } catch (err) {
     console.error('Prefill fejl:', err);
   }
@@ -1183,7 +1197,8 @@ function updateQtyBadge(pid) {
   if (!el || !badge) return;
   const v = parseInt(el.value) || 0;
   const self = !!selfPrint[pid];
-  badge.textContent = self ? 'Self-print' : (v > 0 ? ('× ' + v) : '');
+  const _t2 = window.__T || {};
+  badge.textContent = self ? (_t2.badge_self_print || 'Self-print') : (v > 0 ? ('× ' + v) : '');
   const acc = el.closest('.produkt-acc');
   if (acc) acc.classList.toggle('filled', v > 0 || self);
   if (v > 0 || self) {
@@ -1201,8 +1216,9 @@ async function handleFiles(input) {
   const files = Array.from(input.files || []);
   input.value = '';
   for (const file of files) {
-    if (file.size > MAX_UPLOAD) { showToast(file.name + ' exceeds 50 MB', 'error'); continue; }
-    showToast('Uploading ' + file.name + '…', '');
+    const _ut = window.__T || {};
+    if (file.size > MAX_UPLOAD) { showToast(file.name + ' ' + (_ut.upload_exceeds || 'exceeds 50 MB'), 'error'); continue; }
+    showToast((_ut.upload_uploading || 'Uploading') + ' ' + file.name + '…', '');
     try {
       const r = await fetch('/api/upload-url', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ filename: file.name }) });
       const d = await r.json();
@@ -1211,9 +1227,9 @@ async function handleFiles(input) {
       if (!put.ok) throw new Error('Upload failed (' + put.status + ')');
       uploadedFiles.push({ path: d.path, name: file.name, size: file.size });
       renderUploads();
-      showToast(file.name + ' uploaded', 'success');
+      showToast(file.name + ' ' + (window.__T?.upload_uploaded || 'uploaded'), 'success');
     } catch (e) {
-      showToast('Could not upload ' + file.name + ': ' + e.message, 'error');
+      showToast((window.__T?.upload_error || 'Could not upload') + ' ' + file.name + ': ' + e.message, 'error');
     }
   }
 }
@@ -1383,12 +1399,14 @@ function makeBadge(ext, bg, color) {
 function goToReview() {
   if (!validate()) return;
 
+  const _rt = window.__T || {};
   v('rv-butiksnavn', g('butiksnavn'));
   v('rv-navn', g('bestiller_navn'));
   v('rv-email', g('bestiller_email'));
   const dd = g('delivery_date');
-  v('rv-delivery-date', dd ? new Date(dd).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
-  v('rv-addrtype', addrType === 'butik' ? 'Business address' : 'Private address');
+  const _dtLocale = window.__LANG === 'da' ? 'da-DK' : 'en-GB';
+  v('rv-delivery-date', dd ? new Date(dd).toLocaleDateString(_dtLocale, { day: '2-digit', month: 'short', year: 'numeric' }) : '—');
+  v('rv-addrtype', addrType === 'butik' ? (_rt.review_business_addr || 'Business address') : (_rt.review_private_addr || 'Private address'));
   v('rv-addr', [g('gade'), g('postnr'), g('by'), g('land')].filter(Boolean).join(', ') || '—');
   v('rv-att', g('att') || '—');
   v('rv-tlf', g('tlf_lev') || '—');
@@ -1424,8 +1442,8 @@ function goToReview() {
       return `${escHtml(n)}: ${escHtml(Array.isArray(v) ? v.join(', ') : v)}`;
     }).filter(Boolean).join(' · ');
     const comment = document.getElementById(cmt)?.value.trim();
-    const qtyLine = isSelf ? 'Handles print process themselves' : `Qty: ${qty}`;
-    const meta = [qtyLine, optStr || null, comment ? `Comment: ${escHtml(comment)}` : null].filter(Boolean).join('<br>');
+    const qtyLine = isSelf ? (_rt.review_handles_print || 'Handles print process themselves') : ((_rt.review_qty || 'Qty:') + ' ' + qty);
+    const meta = [qtyLine, optStr || null, comment ? ((_rt.review_comment || 'Comment:') + ' ' + escHtml(comment)) : null].filter(Boolean).join('<br>');
     const d = document.createElement('div');
     d.className = 'rv-produkt-row';
     d.innerHTML = `
@@ -1443,7 +1461,7 @@ function goToReview() {
     d.style.alignItems = 'flex-start';
     d.style.gap = '6px';
     d.innerHTML = `
-      <div class="rv-produkt-name">Brief</div>
+      <div class="rv-produkt-name">${escHtml(_rt.review_brief || 'Brief')}</div>
       <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${escHtml(andet)}</div>
     `;
     rvProd.appendChild(d);
@@ -1453,8 +1471,8 @@ function goToReview() {
     const d = document.createElement('div');
     d.className = 'rv-produkt-row';
     d.innerHTML = `
-      <div class="rv-produkt-name">Artwork</div>
-      <div class="rv-produkt-meta">Help requested</div>
+      <div class="rv-produkt-name">${escHtml(_rt.review_artwork || 'Artwork')}</div>
+      <div class="rv-produkt-meta">${escHtml(_rt.review_help_requested || 'Help requested')}</div>
     `;
     rvProd.appendChild(d);
   }
@@ -1463,8 +1481,8 @@ function goToReview() {
     const d = document.createElement('div');
     d.className = 'rv-produkt-row';
     d.innerHTML = `
-      <div class="rv-produkt-name">Smash upload link</div>
-      <div class="rv-produkt-meta">Requested · brandsurface.fromsmash.com</div>
+      <div class="rv-produkt-name">${escHtml(_rt.review_smash || 'Smash upload link')}</div>
+      <div class="rv-produkt-meta">${escHtml(_rt.review_smash_requested || 'Requested · brandsurface.fromsmash.com')}</div>
     `;
     rvProd.appendChild(d);
   }
@@ -1506,7 +1524,7 @@ async function submitOrder() {
   const btn = document.querySelector('#view-review .btn-primary');
   const originalHTML = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = 'Sending...';
+  btn.innerHTML = (window.__T?.toast_sending) || 'Sending...';
 
   // Collect products
   const produkter = [];
@@ -1557,6 +1575,7 @@ async function submitOrder() {
     konsulent_email: g('konsulent_email'),
     uploads:         uploadedFiles,
     previous_id:     window.__editId || null,
+    language:        window.__LANG || 'en',
   };
 
   try {
@@ -1573,7 +1592,7 @@ async function submitOrder() {
     document.getElementById('conf-email').textContent = g('bestiller_email');
     showView('view-confirm'); setPill(3);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    showToast('Order submitted! Check your email.', 'success');
+    showToast((window.__T?.toast_submitted) || 'Order submitted! Check your email.', 'success');
 
     // Ryd edit-state efter succes
     window.__editId = null;
@@ -1589,7 +1608,7 @@ async function submitOrder() {
 function closePage() {
   window.close();
   // Browsers won't close tabs they didn't open via script — show a fallback
-  setTimeout(() => showToast('Thank you! You can now close this tab.', 'success'), 150);
+  setTimeout(() => showToast((window.__T?.toast_close_tab) || 'Thank you! You can now close this tab.', 'success'), 150);
 }
 
 function resetForm() {
@@ -1623,6 +1642,17 @@ function v(id, val) { const el = document.getElementById(id); if (el) el.textCon
 function showView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
 function setPill(n) { document.querySelectorAll('.step-pill').forEach((p, i) => { p.classList.remove('active','done'); if (i+1 < n) p.classList.add('done'); else if (i+1 === n) p.classList.add('active'); }); }
 function showToast(msg, type='') { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + (type==='success'?'success':type==='error'?'error-t':''); t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3500); }
+
+// Language switcher
+function setLang(l) {
+  document.cookie = 'lang=' + l + ';path=/;max-age=31536000;SameSite=Lax';
+  location.reload();
+}
+(function() {
+  const active = window.__LANG || 'en';
+  const btn = document.getElementById('lang-' + active);
+  if (btn) btn.classList.add('active');
+})();
 
 // Keep the "Review order" button visible at the bottom of the viewport so it
 // rides along smoothly while scrolling the form (no jump).
