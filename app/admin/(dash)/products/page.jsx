@@ -1,17 +1,8 @@
 import { supabase } from '@/lib/supabase'
+import { getAdminT } from '@/lib/admin-i18n'
 import OptionGroupsBuilder from './OptionGroupsBuilder'
 
 export const dynamic = 'force-dynamic'
-
-const STATUS = {
-  created: ['ok', 'Product added.'],
-  saved: ['ok', 'Saved.'],
-  deleted: ['ok', 'Product deleted.'],
-  invalid: ['err', 'Please enter a product name.'],
-  error: ['err', 'Something went wrong. Please try again.'],
-}
-
-const GROUPS = [['print', 'Print materials'], ['some', 'SoMe assets']]
 
 function groupsToJson(p) {
   if (Array.isArray(p?.option_groups) && p.option_groups.length) {
@@ -24,6 +15,22 @@ function groupsToJson(p) {
 }
 
 export default async function AdminProducts({ searchParams }) {
+  const { t } = await getAdminT()
+  const STATUS = {
+    created: ['ok', t.st_created_product],
+    saved: ['ok', t.st_saved],
+    deleted: ['ok', t.st_deleted_product],
+    invalid: ['err', t.st_invalid_product],
+    error: ['err', t.st_error],
+  }
+  const GROUPS = [['print', t.group_print], ['some', t.group_some]]
+  const ogT = {
+    label: t.og_label, hint: t.og_hint, groupNamePh: t.og_group_name_ph,
+    removeGroup: t.og_remove_group, optionPh: t.og_option_ph, starOn: t.og_star_on,
+    starOff: t.og_star_off, removeOption: t.og_remove_option, addOption: t.og_add_option,
+    addGroup: t.og_add_group,
+  }
+
   const { data: products } = await supabase
     .from('products')
     .select('id, grp, label, description, formats, option_groups, sort, active, allow_custom_format, allow_duplicate')
@@ -34,8 +41,8 @@ export default async function AdminProducts({ searchParams }) {
 
   return (
     <>
-      <h1 className="a-h1">Products</h1>
-      <p className="a-sub">Edit the order-form products. Add option groups (e.g. <code style={{ fontFamily: "'DM Mono',monospace" }}>Format</code> with choices A4, 50×70 cm) to give customers multiple-choice selections. Every product also shows a comment field on the form.</p>
+      <h1 className="a-h1">{t.products_title}</h1>
+      <p className="a-sub">{t.products_sub}</p>
 
       {note && <div className={`a-note ${note[0]}`}>{note[1]}</div>}
 
@@ -44,26 +51,26 @@ export default async function AdminProducts({ searchParams }) {
           <input type="hidden" name="action" value="create" />
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 2, minWidth: 180 }}>
-              <label className="a-label">New product name</label>
-              <input className="a-input" name="label" required placeholder="Product name" />
+              <label className="a-label">{t.products_new_name}</label>
+              <input className="a-input" name="label" required placeholder={t.products_name_ph} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 150 }}>
-              <label className="a-label">Group</label>
+              <label className="a-label">{t.products_group}</label>
               <select className="a-input" name="grp" defaultValue="print">
                 {GROUPS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 80 }}>
-              <label className="a-label">Sort</label>
+              <label className="a-label">{t.products_sort}</label>
               <input className="a-input" name="sort" type="number" defaultValue={0} />
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <label className="a-label">Description (optional)</label>
-            <input className="a-input" name="description" placeholder="Spec text shown when expanded" />
+            <label className="a-label">{t.products_desc_opt}</label>
+            <input className="a-input" name="description" placeholder={t.products_desc_ph} />
           </div>
-          <OptionGroupsBuilder initial={[]} />
-          <button type="submit" className="a-btn" style={{ alignSelf: 'flex-start' }}>Add product</button>
+          <OptionGroupsBuilder initial={[]} t={ogT} />
+          <button type="submit" className="a-btn" style={{ alignSelf: 'flex-start' }}>{t.products_add}</button>
         </form>
       </div>
 
@@ -75,45 +82,45 @@ export default async function AdminProducts({ searchParams }) {
               <input type="hidden" name="id" value={p.id} />
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 2, minWidth: 180 }}>
-                  <label className="a-label">Name</label>
+                  <label className="a-label">{t.products_name}</label>
                   <input className="a-input" name="label" defaultValue={p.label} required />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 150 }}>
-                  <label className="a-label">Group</label>
+                  <label className="a-label">{t.products_group}</label>
                   <select className="a-input" name="grp" defaultValue={p.grp}>
                     {GROUPS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                   </select>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: 80 }}>
-                  <label className="a-label">Sort</label>
+                  <label className="a-label">{t.products_sort}</label>
                   <input className="a-input" name="sort" type="number" defaultValue={p.sort} />
                 </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#b8b4ae', height: 40 }}>
-                  <input type="checkbox" name="active" defaultChecked={p.active} /> Active
+                  <input type="checkbox" name="active" defaultChecked={p.active} /> {t.products_active}
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#b8b4ae', height: 40 }}>
-                  <input type="checkbox" name="allow_custom_format" defaultChecked={p.allow_custom_format} /> Custom format field
+                  <input type="checkbox" name="allow_custom_format" defaultChecked={p.allow_custom_format} /> {t.products_custom_format}
                 </label>
                 <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#b8b4ae', height: 40 }}>
-                  <input type="checkbox" name="allow_duplicate" defaultChecked={p.allow_duplicate} /> Allow duplicate
+                  <input type="checkbox" name="allow_duplicate" defaultChecked={p.allow_duplicate} /> {t.products_allow_duplicate}
                 </label>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <label className="a-label">Description</label>
+                <label className="a-label">{t.products_desc}</label>
                 <input className="a-input" name="description" defaultValue={p.description || ''} placeholder="—" />
               </div>
-              <OptionGroupsBuilder initial={groupsToJson(p)} />
-              <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>Save</button>
+              <OptionGroupsBuilder initial={groupsToJson(p)} t={ogT} />
+              <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>{t.products_save}</button>
             </form>
             <form method="POST" action="/api/admin/products" style={{ marginTop: 10 }}>
               <input type="hidden" name="action" value="delete" />
               <input type="hidden" name="id" value={p.id} />
-              <button type="submit" className="a-btn-danger">Delete</button>
+              <button type="submit" className="a-btn-danger">{t.products_delete}</button>
             </form>
           </div>
         ))}
         {(!products || products.length === 0) && (
-          <div className="a-card" style={{ color: '#7a7672' }}>No products yet — add one above.</div>
+          <div className="a-card" style={{ color: '#7a7672' }}>{t.products_empty}</div>
         )}
       </div>
     </>

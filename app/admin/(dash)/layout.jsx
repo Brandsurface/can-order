@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/lib/admin-auth'
+import { getAdminT } from '@/lib/admin-i18n'
+import AdminLangSwitcher from '../AdminLangSwitcher'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,20 +59,23 @@ export default async function DashLayout({ children }) {
   const user = await getCurrentUser()
   if (!user) redirect('/admin/login')
 
+  const { lang, t } = await getAdminT()
+
   return (
     <div className="a-body">
       <style dangerouslySetInnerHTML={{ __html: ADMIN_CSS }} />
       <nav className="a-nav">
         <span className="a-logo">BRANDSURFACE</span>
         <div className="a-nav-links">
-          <a className="a-nav-link" href="/admin">Orders</a>
-          <a className="a-nav-link" href="/admin/products">Products</a>
-          <a className="a-nav-link" href="/admin/settings">Settings</a>
-          {user.is_master && <a className="a-nav-link" href="/admin/users">Users</a>}
+          <a className="a-nav-link" href="/admin">{t.nav_orders}</a>
+          <a className="a-nav-link" href="/admin/products">{t.nav_products}</a>
+          <a className="a-nav-link" href="/admin/settings">{t.nav_settings}</a>
+          {user.is_master && <a className="a-nav-link" href="/admin/users">{t.nav_users}</a>}
         </div>
         <div className="a-nav-right">
+          <AdminLangSwitcher lang={lang} />
           <span>{user.email}</span>
-          <a href="/api/admin/logout">Log out</a>
+          <a href="/api/admin/logout">{t.nav_logout}</a>
         </div>
       </nav>
       <div className="a-wrap">{children}</div>
