@@ -227,6 +227,9 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .format-chip.rec { border-color: rgba(74,222,128,0.5); color: #4ade80; background: rgba(74,222,128,0.08); }
 .format-chip.rec:hover { border-color: rgba(74,222,128,0.75); color: #4ade80; }
 .format-chip.rec.active { background: var(--accent-dim); border-color: rgba(241,86,46,0.5); color: var(--accent); }
+/* Once a non-standard choice is made, drop the green overlay on the standard chips */
+.opt-chips.rec-hidden .format-chip.rec:not(.active) { border-color: var(--border); color: var(--text-2); background: var(--surface-3); }
+.opt-chips.rec-hidden .format-chip.rec:not(.active):hover { border-color: rgba(241,86,46,0.35); color: var(--text); }
 .custom-fmt-input {
   padding: 5px 10px; border-radius: 6px; width: 148px;
   border: 1px solid var(--border); background: var(--surface-3);
@@ -316,6 +319,9 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .help-box-content a:hover { text-decoration: underline; }
 
 /* File uploads */
+.brief-attach-btn { display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 6px 12px; background: none; border: 1px solid var(--border); border-radius: var(--radius); color: var(--text-3); font-family: inherit; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.brief-attach-btn:hover { border-color: rgba(241,86,46,0.45); color: var(--text-2); }
+.brief-attach-btn svg { color: var(--accent); }
 .upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; background: var(--surface-3); border: 1px dashed var(--border-light); border-radius: var(--radius); color: var(--text-2); cursor: pointer; font-size: 13px; width: fit-content; transition: all 0.2s; }
 .upload-btn:hover { border-color: rgba(241,86,46,0.45); color: var(--text); }
 .upload-btn svg { color: var(--accent); }
@@ -712,6 +718,10 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
         <div class="andet-card">
           <textarea id="andet" placeholder="{{brief_ph}}"></textarea>
         </div>
+        <button type="button" class="brief-attach-btn" onclick="document.getElementById('file-input').click()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          {{attach_btn}}
+        </button>
 
         <!-- Artwork -->
         <div class="produkt-section-label">{{artwork_section}}</div>
@@ -731,7 +741,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
         <div class="produkt-section-label">{{attachments_section}}</div>
         <div class="artwork-card">
           <label class="upload-btn">
-            <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this)"/>
+            <input type="file" id="file-input" multiple style="display:none" accept=".pdf,.ai,.eps,.psd,.indd,.svg,.png,.jpg,.jpeg,.gif,.webp,.tif,.tiff,.zip,.mp4" onchange="handleFiles(this)"/>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             {{attach_btn}}
           </label>
@@ -1070,6 +1080,7 @@ function updateCustomFmt(pid, el) {
       delete selectedOptions[pid][prod.groups[0]];
     }
   }
+  refreshRecState(el.parentElement);
 }
 
 const ARTWORK_TYPE = 'Artwork';
@@ -1118,6 +1129,7 @@ async function prefillFromOrder(orderId) {
             document.querySelectorAll('#opt-' + cfg.pid + '-' + gi + ' .format-chip').forEach(chip => {
               if (wanted.includes(chip.textContent)) { chip.classList.add('active'); sel.push(chip.textContent); }
             });
+            refreshRecState(document.getElementById('opt-' + cfg.pid + '-' + gi));
             if (sel.length) {
               selectedOptions[cfg.pid] = selectedOptions[cfg.pid] || {};
               selectedOptions[cfg.pid][name] = sel;
@@ -1176,6 +1188,16 @@ function toggleProduct(pid, forceOpen) {
   else body.parentElement.classList.toggle('open');
 }
 
+// Hide the green "standard assortment" overlay once a non-standard choice
+// is made in a group (a non-recommended chip, or a typed custom format).
+function refreshRecState(container) {
+  if (!container) return;
+  const activeChip = container.querySelector('.format-chip.active');
+  const activeCustom = container.querySelector('.custom-fmt-input.active');
+  const diverged = (activeChip && !activeChip.classList.contains('rec')) || !!activeCustom;
+  container.classList.toggle('rec-hidden', diverged);
+}
+
 // ── Option selection (one choice per group) ──
 function selectOption(chip, pid, groupIndex) {
   const wasActive = chip.classList.contains('active');
@@ -1183,6 +1205,7 @@ function selectOption(chip, pid, groupIndex) {
   if (!wasActive) chip.classList.add('active');
   const prod = PRODUCTS.find(p => p.pid === pid);
   const name = prod && prod.groups[groupIndex];
+  refreshRecState(chip.parentElement);
   if (!name) return;
   selectedOptions[pid] = selectedOptions[pid] || {};
   selectedOptions[pid][name] = Array.from(chip.parentElement.querySelectorAll('.format-chip.active')).map(c => c.textContent);
@@ -1468,7 +1491,7 @@ function goToReview() {
     d.style.gap = '6px';
     d.innerHTML = `
       <div class="rv-produkt-name">${escHtml(_rt.review_brief || 'Brief')}</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${escHtml(andet)}</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.5;white-space:pre-wrap;word-break:break-word;">${escHtml(andet)}</div>
     `;
     rvProd.appendChild(d);
   }
@@ -1622,6 +1645,7 @@ function resetForm() {
   document.querySelectorAll('input[type="number"]').forEach(el => el.value = 0);
   document.querySelectorAll('textarea').forEach(el => el.value = '');
   document.querySelectorAll('.format-chip').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.opt-chips.rec-hidden').forEach(c => c.classList.remove('rec-hidden'));
   document.querySelectorAll('.produkt-acc.open').forEach(a => a.classList.remove('open'));
   document.querySelectorAll('.produkt-acc.filled').forEach(a => a.classList.remove('filled'));
   document.querySelectorAll('.acc-qty').forEach(b => b.textContent = '');
