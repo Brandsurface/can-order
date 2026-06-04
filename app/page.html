@@ -1468,7 +1468,7 @@ function goToReview() {
     d.style.gap = '6px';
     d.innerHTML = `
       <div class="rv-produkt-name">${escHtml(_rt.review_brief || 'Brief')}</div>
-      <div style="font-size:13px;color:var(--text-2);line-height:1.5;">${escHtml(andet)}</div>
+      <div style="font-size:13px;color:var(--text-2);line-height:1.5;white-space:pre-wrap;word-break:break-word;">${escHtml(andet)}</div>
     `;
     rvProd.appendChild(d);
   }
