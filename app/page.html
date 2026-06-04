@@ -111,6 +111,8 @@ header {
 .form-hero { margin-bottom: 52px; }
 .form-hero h1 { font-size: clamp(36px, 5vw, 60px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.0; color: #f1562e; }
 .form-hero p { margin-top: 14px; color: var(--text-2); font-size: 16px; font-weight: 300; line-height: 1.6; }
+@keyframes heroSubFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.hero-sub { animation: heroSubFadeIn 1.4s cubic-bezier(0.4,0,0.2,1) 0.3s both; }
 
 /* ── Layout grid ── */
 .grid-main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
@@ -602,7 +604,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
   <div class="form-hero">
     <h1>{{hero_title}}</h1>
-    <p>{{hero_sub}}</p>
+    <p class="hero-sub">{{hero_sub}}</p>
   </div>
 
   <!-- Order process guide + form in outer grid -->
