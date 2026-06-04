@@ -731,7 +731,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
         <div class="produkt-section-label">{{attachments_section}}</div>
         <div class="artwork-card">
           <label class="upload-btn">
-            <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this)"/>
+            <input type="file" id="file-input" multiple style="display:none" accept=".pdf,.ai,.eps,.psd,.indd,.svg,.png,.jpg,.jpeg,.gif,.webp,.tif,.tiff,.zip,.mp4" onchange="handleFiles(this)"/>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
             {{attach_btn}}
           </label>
