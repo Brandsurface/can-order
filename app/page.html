@@ -222,14 +222,14 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 }
 .format-chip:hover { border-color: rgba(241,86,46,0.35); color: var(--text); }
 .format-chip.active {
-  background: var(--accent-dim); border-color: rgba(241,86,46,0.5); color: var(--accent);
+  background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.5); color: #4ade80;
 }
-.format-chip.rec { border-color: rgba(74,222,128,0.5); color: #4ade80; background: rgba(74,222,128,0.08); }
-.format-chip.rec:hover { border-color: rgba(74,222,128,0.75); color: #4ade80; }
-.format-chip.rec.active { background: var(--accent-dim); border-color: rgba(241,86,46,0.5); color: var(--accent); }
-/* Once a non-standard choice is made, drop the green overlay on the standard chips */
+.format-chip.rec { border-color: rgba(241,86,46,0.5); color: var(--accent); background: var(--accent-dim); }
+.format-chip.rec:hover { border-color: rgba(241,86,46,0.75); color: var(--accent); }
+.format-chip.rec.active { background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.5); color: #4ade80; }
+/* Once a non-standard choice is made, drop the orange overlay on the standard chips */
 .opt-chips.rec-hidden .format-chip.rec:not(.active) { border-color: var(--border); color: var(--text-2); background: var(--surface-3); }
-.opt-chips.rec-hidden .format-chip.rec:not(.active):hover { border-color: rgba(241,86,46,0.35); color: var(--text); }
+.opt-chips.rec-hidden .format-chip.rec:not(.active):hover { border-color: rgba(74,222,128,0.35); color: var(--text); }
 .custom-fmt-input {
   padding: 5px 10px; border-radius: 6px; width: 148px;
   border: 1px solid var(--border); background: var(--surface-3);
@@ -239,7 +239,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 .custom-fmt-input::placeholder { color: var(--text-3); }
 .custom-fmt-input:focus { border-color: rgba(241,86,46,0.35); color: var(--text); }
 .custom-fmt-input.active {
-  background: var(--accent-dim); border-color: rgba(241,86,46,0.5); color: var(--accent);
+  background: rgba(74,222,128,0.08); border-color: rgba(74,222,128,0.5); color: #4ade80;
 }
 
 /* Quantity stepper */
@@ -279,7 +279,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 }
 .remove-instance-btn:hover { color: #f87171; }
 .produkt-acc { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; transition: border-color 0.2s; }
-.produkt-acc:hover { border-color: var(--border-light); }
+.produkt-acc:hover { border-color: rgba(74,222,128,0.35); }
 .produkt-acc.filled { border-color: rgba(74,222,128,0.45); background: rgba(74,222,128,0.06); }
 .prod-icon { display: inline-flex; align-items: center; color: var(--accent); }
 .prod-icon-check { display: none; color: #4ade80; }
