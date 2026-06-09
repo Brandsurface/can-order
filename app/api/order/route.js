@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { buildCustomerConfirmEmail, buildBrand SurfaceEmail } from '@/lib/emails'
-import { dispatchToBrand Surface, buildUploadLinks } from '@/lib/dispatch'
+import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
+import { dispatchToBrandsurface, buildUploadLinks } from '@/lib/dispatch'
 
 export const dynamic = 'force-dynamic'
 
@@ -113,12 +113,12 @@ export async function POST(request) {
     if (recipient) {
       if (delayMinutes <= 0) {
         // scheduledAt must be in the future, so send right away instead
-        await dispatchToBrand Surface(order)
+        await dispatchToBrandsurface(order)
       } else {
         const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
         try {
           const uploadLinks = await buildUploadLinks(order)
-          const bs = buildBrand SurfaceEmail({ order: { ...order, uploadLinks } })
+          const bs = buildBrandsurfaceEmail({ order: { ...order, uploadLinks } })
           const { data: scheduled, error: schedErr } = await resend.emails.send({
             from: `Brand Surface Ordre <${fromAddress}>`,
             to: recipient,
