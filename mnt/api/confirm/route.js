@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { buildBrand SurfaceEmail } from '@/lib/emails'
+import { buildBrandsurfaceEmail } from '@/lib/emails'
 import { redirect } from 'next/navigation'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -45,7 +45,7 @@ export async function GET(request) {
   }
 
   // Send mail til Brand Surface
-  const { subject, html } = buildBrand SurfaceEmail({ order })
+  const { subject, html } = buildBrandsurfaceEmail({ order })
 
   await resend.emails.send({
     from:    'Brand Surface Ordre <ordre@brandsurface.dk>',
