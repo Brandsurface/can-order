@@ -105,7 +105,7 @@ export function buildConfirmEmail({ order, baseUrl }) {
       <!-- Footer -->
       <tr><td style="border-top:1px solid #2e2e2e;padding-top:20px;">
         <p style="margin:0;font-size:12px;color:#5a5652;line-height:1.6;">
-          This email was sent automatically by the Brandsurface ordering system.<br>
+          This email was sent automatically by the Brand Surface ordering system.<br>
           Order ID: <code style="color:#7a7672;">${order.id}</code>
         </p>
       </td></tr>

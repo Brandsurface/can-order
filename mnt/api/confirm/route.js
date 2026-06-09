@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { buildBrandsurfaceEmail } from '@/lib/emails'
+import { buildBrand SurfaceEmail } from '@/lib/emails'
 import { redirect } from 'next/navigation'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -44,11 +44,11 @@ export async function GET(request) {
     return Response.json({ error: 'Kunne ikke bekræfte ordre' }, { status: 500 })
   }
 
-  // Send mail til Brandsurface
-  const { subject, html } = buildBrandsurfaceEmail({ order })
+  // Send mail til Brand Surface
+  const { subject, html } = buildBrand SurfaceEmail({ order })
 
   await resend.emails.send({
-    from:    'Brandsurface Ordre <ordre@brandsurface.dk>',
+    from:    'Brand Surface Ordre <ordre@brandsurface.dk>',
     to:      process.env.BRANDSURFACE_EMAIL,
     replyTo: order.email,
     subject,

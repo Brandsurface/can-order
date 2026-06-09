@@ -1,8 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
-  title: 'POS materials — Brandsurface',
-  description: 'Online ordering of print materials from Brandsurface',
+  title: 'POS materials — Brand Surface',
+  description: 'Online ordering of print materials from Brand Surface',
 }
 
 export default function RootLayout({ children }) {

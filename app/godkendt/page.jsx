@@ -9,10 +9,10 @@ export default function GodkendtPage({ searchParams }) {
       : 'Order approved!'
 
   const body = isError
-    ? 'We could not process your approval. Please try again or contact Brandsurface directly.'
+    ? 'We could not process your approval. Please try again or contact Brand Surface directly.'
     : isAlready
-      ? 'This order has already been approved and forwarded to Brandsurface.'
-      : 'Thank you — your order has been confirmed and forwarded to Brandsurface. We will contact you shortly with next steps.'
+      ? 'This order has already been approved and forwarded to Brand Surface.'
+      : 'Thank you — your order has been confirmed and forwarded to Brand Surface. We will contact you shortly with next steps.'
 
   const iconColor = isError ? '#f87171' : '#4ade80'
   const iconBg = isError ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)'

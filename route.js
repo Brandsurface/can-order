@@ -56,7 +56,7 @@ export async function POST(request) {
     const { subject, html } = buildConfirmEmail({ order, baseUrl })
 
     const { error: mailError } = await resend.emails.send({
-      from:    'Brandsurface <ordre@brandsurface.dk>',
+      from:    'Brand Surface <ordre@brandsurface.dk>',
       to:      order.email,
       subject,
       html,

@@ -1,4 +1,4 @@
-# Brandsurface Bestillingssystem
+# Brand Surface Bestillingssystem
 
 Komplet bestillings- og godkendelsesflow med database og mail.
 
@@ -19,7 +19,7 @@ Ordre gemmes i Supabase (status: pending)
 Kunde modtager bekræftelsesmail med Godkend / Fortryd knapper
   ↓
   ├── Godkend → /api/confirm → status: confirmed
-  │              → Resend sender mail til Brandsurface
+  │              → Resend sender mail til Brand Surface
   │              → kunde redirectes til /godkendt
   │
   └── Fortryd → /api/cancel → status: cancelled
@@ -102,7 +102,7 @@ brandsurface-bestilling/
 ├── app/
 │   ├── api/
 │   │   ├── order/route.js          POST  → opret ordre + send kunde-mail
-│   │   ├── confirm/route.js        GET   → godkend, mail til Brandsurface
+│   │   ├── confirm/route.js        GET   → godkend, mail til Brand Surface
 │   │   ├── cancel/route.js         GET   → fortryd, redirect til formular
 │   │   └── order-data/route.js     GET   → hent ordre-data til prefill
 │   ├── godkendt/page.jsx           Side efter godkendelse
@@ -111,7 +111,7 @@ brandsurface-bestilling/
 │   └── page.html                   Selve bestillingsformularen
 ├── lib/
 │   ├── supabase.js                 Supabase server-klient
-│   └── emails.js                   Mail-templates (kunde + Brandsurface)
+│   └── emails.js                   Mail-templates (kunde + Brand Surface)
 ├── supabase-schema.sql             Kør i Supabase SQL Editor
 ├── .env.example                    Skabelon for environment variables
 ├── jsconfig.json                   @/ path alias

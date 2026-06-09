@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { Resend } from 'resend'
-import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
-import { dispatchToBrandsurface, buildUploadLinks } from '@/lib/dispatch'
+import { buildCustomerConfirmEmail, buildBrand SurfaceEmail } from '@/lib/emails'
+import { dispatchToBrand Surface, buildUploadLinks } from '@/lib/dispatch'
 
 export const dynamic = 'force-dynamic'
 
@@ -99,7 +99,7 @@ export async function POST(request) {
     // 1) Send ordrebekræftelse til kunden med det samme
     const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
     const { error: mailError } = await resend.emails.send({
-      from: `Brandsurface <${fromAddress}>`,
+      from: `Brand Surface <${fromAddress}>`,
       to: order.email,
       subject,
       html,
@@ -109,18 +109,18 @@ export async function POST(request) {
       return Response.json({ success: true, orderId: order.id, warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes' })
     }
 
-    // 2) Forward to Brandsurface — immediately when no delay, otherwise scheduled
+    // 2) Forward to Brand Surface — immediately when no delay, otherwise scheduled
     if (recipient) {
       if (delayMinutes <= 0) {
         // scheduledAt must be in the future, so send right away instead
-        await dispatchToBrandsurface(order)
+        await dispatchToBrand Surface(order)
       } else {
         const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
         try {
           const uploadLinks = await buildUploadLinks(order)
-          const bs = buildBrandsurfaceEmail({ order: { ...order, uploadLinks } })
+          const bs = buildBrand SurfaceEmail({ order: { ...order, uploadLinks } })
           const { data: scheduled, error: schedErr } = await resend.emails.send({
-            from: `Brandsurface Ordre <${fromAddress}>`,
+            from: `Brand Surface Ordre <${fromAddress}>`,
             to: recipient,
             replyTo: order.email,
             scheduledAt: sendAfter.toISOString(),
@@ -136,11 +136,11 @@ export async function POST(request) {
               .eq('id', order.id)
           }
         } catch (e) {
-          console.error('Planlægning af Brandsurface-mail fejlede:', e?.message)
+          console.error('Planlægning af Brand Surface-mail fejlede:', e?.message)
         }
       }
     } else {
-      console.warn('Ingen Brandsurface-modtager konfigureret — ingen ordremail planlagt')
+      console.warn('Ingen Brand Surface-modtager konfigureret — ingen ordremail planlagt')
     }
 
     return Response.json({ success: true, orderId: order.id, delayMinutes })

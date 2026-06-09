@@ -24,19 +24,19 @@ create table if not exists app_settings (
   updated_at timestamptz default now()
 );
 
--- Recipient for the "new approved order" email to Brandsurface.
+-- Recipient for the "new approved order" email to Brand Surface.
 -- Empty value falls back to the BRANDSURFACE_EMAIL env var.
 insert into app_settings (key, value)
   values ('brandsurface_email', '')
   on conflict (key) do nothing;
 
 -- Minutes to wait after submission before the order is forwarded to
--- Brandsurface (grace period for the customer to edit). Editable in admin.
+-- Brand Surface (grace period for the customer to edit). Editable in admin.
 insert into app_settings (key, value)
   values ('confirm_delay_minutes', '10')
   on conflict (key) do nothing;
 
--- Delayed-send flow: scheduled Brandsurface email per order
+-- Delayed-send flow: scheduled Brand Surface email per order
 alter table orders add column if not exists send_after          timestamptz;
 alter table orders add column if not exists scheduled_email_id   text;
 
