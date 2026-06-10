@@ -13,7 +13,7 @@
 
 <header>
   <a href="#" style="display:flex;align-items:center;line-height:0;">
-    <img src="/brandsurface.svg" style="height:28px;width:auto;" alt="Brand Surface"/>
+    <img src="/brandsurface.svg" style="height:26px;width:auto;" alt="Brand Surface"/>
   </a>
   <div class="step-pills">
     <div class="step-pill active" id="pill-1"><span class="step-dot"></span>{{step_fill_in}}</div>
@@ -27,12 +27,11 @@
     <span class="lang-sep">|</span>
     <button type="button" class="lang-btn" id="lang-da" onclick="setLang('da')">DA</button>
   </div>
-  </div>
 </header>
 
 <div class="page">
 
-<!-- ═══ VIEW 1: FORMULAR ═══ -->
+<!-- ═══ VIEW 1: FORM ═══ -->
 <div class="view active" id="view-form">
 <div class="form-wrap">
 
@@ -41,63 +40,52 @@
     <p class="hero-sub">{{hero_sub}}</p>
   </div>
 
-  <!-- Order process guide + form in outer grid -->
   <div class="form-outer">
-    <div class="form-guide-panel">
+
+    <!-- ── Sidebar: order process guide ── -->
+    <aside class="form-guide-panel">
       <div class="orderhelp">
-        <button type="button" class="orderhelp-trigger open" id="oh-trigger" onclick="toggleOrderHelp()">
-          <span class="orderhelp-trigger-label">{{order_process_label}}</span>
-          <svg class="collapse-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-        </button>
-    <div class="orderhelp-content open" id="oh-content">
-      <div class="oh-steps">
-        <div class="oh-step">
-          <div class="oh-badge">1</div>
-          <div class="oh-text">
-            <div class="oh-step-title">{{oh_step1_title}}</div>
-            <p>{{oh_step1_p1}}</p>
-            <p>{{oh_step1_p2}}</p>
+        <div class="oh-head">
+          <span class="oh-head-label"><span class="oh-dot"></span>{{order_process_label}}</span>
+          <p class="oh-head-sub">{{order_process_sub}}</p>
+        </div>
+        <div class="oh-steps">
+          <div class="oh-step" id="ohstep-1">
+            <div class="oh-badge">1</div>
+            <div class="oh-text"><div class="oh-step-title">{{oh_step1_title}}</div><p>{{oh_step1_p}}</p></div>
+          </div>
+          <div class="oh-step" id="ohstep-2">
+            <div class="oh-badge">2</div>
+            <div class="oh-text"><div class="oh-step-title">{{oh_step2_title}}</div><p>{{oh_step2_p}}</p></div>
+          </div>
+          <div class="oh-step" id="ohstep-3">
+            <div class="oh-badge">3</div>
+            <div class="oh-text"><div class="oh-step-title">{{oh_step3_title}}</div><p>{{oh_step3_p}}</p></div>
+          </div>
+          <div class="oh-step" id="ohstep-4">
+            <div class="oh-badge oh-badge-final">✓</div>
+            <div class="oh-text"><div class="oh-step-title">{{oh_step4_title}}</div><p>{{oh_step4_p}}</p></div>
           </div>
         </div>
-        <div class="oh-step">
-          <div class="oh-badge">2</div>
-          <div class="oh-text">
-            <div class="oh-step-title">{{oh_step2_title}}</div>
-            <p>{{oh_step2_p1}}</p>
-            <p>{{oh_step2_p2}}</p>
-            <p>{{oh_step2_p3}}</p>
-          </div>
+        <div class="oh-divider"></div>
+        <div class="oh-help">
+          <div class="oh-help-label">{{help_label}}</div>
+          <a class="oh-help-contact" href="mailto:{{help_contact_email}}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+            {{help_contact}}
+          </a>
         </div>
-        <div class="oh-step">
-          <div class="oh-badge">3</div>
-          <div class="oh-text">
-            <div class="oh-step-title">{{oh_step3_title}}</div>
-            <p>{{oh_step3_p1}}</p>
-            <p>{{oh_step3_p2}}</p>
-          </div>
-        </div>
-        <div class="oh-step">
-          <div class="oh-badge oh-badge-final">✓</div>
-          <div class="oh-text">
-            <div class="oh-step-title">{{oh_step4_title}}</div>
-            <p>{{oh_step4_p1}}</p>
-            <p>{{oh_step4_p2}}</p>
-          </div>
-        </div>
+        <!--HELP_BOX-->
       </div>
-      <div class="oh-highlight-box">{{oh_quotation}}</div>
-      </div>
-    </div><!-- /orderhelp -->
-    </div><!-- /form-guide-panel -->
+    </aside>
 
+    <!-- ── Main: form cards ── -->
     <div class="form-main-panel">
-    <div class="grid-main">
-    <div class="grid-left">
 
-      <!-- Grundoplysninger -->
+      <!-- Order details -->
       <div class="card">
-        <div class="card-label"><span class="card-num">1</span>{{card1_label}}</div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card-label"><span class="card-dot"></span>{{card_details_label}}</div>
+        <div class="stack-16">
           <div class="field">
             <label>{{campaign_label}} <span class="req">*</span></label>
             <input type="text" id="butiksnavn" placeholder="{{campaign_ph}}"/>
@@ -115,54 +103,138 @@
               <div class="field-error" id="err-bestiller_email">{{email_err}}</div>
             </div>
           </div>
-
-          <div class="field">
-            <label>{{delivery_date_label}}</label>
+          <div class="field" style="max-width:240px;">
+            <label>{{deadline_label}}</label>
             <input type="date" id="delivery_date"/>
           </div>
-
           <div id="consent-container">
-            <div class="alt-addr-toggle" id="legal-toggle" onclick="toggleLegal()" style="margin-top:0;">
+            <div class="toggle-pill" id="legal-toggle" onclick="toggleLegal()">
               <div class="toggle-switch"></div>
-              <span class="alt-addr-toggle-label">{{legal_label}}</span>
+              <span class="toggle-label">{{legal_label}}</span>
             </div>
-            <div class="legal-expand" id="legal-expand">
-              {{legal_text}}
-            </div>
+            <div class="legal-expand" id="legal-expand">{{legal_text}}</div>
             <div class="consent-error" id="consent-error">{{consent_err}}</div>
           </div>
         </div>
       </div>
 
-      <!-- Artwork / files (step 2) -->
+      <!-- 1 · Brand selection -->
       <div class="card">
-        <div class="card-label"><span class="card-num">2</span>{{card2_label}}</div>
-
-        <!-- Brief -->
-        <div class="produkt-section-label" style="margin-top:0;">{{brief_section}}</div>
-        <div class="andet-card">
-          <textarea id="andet" placeholder="{{brief_ph}}"></textarea>
+        <div class="card-label"><span class="card-num">1</span>{{card_brand_label}}</div>
+        <div class="field" style="gap:10px;">
+          <label>{{brand_label}} <span class="req">*</span></label>
+          <div class="brand-grid" id="brand-grid"><!--BRAND_TILES--></div>
+          <div class="field-error" id="err-brand">{{brand_err}}</div>
         </div>
-        <button type="button" class="brief-attach-btn" onclick="document.getElementById('file-input').click()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-          {{attach_btn}}
-        </button>
+        <div class="field" style="margin-top:18px;">
+          <label>{{variant_label}}</label>
+          <div class="select-wrap">
+            <select id="variant" disabled>
+              <option value="">{{variant_ph}}</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
-        <!-- Artwork -->
-        <div class="produkt-section-label">{{artwork_section}}</div>
+      <!-- 2 · Size & technical specs -->
+      <div class="card">
+        <div class="card-label"><span class="card-num">2</span>{{card_tech_label}}</div>
+
+        <div class="field" style="gap:10px;">
+          <label>{{size_label}} <span class="req">*</span></label>
+          <div class="seg-chips" id="size-chips"><!--SIZE_CHIPS--></div>
+          <div class="field-error" id="err-size">{{size_err}}</div>
+        </div>
+
+        <div class="row-2" style="margin-top:18px;">
+          <div class="field">
+            <label>{{region_label}} <span class="req">*</span></label>
+            <div class="segmented" id="region-seg"><!--REGION_SEG--></div>
+          </div>
+          <div class="field">
+            <label>{{label_type_label}} <span class="req">*</span></label>
+            <div class="segmented" id="labeltype-seg"><!--LABELTYPE_SEG--></div>
+          </div>
+        </div>
+
+        <div class="row-2" style="margin-top:18px;">
+          <div class="field">
+            <label>{{cutterguide_label}}</label>
+            <div class="input-attach">
+              <input type="text" id="cutterguide" placeholder="{{cutterguide_ph}}"/>
+              <button type="button" class="attach-icon-btn" title="{{attach_btn}}" onclick="document.getElementById('file-input').click()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="field">
+            <label>{{finish_label}} <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="finish"><!--FINISH_OPTIONS--></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 · Production details -->
+      <div class="card">
+        <div class="card-label"><span class="card-num">3</span>{{card_production_label}}</div>
+
+        <div class="row-2">
+          <div class="field">
+            <label>{{material_old_label}}</label>
+            <input type="text" id="material_old"/>
+          </div>
+          <div class="field">
+            <label>{{material_new_label}}</label>
+            <input type="text" id="material_new"/>
+          </div>
+        </div>
+
+        <div class="field" style="margin-top:16px;">
+          <label>{{ean_label}}</label>
+          <input type="text" id="ean" placeholder="{{ean_ph}}"/>
+        </div>
+
+        <div class="pantmaerke-card" id="pantmaerke-card">
+          <label class="check-row">
+            <input type="checkbox" id="pantmaerke" checked/>
+            <span>
+              <span class="check-title">{{pantmaerke_label}}</span>
+              <span class="check-note">{{pantmaerke_note}}</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="field" style="margin-top:16px;gap:10px;">
+          <label>{{ingredients_label}}</label>
+          <textarea id="ingredients" rows="4" placeholder="{{ingredients_ph}}"></textarea>
+          <div class="attach-inline">
+            <span class="attach-or">{{or_label}}</span>
+            <button type="button" class="brief-attach-btn" onclick="document.getElementById('file-input').click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+              {{attach_pdf_btn}}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Artwork -->
+      <div class="card">
+        <div class="card-label"><span class="card-dot"></span>{{card_artwork_label}}</div>
+
         <div class="artwork-card">
-          <div class="alt-addr-toggle" id="artwork-toggle" onclick="toggleArtwork()">
+          <div class="toggle-pill" id="artwork-toggle" onclick="toggleArtwork()">
             <div class="toggle-switch"></div>
-            <span class="alt-addr-toggle-label">{{artwork_toggle}}</span>
+            <span class="toggle-label">{{artwork_toggle}}</span>
           </div>
           <p class="artwork-note">{{artwork_note}}</p>
-          <div class="alt-addr-toggle" id="smash-toggle" onclick="toggleSmash()">
+          <div class="toggle-pill" id="smash-toggle" onclick="toggleSmash()">
             <div class="toggle-switch"></div>
-            <span class="alt-addr-toggle-label">{{smash_toggle}}</span>
+            <span class="toggle-label">{{smash_toggle}}</span>
           </div>
         </div>
 
-        <!-- Attachments -->
         <div class="produkt-section-label">{{attachments_section}}</div>
         <div class="artwork-card">
           <label class="upload-btn">
@@ -173,190 +245,45 @@
           <p class="artwork-note">{{attach_note}}</p>
           <div id="upload-list" class="upload-list"></div>
         </div>
-      </div><!-- /artwork card -->
-
-      <!-- Produkter (step 3) -->
-      <div class="card">
-        <div class="card-label"><span class="card-num">3</span>{{card3_label}}</div>
-        <div class="field-error" id="err-products" style="margin-bottom:4px;">{{products_err}}</div>
-
-        <!--PRODUCTS_SECTIONS-->
-      </div><!-- /produkter card -->
-
-    </div><!-- /grid-left -->
-
-    <!-- ── Højre kolonne ── -->
-    <div class="grid-right">
-
-      <!-- Leveringsadresse -->
-      <div class="card">
-        <div class="card-label">{{delivery_card_label}}</div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div class="field">
-            <label>{{street_label}} <span class="req">*</span></label>
-            <input type="text" id="gade" placeholder="{{street_ph}}"/>
-          </div>
-          <div class="row-2">
-            <div class="field">
-              <label>{{postcode_label}}</label>
-              <input type="text" id="postnr" placeholder="{{postcode_ph}}"/>
-            </div>
-            <div class="field">
-              <label>{{city_label}}</label>
-              <input type="text" id="by" placeholder="{{city_ph}}"/>
-            </div>
-          </div>
-          <div class="field">
-            <label>{{country_label}}</label>
-            <input type="text" id="land" placeholder="{{country_ph}}"/>
-          </div>
-          <div class="divider" style="margin:2px 0;"></div>
-          <div class="field">
-            <label>{{attn_label}}</label>
-            <input type="text" id="att" placeholder="{{attn_ph}}"/>
-          </div>
-          <div class="field">
-            <label>{{phone_label}}</label>
-            <input type="text" id="tlf_lev" placeholder="{{phone_ph}}"/>
-          </div>
-        </div>
-
-        <div class="alt-addr-toggle" id="alt-addr-toggle" onclick="toggleAltAddr()">
-          <div class="toggle-switch"></div>
-          <span class="alt-addr-toggle-label">{{alt_addr_toggle}}</span>
-        </div>
-
-        <div class="alt-addr-fields" id="alt-addr-fields">
-          <div class="field">
-            <label>{{street_label}}</label>
-            <input type="text" id="alt_gade" placeholder="{{alt_street_ph}}"/>
-          </div>
-          <div class="row-2">
-            <div class="field">
-              <label>{{postcode_label}}</label>
-              <input type="text" id="alt_postnr" placeholder="{{alt_postcode_ph}}"/>
-            </div>
-            <div class="field">
-              <label>{{city_label}}</label>
-              <input type="text" id="alt_by" placeholder="{{alt_city_ph}}"/>
-            </div>
-          </div>
-          <div class="divider" style="margin:2px 0;"></div>
-          <div class="field">
-            <label>{{attn_label}}</label>
-            <input type="text" id="alt_att" placeholder="{{alt_attn_ph}}"/>
-          </div>
-          <div class="field">
-            <label>{{phone_label}}</label>
-            <input type="text" id="alt_tlf" placeholder="{{phone_ph}}"/>
-          </div>
-        </div>
       </div>
 
-      <!-- Salgskonsulent -->
-      <div class="card">
-        <div class="card-label">{{consultant_label}}</div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-          <div class="field">
-            <label>{{consultant_name_label}}</label>
-            <input type="text" id="konsulent_navn" placeholder="{{consultant_name_ph}}"/>
-          </div>
-          <div class="field">
-            <label>{{phone_label}}</label>
-            <input type="text" id="konsulent_tlf" placeholder="{{phone_ph}}"/>
-          </div>
-          <div class="field">
-            <label>{{email_label}}</label>
-            <input type="email" id="konsulent_email" placeholder="{{consultant_email_ph}}"/>
-          </div>
-        </div>
-      </div>
-
-      <!--HELP_BOX-->
-
-      <button class="btn-primary review-order-btn" onclick="goToReview()" style="width:100%;justify-content:center;">
+      <button class="btn-accent review-order-btn" onclick="goToReview()">
         {{review_btn}}
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
 
-    </div><!-- /grid-right -->
-  </div><!-- /grid-main -->
-  </div><!-- /form-main-panel -->
+    </div><!-- /form-main-panel -->
   </div><!-- /form-outer -->
 </div><!-- /form-wrap -->
-
 </div><!-- /view-form -->
 
 
-<!-- ═══ VIEW 2: GENNEMGÅ ═══ -->
-<div class="view" id="view-review">
-<div class="review-wrap">
-  <h2 class="review-title">{{review_title}}</h2>
-  <p class="review-sub">{{review_sub}}</p>
-
-  <div class="review-section">
-    <div class="review-section-label">{{review_orderer}}</div>
-    <div class="review-grid">
-      <div class="review-field"><div class="rf-label">{{review_campaign_label}}</div><div class="rf-val" id="rv-butiksnavn">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_name_label}}</div><div class="rf-val" id="rv-navn">—</div></div>
-      <div class="review-field full"><div class="rf-label">{{review_email_label}}</div><div class="rf-val" id="rv-email" style="color:var(--accent);font-family:'IBM Plex Mono',monospace;font-size:13px;">—</div></div>
-      <div class="review-field full"><div class="rf-label">{{review_date_label}}</div><div class="rf-val" id="rv-delivery-date">—</div></div>
+<!-- ═══ REVIEW POPUP ═══ -->
+<div class="modal-overlay" id="review-modal" onclick="if(event.target===this)goBack()">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="review-title">
+    <div class="modal-head">
+      <div>
+        <h2 class="modal-title" id="review-title">{{review_title}}</h2>
+        <p class="modal-sub">{{review_sub}}</p>
+      </div>
+      <button type="button" class="modal-close" onclick="goBack()" aria-label="Close">×</button>
     </div>
-  </div>
-
-  <div class="review-section">
-    <div class="review-section-label">{{review_products}}</div>
-    <div id="rv-products"></div>
-  </div>
-
-  <div class="review-section">
-    <div class="review-section-label">{{review_delivery}}</div>
-    <div class="review-grid">
-      <div class="review-field"><div class="rf-label">{{review_addrtype_label}}</div><div class="rf-val" id="rv-addrtype">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_addr_label}}</div><div class="rf-val" id="rv-addr">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_recipient_label}}</div><div class="rf-val" id="rv-att">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-tlf">—</div></div>
+    <div class="modal-body" id="rv-body"></div>
+    <div class="modal-foot">
+      <button class="btn-secondary btn-grey" onclick="goBack()">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        {{edit_order_btn}}
+      </button>
+      <button class="btn-primary" onclick="submitOrder()">
+        {{submit_order_btn}}
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
     </div>
-  </div>
-
-  <div class="review-section" id="rv-alt-section" style="display:none;">
-    <div class="review-section-label">{{review_alt_delivery}}</div>
-    <div class="review-grid">
-      <div class="review-field full"><div class="rf-label">{{review_addr_label}}</div><div class="rf-val" id="rv-alt-addr">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_recipient_label}}</div><div class="rf-val" id="rv-alt-att">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-alt-tlf">—</div></div>
-    </div>
-  </div>
-
-  <div class="review-section">
-    <div class="review-section-label">{{review_consultant}}</div>
-    <div class="review-grid">
-      <div class="review-field"><div class="rf-label">{{review_name_label}}</div><div class="rf-val" id="rv-k-navn">—</div></div>
-      <div class="review-field"><div class="rf-label">{{review_phone_label}}</div><div class="rf-val" id="rv-k-tlf">—</div></div>
-      <div class="review-field full"><div class="rf-label">{{email_label}}</div><div class="rf-val" id="rv-k-email">—</div></div>
-    </div>
-  </div>
-
-  <div class="review-section" id="rv-uploads-section" style="display:none;">
-    <div class="review-section-label">{{review_files}}</div>
-    <div class="rv-files-grid" id="rv-files"></div>
   </div>
 </div>
 
-<div style="display:flex;justify-content:flex-end;gap:12px;align-items:center;margin-top:20px;">
-  <button class="btn-secondary btn-grey" onclick="goBack()">
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    {{edit_order_btn}}
-  </button>
-  <button class="btn-primary" onclick="submitOrder()">
-    {{submit_order_btn}}
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M10 4l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-  </button>
-</div>
-</div><!-- /view-review -->
 
-
-<!-- ═══ VIEW 3: AFSENDT ═══ -->
+<!-- ═══ VIEW 3: SENT ═══ -->
 <div class="view" id="view-confirm">
 <div class="confirm-wrap">
   <div class="confirm-icon">

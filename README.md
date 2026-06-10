@@ -1,121 +1,112 @@
-# Brand Surface Bestillingssystem
+# Brand Surface — Can Artwork & Production
 
-Komplet bestillings- og godkendelsesflow med database og mail.
+Order/brief flow for can artwork & production, with database, transactional
+mail (with a grace-period delay), two languages and a flexible admin.
 
 ## Tech stack
 
 - **Next.js 14** (App Router) — frontend + serverless API routes
-- **Supabase** — PostgreSQL database til ordrer
-- **Resend** — transactional mail (kun afsendelse)
+- **Supabase** — PostgreSQL database (orders, brands, settings, admin users) + file storage
+- **Resend** — transactional mail (customer confirmation + delayed forwarding)
 - **Vercel** — hosting
+
+## What the customer fills in
+
+One order = one **can brief**:
+
+1. **Order details** — campaign/project, name, email, deadline, GDPR consent
+2. **Brand selection** — brand (tiles) → variant (dropdown, cascades from the brand)
+3. **Size & technical specs** — size, region (DK/Border), label type, cutterguide (+ attach), finish
+4. **Production details** — material no. (old/new), EAN, *Pantmærke* (auto-hidden for `Border`), ingredients & nutrition (+ attach PDF)
+5. **Artwork** — upload files, request artwork help, or request a Smash link
+
+Pressing **Review order** opens a popup summarising everything; the customer
+can always go back and edit before submitting.
 
 ## Mail-flow
 
 ```
-Kunde udfylder formularen
+Customer fills in the form
   ↓ POST /api/order
-Ordre gemmes i Supabase (status: pending)
-  ↓ Resend
-Kunde modtager bekræftelsesmail med Godkend / Fortryd knapper
-  ↓
-  ├── Godkend → /api/confirm → status: confirmed
-  │              → Resend sender mail til Brand Surface
-  │              → kunde redirectes til /godkendt
+Order saved in Supabase (status: pending)
+  ↓ Resend → customer confirmation (with Edit link)
+  ↓ Resend → Brand Surface order email, SCHEDULED after N minutes (admin-configurable grace period)
   │
-  └── Fortryd → /api/cancel → status: cancelled
-                 → kunde redirectes til /?edit=<ordre-id>
-                 → formularen genindlæses med alle data
-                 → kunde retter og sender igen (revision +1)
+  ├── Edit link → /?edit=<id> → form re-loads with all data → resubmit (revision +1, timer resets)
+  └── No action → after the delay the order auto-forwards to Brand Surface
 ```
 
----
+The customer email also contains explicit Approve via the admin "Approve now"
+action (`/api/admin/orders`) and `/api/confirm` / `/api/cancel` endpoints.
 
-## Setup — trin for trin
+## Admin (`/admin`)
+
+Cookie-session login (each user sets their password on first login).
+
+- **Orders** — list, status, PM-status, approve-now, edit, delete (+ bulk)
+- **Catalogue** — manage **brands & variants** and the option lists
+  (**sizes, regions, label types, finishes** + the region that hides Pantmærke)
+- **Settings** — Brand Surface recipient email, forward delay, sidebar help box
+- **Users** (master only) — add/reset/delete admins
+
+The whole order form is data-driven from the Catalogue + Settings, so brands,
+variants and option lists are all editable without code changes.
+
+## Setup
 
 ### 1. Supabase
 
-1. Log ind på [supabase.com](https://supabase.com) → opret nyt projekt (gratis tier er rigeligt)
-2. SQL Editor → New query → indsæt indholdet af `supabase-schema.sql` → Run
-3. Settings → API → kopier:
-   - **Project URL** → bruges som `NEXT_PUBLIC_SUPABASE_URL`
-   - **service_role** secret (under "Project API keys") → bruges som `SUPABASE_SERVICE_ROLE_KEY`
+1. Create a project on [supabase.com](https://supabase.com)
+2. SQL Editor → run `supabase-schema.sql`, then `admin-schema.sql`
+3. Settings → API → copy the **Project URL** and the **service_role** secret
 
 ### 2. Resend
 
-1. Log ind på [resend.com](https://resend.com)
-2. **API Keys** → Create → vælg **Sending access** (IKKE Full access) → kopier nøglen
-3. (Senere) **Domains** → tilføj `brandsurface.dk` → tilføj de DNS-records Resend viser
-4. Indtil domænet er verificeret kan du sende fra `onboarding@resend.dev`
+1. [resend.com](https://resend.com) → API Keys → create with **Sending access**
+2. (Later) verify `brandsurface.dk` under Domains; until then send from `onboarding@resend.dev`
 
-### 3. Push til GitHub
+### 3. Environment variables
 
-```bash
-cd brandsurface-bestilling
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/DIN-ORG/DIT-REPO.git
-git push -u origin main
-```
+Copy `.env.example` → `.env.local` (local) or add them in Vercel:
 
-### 4. Deploy på Vercel
-
-1. [vercel.com](https://vercel.com) → New Project → importér GitHub repoet
-2. Framework Preset detekteres automatisk som **Next.js**
-3. Under **Environment Variables** tilføj alle fra `.env.example`:
-
-| Navn | Værdi |
+| Name | Value |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Fra Supabase Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Fra Supabase Settings → API (service_role) |
-| `RESEND_API_KEY` | Fra Resend API Keys |
-| `RESEND_FROM` | `onboarding@resend.dev` (indtil dit domæne er verificeret) |
-| `BRANDSURFACE_EMAIL` | `ls@brandsurface.dk` |
-| `NEXT_PUBLIC_BASE_URL` | `https://DIN-APP.vercel.app` (sættes efter første deploy) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API (service_role) |
+| `RESEND_API_KEY` | Resend API key |
+| `RESEND_FROM` | `onboarding@resend.dev` until your domain is verified |
+| `BRANDSURFACE_EMAIL` | Fallback recipient (also editable in admin) |
+| `ADMIN_SESSION_SECRET` | Long random string (`openssl rand -hex 32`) |
+| `NEXT_PUBLIC_BASE_URL` | Your deployed URL (used in email links) |
 
-4. Deploy
-
-### 5. Efter første deploy
-
-Sæt `NEXT_PUBLIC_BASE_URL` til den faktiske Vercel-URL og redeploy.
-
----
-
-## Lokal udvikling
+### 4. Local development
 
 ```bash
 npm install
-cp .env.example .env.local
-# udfyld .env.local
+cp .env.example .env.local   # fill it in
 npm run dev
 ```
 
-Åbn `http://localhost:3000`
+Open `http://localhost:3000` (form) and `http://localhost:3000/admin` (admin).
+The master admin user (`itpc@brandsurface.dk`) sets its password on first login.
 
----
-
-## Projektstruktur
+## Project structure
 
 ```
-brandsurface-bestilling/
-├── app/
-│   ├── api/
-│   │   ├── order/route.js          POST  → opret ordre + send kunde-mail
-│   │   ├── confirm/route.js        GET   → godkend, mail til Brand Surface
-│   │   ├── cancel/route.js         GET   → fortryd, redirect til formular
-│   │   └── order-data/route.js     GET   → hent ordre-data til prefill
-│   ├── godkendt/page.jsx           Side efter godkendelse
-│   ├── layout.jsx                  Root layout
-│   ├── page.jsx                    Forside (serverer HTML formularen)
-│   └── page.html                   Selve bestillingsformularen
-├── lib/
-│   ├── supabase.js                 Supabase server-klient
-│   └── emails.js                   Mail-templates (kunde + Brand Surface)
-├── supabase-schema.sql             Kør i Supabase SQL Editor
-├── .env.example                    Skabelon for environment variables
-├── jsconfig.json                   @/ path alias
-├── next.config.js
-├── package.json
-└── README.md
+app/
+  page.jsx / page.html        Customer form (HTML template injected server-side)
+  api/
+    order/                    POST → create order + customer mail + scheduled forward
+    confirm/ cancel/          Email Approve / Edit links
+    order-data/               GET → order data for prefill (?edit=)
+    upload-url/               Signed direct-to-storage upload URLs
+    admin/                    Admin actions (orders, products=catalogue, settings, users, login)
+  admin/                      Admin dashboard (orders, catalogue, settings, users)
+  godkendt/                   Post-approval landing page
+lib/
+  supabase.js translations.js emails.js dispatch.js session.js admin-auth.js admin-i18n.js
+public/
+  order.css order.client.js brandsurface.svg
+supabase-schema.sql           Core orders table
+admin-schema.sql              Admin users, settings, brands catalogue, storage bucket
 ```

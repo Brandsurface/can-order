@@ -16,7 +16,7 @@ export default async function AdminLogin({ searchParams }) {
   return (
     <div style={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(160deg,#2a2820 0%,#0e0a00 60%)', padding: 24,
+      background: 'linear-gradient(160deg,#16231c 0%,#0b120e 60%)', padding: 24,
       fontFamily: "'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif",
       color: '#f0ede8',
     }}>

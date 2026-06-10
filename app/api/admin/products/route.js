@@ -6,38 +6,15 @@ export const dynamic = 'force-dynamic'
 
 const back = (req, status) => NextResponse.redirect(new URL(`/admin/products?status=${status}`, req.url), 303)
 
-// Accepts JSON from the visual builder (preferred) or legacy "Name: a, b" lines.
-function parseOptionGroups(raw) {
+// Parse a JSON array of strings from a hidden ListBuilder input.
+function parseStringArray(raw) {
   const str = String(raw || '').trim()
   if (!str) return []
-
-  if (str.startsWith('[')) {
-    try {
-      const arr = JSON.parse(str)
-      if (Array.isArray(arr)) {
-        return arr
-          .map(g => {
-            const options = Array.isArray(g?.options) ? g.options.map(o => String(o).trim()).filter(Boolean) : []
-            const recommended = Array.isArray(g?.recommended)
-              ? g.recommended.map(o => String(o).trim()).filter(v => options.includes(v))
-              : []
-            return { name: String(g?.name || '').trim(), options, recommended }
-          })
-          .filter(g => g.name && g.options.length)
-      }
-    } catch {}
-  }
-
-  return str
-    .split('\n')
-    .map(line => {
-      const i = line.indexOf(':')
-      if (i < 0) return null
-      const name = line.slice(0, i).trim()
-      const options = line.slice(i + 1).split(',').map(s => s.trim()).filter(Boolean)
-      return name && options.length ? { name, options } : null
-    })
-    .filter(Boolean)
+  try {
+    const arr = JSON.parse(str)
+    if (Array.isArray(arr)) return arr.map(v => String(v).trim()).filter(Boolean)
+  } catch {}
+  return []
 }
 
 export async function POST(req) {
@@ -47,52 +24,43 @@ export async function POST(req) {
   const form = await req.formData()
   const action = String(form.get('action') || '')
 
-  if (action === 'create' || action === 'update') {
-    const label = String(form.get('label') || '').trim()
-    if (!label) return back(req, 'invalid')
-    const description = String(form.get('description') || '').trim() || null
-    const lang = String(form.get('lang') || '') === 'en' ? 'en' : 'da'
-    const optionGroups = parseOptionGroups(form.get('option_groups'))
+  // ── Brands ──
+  if (action === 'create-brand' || action === 'update-brand') {
+    const name = String(form.get('name') || '').trim()
+    if (!name) return back(req, 'brand-invalid')
+    const variants = parseStringArray(form.get('variants'))
+    const sort = parseInt(form.get('sort'), 10) || 0
 
-    // Language-neutral fields shared by both languages
-    const common = {
-      grp: String(form.get('grp') || 'print') === 'some' ? 'some' : 'print',
-      formats: [], // option_groups is the single source of truth going forward
-      sort: parseInt(form.get('sort'), 10) || 0,
+    if (action === 'create-brand') {
+      const { error } = await supabase.from('brands').insert({ name, variants, sort, active: true })
+      return back(req, error ? 'error' : 'brand-created')
     }
-
-    if (action === 'create') {
-      // New products seed both languages so they show regardless of customer language
-      const { error } = await supabase.from('products').insert({
-        ...common,
-        label, description, option_groups: optionGroups,
-        label_en: label, label_da: label,
-        description_en: description, description_da: description,
-        option_groups_en: optionGroups, option_groups_da: optionGroups,
-      })
-      return back(req, error ? 'error' : 'created')
-    }
-
     const id = String(form.get('id') || '')
-    if (!id) return back(req, 'invalid')
-    // Update only the edited language — the other language is left untouched
-    const { error } = await supabase.from('products').update({
-      ...common,
-      [`label_${lang}`]:         label,
-      [`description_${lang}`]:   description,
-      [`option_groups_${lang}`]: optionGroups,
-      active:              form.get('active') === 'on',
-      allow_custom_format: form.get('allow_custom_format') === 'on',
-      allow_duplicate:     form.get('allow_duplicate') === 'on',
-      allow_multi:         form.get('allow_multi') === 'on',
-    }).eq('id', id)
-    return back(req, error ? 'error' : 'saved')
+    if (!id) return back(req, 'error')
+    const { error } = await supabase.from('brands')
+      .update({ name, variants, sort, active: form.get('active') === 'on' })
+      .eq('id', id)
+    return back(req, error ? 'error' : 'brand-saved')
   }
 
-  if (action === 'delete') {
+  if (action === 'delete-brand') {
     const id = String(form.get('id') || '')
-    const { error } = await supabase.from('products').delete().eq('id', id)
-    return back(req, error ? 'error' : 'deleted')
+    const { error } = await supabase.from('brands').delete().eq('id', id)
+    return back(req, error ? 'error' : 'brand-deleted')
+  }
+
+  // ── Option lists ──
+  if (action === 'save-options') {
+    const now = new Date().toISOString()
+    const rows = [
+      { key: 'sizes', value: JSON.stringify(parseStringArray(form.get('sizes'))), updated_at: now },
+      { key: 'regions', value: JSON.stringify(parseStringArray(form.get('regions'))), updated_at: now },
+      { key: 'label_types', value: JSON.stringify(parseStringArray(form.get('label_types'))), updated_at: now },
+      { key: 'finishes', value: JSON.stringify(parseStringArray(form.get('finishes'))), updated_at: now },
+      { key: 'pantmaerke_exempt_region', value: String(form.get('pantmaerke_exempt_region') || '').trim(), updated_at: now },
+    ]
+    const { error } = await supabase.from('app_settings').upsert(rows, { onConflict: 'key' })
+    return back(req, error ? 'error' : 'opts-saved')
   }
 
   return back(req, 'error')

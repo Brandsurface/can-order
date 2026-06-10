@@ -1,6 +1,10 @@
 -- ══════════════════════════════════════════════════════
--- KØR DETTE I SUPABASE → SQL EDITOR
+-- CORE SCHEMA — run this in SUPABASE → SQL EDITOR first
+-- (then run admin-schema.sql)
 -- ══════════════════════════════════════════════════════
+--
+-- "Can Artwork & Production — Brief": one order = one can brief
+-- (brand, variant, size, technical specs and production details).
 
 create table if not exists orders (
   id            uuid primary key default gen_random_uuid(),
@@ -9,44 +13,65 @@ create table if not exists orders (
   status        text not null default 'pending'
                 check (status in ('pending', 'confirmed', 'cancelled')),
 
-  -- Bestiller
-  butiksnavn    text not null,
-  navn          text not null,
-  email         text not null,
+  -- Orderer / project
+  butiksnavn    text not null,          -- campaign / project name
+  navn          text not null,          -- contact name
+  email         text not null,          -- contact email
+  delivery_date date,                   -- desired deadline (optional)
 
-  -- Produkter (JSON array)
-  -- Eksempel: [{"type":"Plakat","format":"A4","antal":10},{"type":"Bordkort","antal":50}]
-  produkter     jsonb not null default '[]',
-  andet         text,
+  -- The can brief
+  brand         text,
+  variant       text,
+  size          text,
+  region        text,                   -- 'DK' | 'Border'
+  label_type    text,                   -- 'Label' | 'Tryk'
+  cutterguide   text,
+  finish        text,                   -- 'Mat' | 'Gloss' | 'To be confirmed'
+  material_old  text,
+  material_new  text,
+  ean           text,
+  pantmaerke    boolean default false,  -- deposit mark (required for DK, n/a for Border)
+  ingredients   text,                   -- ingredients & nutritional content (free text or "see file")
 
-  -- Leveringsadresse (primær)
-  addr_type     text default 'butik',
-  gade          text,
-  postnr        text,
-  by            text,
-  att           text,
-  tlf           text,
+  -- Artwork
+  andet         text,                   -- brief / notes
+  artwork_help  boolean default false,  -- customer wants Brand Surface to create artwork
+  smash_link    boolean default false,  -- customer wants a Smash upload link
+  uploads       jsonb not null default '[]',  -- [{path,name,size}] in the order-uploads bucket
 
-  -- Alternativ leveringsadresse
-  alt_active    boolean default false,
-  alt_gade      text,
-  alt_postnr    text,
-  alt_by        text,
-  alt_att       text,
-  alt_tlf       text,
-
-  -- Salgskonsulent
-  konsulent_navn  text,
-  konsulent_tlf   text,
-  konsulent_email text,
-
-  -- Revision counter (antal gange kunden har fortrudt og rettet)
-  revision      integer default 0
+  -- Meta
+  language      text default 'en' check (language in ('en','da')),
+  revision      integer default 0,
+  pm_status     text,                   -- internal project-management status
+  send_after    timestamptz,           -- when the Brand Surface mail is scheduled
+  scheduled_email_id text               -- Resend id of the scheduled mail (for cancel)
 );
 
--- Automatisk updated_at
--- search_path pinnes til '' (tom) for at undgå "Function Search Path Mutable"
--- linter-advarslen. now() ligger i pg_catalog og resolves stadig korrekt.
+-- Backfill columns for installs that predate the can model (idempotent)
+alter table orders add column if not exists brand        text;
+alter table orders add column if not exists variant      text;
+alter table orders add column if not exists size         text;
+alter table orders add column if not exists region       text;
+alter table orders add column if not exists label_type   text;
+alter table orders add column if not exists cutterguide  text;
+alter table orders add column if not exists finish       text;
+alter table orders add column if not exists material_old text;
+alter table orders add column if not exists material_new text;
+alter table orders add column if not exists ean          text;
+alter table orders add column if not exists pantmaerke   boolean default false;
+alter table orders add column if not exists ingredients  text;
+alter table orders add column if not exists artwork_help boolean default false;
+alter table orders add column if not exists smash_link   boolean default false;
+alter table orders add column if not exists uploads      jsonb not null default '[]';
+alter table orders add column if not exists language     text default 'en';
+alter table orders add column if not exists revision     integer default 0;
+alter table orders add column if not exists pm_status    text;
+alter table orders add column if not exists send_after   timestamptz;
+alter table orders add column if not exists scheduled_email_id text;
+
+-- Keep updated_at fresh.
+-- search_path pinned to '' to avoid the "Function Search Path Mutable" linter
+-- warning; now() lives in pg_catalog and still resolves correctly.
 create or replace function set_updated_at()
 returns trigger
 language plpgsql
@@ -63,6 +88,6 @@ create trigger orders_updated_at
   before update on orders
   for each row execute procedure set_updated_at();
 
--- Row Level Security: ingen offentlig adgang
--- Al adgang sker via Vercel Functions med service_role nøglen
+-- Row Level Security: no public access.
+-- All access goes through Next.js server routes using the service_role key.
 alter table orders enable row level security;

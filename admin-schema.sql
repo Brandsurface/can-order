@@ -1,6 +1,6 @@
 -- ══════════════════════════════════════════════════════
--- ADMIN MODULE — run this in Supabase → SQL Editor
--- (in addition to supabase-schema.sql)
+-- ADMIN MODULE — run this in SUPABASE → SQL EDITOR
+-- (after supabase-schema.sql)
 -- ══════════════════════════════════════════════════════
 
 -- Admin users (cookie-session auth, managed from the admin UI)
@@ -17,7 +17,7 @@ insert into admin_users (email, is_master)
   values ('itpc@brandsurface.dk', true)
   on conflict (email) do nothing;
 
--- Editable application settings (key/value)
+-- ── Editable application settings (key/value) ──────────
 create table if not exists app_settings (
   key        text primary key,
   value      text,
@@ -26,109 +26,69 @@ create table if not exists app_settings (
 
 -- Recipient for the "new approved order" email to Brand Surface.
 -- Empty value falls back to the BRANDSURFACE_EMAIL env var.
-insert into app_settings (key, value)
-  values ('brandsurface_email', '')
+insert into app_settings (key, value) values ('brandsurface_email', '')
   on conflict (key) do nothing;
 
--- Minutes to wait after submission before the order is forwarded to
--- Brand Surface (grace period for the customer to edit). Editable in admin.
-insert into app_settings (key, value)
-  values ('confirm_delay_minutes', '10')
+-- Minutes to wait after submission before forwarding to Brand Surface
+-- (grace period for the customer to edit). Set to 0 to send immediately.
+insert into app_settings (key, value) values ('confirm_delay_minutes', '10')
   on conflict (key) do nothing;
 
--- Delayed-send flow: scheduled Brand Surface email per order
-alter table orders add column if not exists send_after          timestamptz;
-alter table orders add column if not exists scheduled_email_id   text;
+-- Optional help / contact box shown on the order form sidebar
+insert into app_settings (key, value) values ('help_box_active', '0')
+  on conflict (key) do nothing;
+insert into app_settings (key, value) values ('help_box_html', '')
+  on conflict (key) do nothing;
 
--- Editable product catalogue (rendered on the order form)
-create table if not exists products (
-  id            uuid primary key default gen_random_uuid(),
-  grp           text not null default 'print' check (grp in ('print','some')),
-  label         text not null,
-  description   text,                          -- spec text shown when the product is expanded
-  formats       jsonb not null default '[]',   -- legacy single option list (fallback only)
-  option_groups jsonb not null default '[]',   -- [{"name":"Format","options":["A4",...]}, ...]
-  sort          int not null default 0,
-  active        boolean not null default true,
-  created_at    timestamptz default now()
+-- ── Editable option lists for the can form (JSON arrays) ──
+insert into app_settings (key, value)
+  values ('sizes', '["250 ml","330 ml","330 ml slim","440 ml","500 ml"]')
+  on conflict (key) do nothing;
+insert into app_settings (key, value)
+  values ('regions', '["DK","Border"]')
+  on conflict (key) do nothing;
+insert into app_settings (key, value)
+  values ('label_types', '["Label","Tryk"]')
+  on conflict (key) do nothing;
+insert into app_settings (key, value)
+  values ('finishes', '["Mat","Gloss","To be confirmed"]')
+  on conflict (key) do nothing;
+-- Selecting this region hides/omits the deposit mark (Pantmærke).
+insert into app_settings (key, value) values ('pantmaerke_exempt_region', 'Border')
+  on conflict (key) do nothing;
+
+-- ── Editable brand catalogue (rendered as tiles on the form) ──
+create table if not exists brands (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null,
+  variants    jsonb not null default '[]',   -- array of variant names
+  sort        int not null default 0,
+  active      boolean not null default true,
+  created_at  timestamptz default now()
 );
 
--- For installs created before these columns existed
-alter table products add column if not exists description   text;
-alter table products add column if not exists option_groups jsonb not null default '[]';
-
--- Per-language product texts. label/description stay as the legacy fallback.
--- Each language is edited independently from the admin EN|DA switcher.
-alter table products add column if not exists label_en       text;
-alter table products add column if not exists label_da       text;
-alter table products add column if not exists description_en text;
-alter table products add column if not exists description_da text;
-
--- Per-language option groups (names + options). option_groups stays as fallback.
-alter table products add column if not exists option_groups_en jsonb not null default '[]';
-alter table products add column if not exists option_groups_da jsonb not null default '[]';
-
--- When true, option chips on the order form allow multiple selections per group.
-alter table products add column if not exists allow_multi boolean not null default false;
-
--- Backfill: start both languages from the current single value (idempotent)
-update products set label_en       = coalesce(label_en, label),
-                    label_da       = coalesce(label_da, label),
-                    description_en = coalesce(description_en, description),
-                    description_da = coalesce(description_da, description);
-
-update products set option_groups_en = option_groups where option_groups_en = '[]'::jsonb and option_groups <> '[]'::jsonb;
-update products set option_groups_da = option_groups where option_groups_da = '[]'::jsonb and option_groups <> '[]'::jsonb;
-
--- Seed the full catalogue (only when the table is still empty)
-insert into products (grp, label, description, option_groups, sort)
-select v.grp, v.label, v.description, v.option_groups::jsonb, v.sort
+-- Seed the brand catalogue (only when the table is still empty)
+insert into brands (name, variants, sort)
+select v.name, v.variants::jsonb, v.sort
 from (values
-  ('print','Poster', null, '[{"name":"Format","options":["A4","50×70 cm","A3","70×100 cm"]},{"name":"Print","options":["4+0","4+4"]},{"name":"Paper","options":["170g","250g"]}]', 10),
-  ('print','Flag line', '10m, A3 flag, paper, 20 flags on each line, 4+4 — or as per brief', '[]', 20),
-  ('print','Wobbler', 'Square or figure cut (110×110 mm) — or as per brief', '[]', 30),
-  ('print','Stickers', 'Stickers for fridge, figure-cut removable foil (110×110 mm) — or as per brief', '[]', 40),
-  ('print','Pallet hanging sign', 'A3, printed on both sides (3 holes in top, or cut-out and holes)', '[]', 50),
-  ('print','Ellipse', 'Standard, or with special cut as per brief', '[]', 60),
-  ('print','Floor sticker', 'ø60 / 60×60 cm — or as per brief', '[]', 70),
-  ('print','Pallet wrap', 'Non-woven, 25 m — fits the height of 2 EUR pallets', '[]', 80),
-  ('print','Table tent', 'Size: Standard', '[]', 90),
-  ('print','Table card', 'Size: Standard', '[]', 100),
-  ('some','Stills', null, '[{"name":"Aspect ratio","options":["1:1","9:16","4:5"]}]', 110),
-  ('some','Video',  null, '[{"name":"Aspect ratio","options":["1:1","9:16","4:5"]}]', 120)
-) as v(grp, label, description, option_groups, sort)
-where not exists (select 1 from products);
+  ('Tuborg',    '["Classic","Fine Festival","Grøn","Guld","Sprød","Twist","Sunsæt","Rød","Julebryg","Påskebryg"]', 10),
+  ('Carlsberg', '["IPA","1883","Carls Jul","Carls Special","Carlsberg 47","Elephant","Nordic","Nordlyst","Pilsner","Sort Guld","Gamle Carlsberg","Gl. Carlsberg Porter","Master Brew"]', 20),
+  ('Mikkeller', '["Big bad Pilsner","Blanche de Mikkeller","Burst IPA","Burst Free IPA","Drink''in the Sun","Drink''in the Winter","Golden Iris","Hop Hop IPA","Iskold Classic","Japanese Lager","Limbo Raspberry","Peach Out","Weird Weather","Windy Hill"]', 30),
+  ('Jacobsen',  '["Brown Ale","Saaz Blonde","Barbaras Easy IPA","El Dorado IPA","Juicy IPA","Juletid IPA","Yakima","Yakima Økologisk","Golden Naked Christmas Ale","Påske Pale Ale"]', 40),
+  ('Somersby',  '[]', 50),
+  ('Grimbergen','["Belgian Pale Ale","Quadrupel","Tripe D''Abbaye","Blanche","Blonde","Double Ambreé","Noël"]', 60),
+  ('Brooklyn',  '["Special Effects","Lager","East India","Bel Air Sour","Parktime IPA","Pilsner","Playa De Brooklyn","Pulp Art","Stonewall Inn IPA","Timemachine"]', 70),
+  ('1664',      '["Blanc","Biere","Blanc 0,0"]', 80)
+) as v(name, variants, sort)
+where not exists (select 1 from brands);
 
--- Migrate existing rows to the new structure (idempotent; never clobbers admin edits)
-update products set option_groups = '[{"name":"Format","options":["A4","50×70 cm","A3","70×100 cm"]},{"name":"Print","options":["4+0","4+4"]},{"name":"Paper","options":["170g","250g"]}]'::jsonb
-  where label = 'Poster' and option_groups = '[]'::jsonb;
-update products set description = '10m, A3 flag, paper, 20 flags on each line, 4+4 — or as per brief' where label = 'Flag line' and description is null;
-update products set description = 'Square or figure cut (110×110 mm) — or as per brief' where label = 'Wobbler' and description is null;
-update products set description = 'Stickers for fridge, figure-cut removable foil (110×110 mm) — or as per brief' where label = 'Stickers' and description is null;
-update products set description = 'A3, printed on both sides (3 holes in top, or cut-out and holes)' where label = 'Pallet hanging sign' and description is null;
-update products set description = 'Standard, or with special cut as per brief' where label = 'Ellipse' and description is null;
-update products set description = 'ø60 / 60×60 cm — or as per brief' where label = 'Floor sticker' and description is null;
-update products set description = 'Non-woven, 25 m — fits the height of 2 EUR pallets' where label = 'Pallet wrap' and description is null;
-update products set description = 'Size: Standard' where label = 'Table tent' and description is null;
-update products set description = 'Size: Standard' where label = 'Table card' and description is null;
-
--- Split the old combined "Stills / Video" into two products
-update products set label = 'Stills', option_groups = '[{"name":"Aspect ratio","options":["1:1","9:16","4:5"]}]'::jsonb
-  where label = 'Stills / Video';
-insert into products (grp, label, option_groups, sort)
-select 'some', 'Video', '[{"name":"Aspect ratio","options":["1:1","9:16","4:5"]}]'::jsonb, 120
-where not exists (select 1 from products where label = 'Video');
-
--- File uploads attached to an order (paths in the order-uploads bucket)
-alter table orders add column if not exists uploads jsonb not null default '[]';
-
--- Private storage bucket for order file uploads, 50 MB per file
+-- ── File uploads bucket (private, 50 MB per file) ──────
 insert into storage.buckets (id, name, public, file_size_limit)
 values ('order-uploads', 'order-uploads', false, 52428800)
 on conflict (id) do update set public = false, file_size_limit = 52428800;
 
--- No public access — all access goes through Vercel functions
+-- No public access — all access goes through Next.js server routes
 -- using the service_role key (which bypasses RLS).
 alter table admin_users  enable row level security;
 alter table app_settings enable row level security;
-alter table products     enable row level security;
+alter table brands       enable row level security;

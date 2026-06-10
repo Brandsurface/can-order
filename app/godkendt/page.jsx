@@ -1,31 +1,45 @@
-export default function GodkendtPage({ searchParams }) {
+import { cookies } from 'next/headers'
+
+const T = {
+  en: {
+    ok_h: 'Order approved!',
+    ok_b: 'Thank you — your order has been confirmed and forwarded to Brand Surface. We will contact you shortly with next steps.',
+    already_h: 'Already approved',
+    already_b: 'This order has already been approved and forwarded to Brand Surface.',
+    err_h: 'Something went wrong',
+    err_b: 'We could not process your approval. Please try again or contact Brand Surface directly.',
+    back: '← Place new order',
+  },
+  da: {
+    ok_h: 'Ordre godkendt!',
+    ok_b: 'Tak — din ordre er bekræftet og videresendt til Brand Surface. Vi kontakter dig snarest med de næste skridt.',
+    already_h: 'Allerede godkendt',
+    already_b: 'Denne ordre er allerede godkendt og videresendt til Brand Surface.',
+    err_h: 'Noget gik galt',
+    err_b: 'Vi kunne ikke behandle din godkendelse. Prøv igen eller kontakt Brand Surface direkte.',
+    back: '← Opret ny ordre',
+  },
+}
+
+export default async function GodkendtPage({ searchParams }) {
+  const lang = (await cookies()).get('lang')?.value === 'da' ? 'da' : 'en'
+  const t = T[lang]
   const isError = !!searchParams?.error
   const isAlready = searchParams?.already === '1'
 
-  const heading = isError
-    ? 'Something went wrong'
-    : isAlready
-      ? 'Already approved'
-      : 'Order approved!'
+  const heading = isError ? t.err_h : isAlready ? t.already_h : t.ok_h
+  const body = isError ? t.err_b : isAlready ? t.already_b : t.ok_b
 
-  const body = isError
-    ? 'We could not process your approval. Please try again or contact Brand Surface directly.'
-    : isAlready
-      ? 'This order has already been approved and forwarded to Brand Surface.'
-      : 'Thank you — your order has been confirmed and forwarded to Brand Surface. We will contact you shortly with next steps.'
-
-  const iconColor = isError ? '#f87171' : '#4ade80'
-  const iconBg = isError ? 'rgba(248,113,113,0.1)' : 'rgba(74,222,128,0.1)'
-  const iconBorder = isError ? 'rgba(248,113,113,0.25)' : 'rgba(74,222,128,0.25)'
+  const iconColor = isError ? '#f87171' : '#9ed6b8'
+  const iconBg = isError ? 'rgba(248,113,113,0.1)' : 'rgba(158,214,184,0.14)'
+  const iconBorder = isError ? 'rgba(248,113,113,0.25)' : 'rgba(158,214,184,0.45)'
 
   return (
     <main style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #46473e 0%, #0e0a00 100%)',
+      background: 'linear-gradient(160deg, #16231c 0%, #0b120e 100%)',
       backgroundAttachment: 'fixed',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Manrope', -apple-system, sans-serif",
       padding: '40px 20px',
     }}>
@@ -47,21 +61,11 @@ export default function GodkendtPage({ searchParams }) {
           )}
         </div>
 
-        <h1 style={{
-          color: iconColor, fontSize: 32, fontWeight: 800,
-          letterSpacing: '-0.02em', margin: '0 0 14px',
-        }}>{heading}</h1>
+        <h1 style={{ color: iconColor, fontSize: 32, fontWeight: 800, letterSpacing: '-0.02em', margin: '0 0 14px' }}>{heading}</h1>
+        <p style={{ color: '#aebdb3', fontSize: 16, lineHeight: 1.6, margin: 0 }}>{body}</p>
 
-        <p style={{ color: '#b8b4ae', fontSize: 16, lineHeight: 1.6, margin: 0 }}>
-          {body}
-        </p>
-
-        <a href="/" style={{
-          display: 'inline-block', marginTop: 36, padding: '12px 24px',
-          color: '#b8b4ae', fontSize: 14, textDecoration: 'none',
-          fontFamily: 'inherit',
-        }}>
-          ← Place new order
+        <a href="/" style={{ display: 'inline-block', marginTop: 36, padding: '12px 24px', color: '#aebdb3', fontSize: 14, textDecoration: 'none', fontFamily: 'inherit' }}>
+          {t.back}
         </a>
       </div>
     </main>
