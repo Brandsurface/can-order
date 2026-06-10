@@ -71,10 +71,10 @@ function renderItem(p, t, lang) {
             </button>
             <div class="produkt-acc-body" id="accbody-${pid}">
               ${desc}${groupsHtml}
-              <div class="alt-addr-toggle self-print-toggle" id="selfprint-toggle-${pid}" onclick="toggleSelfPrint('${pid}')">
+              ${p.grp !== 'some' ? `<div class="alt-addr-toggle self-print-toggle" id="selfprint-toggle-${pid}" onclick="toggleSelfPrint('${pid}')">
                 <div class="toggle-switch"></div>
                 <span class="alt-addr-toggle-label">${esc(t.self_print_toggle)}</span>
-              </div>
+              </div>` : ''}
               <div class="acc-row">
                 <span class="opt-label">${esc(t.qty_label)}</span>
                 <div class="qty-stepper">
