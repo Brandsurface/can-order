@@ -15,9 +15,10 @@ const FALLBACK_T = {
   addGroup: '+ Add option group',
 }
 
-export default function OptionGroupsBuilder({ initial, t }) {
+export default function OptionGroupsBuilder({ initial, t, enableTranslate, labelId, descId }) {
   const tr = { ...FALLBACK_T, ...(t || {}) }
   const [groups, setGroups] = useState(() => (Array.isArray(initial) ? initial : []))
+  const [busy, setBusy] = useState(false)
 
   const addGroup = () => setGroups([...groups, { name: '', options: [''], recommended: [] }])
   const removeGroup = gi => setGroups(groups.filter((_, i) => i !== gi))
@@ -60,6 +61,58 @@ export default function OptionGroupsBuilder({ initial, t }) {
     else recommended.push(val)
     next[gi] = { ...next[gi], recommended }
     setGroups(next)
+  }
+
+  // Translate every Danish text in the product box (name, description and option
+  // groups) to English. English text is detected by DeepL and left untouched.
+  async function translateAll() {
+    const labelEl = labelId ? document.getElementById(labelId) : null
+    const descEl = descId ? document.getElementById(descId) : null
+
+    // Collect the texts to translate, remembering where each one belongs
+    const slots = []
+    if (labelEl && labelEl.value.trim()) slots.push({ kind: 'label', text: labelEl.value })
+    if (descEl && descEl.value.trim()) slots.push({ kind: 'desc', text: descEl.value })
+    groups.forEach((g, gi) => {
+      if (g.name && g.name.trim()) slots.push({ kind: 'gname', gi, text: g.name })
+      ;(g.options || []).forEach((o, oi) => {
+        if (o && o.trim()) slots.push({ kind: 'opt', gi, oi, text: o })
+      })
+    })
+    if (!slots.length) return
+
+    setBusy(true)
+    try {
+      const res = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texts: slots.map(s => s.text) }),
+      })
+      const data = await res.json()
+      if (data.error) throw new Error(data.error)
+
+      const next = groups.map(g => ({ ...g, options: (g.options || []).slice(), recommended: (g.recommended || []).slice() }))
+      let translated = 0
+      slots.forEach((s, i) => {
+        const item = data.translations[i]
+        if (!item || item.source === 'EN') return // already English → leave untouched
+        translated++
+        if (s.kind === 'label' && labelEl) labelEl.value = item.text
+        else if (s.kind === 'desc' && descEl) descEl.value = item.text
+        else if (s.kind === 'gname') next[s.gi].name = item.text
+        else if (s.kind === 'opt') {
+          const old = next[s.gi].options[s.oi]
+          next[s.gi].options[s.oi] = item.text
+          next[s.gi].recommended = next[s.gi].recommended.map(v => (v === old ? item.text : v))
+        }
+      })
+      setGroups(next)
+      if (!translated) alert('Alle tekster er allerede på engelsk — intet at oversætte.')
+    } catch (err) {
+      alert('Oversættelse fejlede: ' + err.message)
+    } finally {
+      setBusy(false)
+    }
   }
 
   const starStyle = (on, enabled) => ({
@@ -105,6 +158,21 @@ export default function OptionGroupsBuilder({ initial, t }) {
         </div>
         <button type="button" className="og-add-group" onClick={addGroup}>{tr.addGroup}</button>
       </div>
+      {enableTranslate && (
+        <button
+          type="button"
+          onClick={translateAll}
+          disabled={busy}
+          title="Oversæt alle danske tekster i kassen til engelsk"
+          style={{
+            alignSelf: 'flex-start', marginTop: 4,
+            background: '#1d4ed8', color: '#fff', border: 'none',
+            borderRadius: 6, fontSize: 12, fontFamily: "'DM Mono',monospace",
+            letterSpacing: '0.06em', padding: '7px 14px',
+            cursor: busy ? 'wait' : 'pointer', opacity: busy ? 0.7 : 1,
+          }}
+        >{busy ? 'Oversætter…' : 'EN — oversæt fra dansk'}</button>
+      )}
     </div>
   )
 }

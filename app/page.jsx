@@ -19,10 +19,12 @@ function esc(s) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#039;')
 }
 
-// option_groups takes precedence; fall back to the legacy formats list
-function effectiveGroups(p) {
-  if (Array.isArray(p.option_groups) && p.option_groups.length) {
-    return p.option_groups.filter(g => g && g.name && Array.isArray(g.options) && g.options.length)
+// Per-language option groups (fallback to the shared column, then legacy formats)
+function effectiveGroups(p, lang) {
+  const perLang = p[`option_groups_${lang}`]
+  const og = (Array.isArray(perLang) && perLang.length) ? perLang : p.option_groups
+  if (Array.isArray(og) && og.length) {
+    return og.filter(g => g && g.name && Array.isArray(g.options) && g.options.length)
   }
   if (Array.isArray(p.formats) && p.formats.length) {
     return [{ name: 'Format', options: p.formats }]
@@ -39,7 +41,7 @@ function renderItem(p, t, lang) {
   const pid = p.id
   const qid = 'qty-' + pid
   const cid = 'cmt-' + pid
-  const groups = effectiveGroups(p)
+  const groups = effectiveGroups(p, lang)
   const label = txt(p, 'label', lang)
   const description = txt(p, 'description', lang)
 
@@ -123,8 +125,8 @@ async function buildProducts(t, lang) {
     pid: p.id,
     qty: 'qty-' + p.id,
     cmt: 'cmt-' + p.id,
-    groups: effectiveGroups(p).map(g => g.name),
-    groupDefs: effectiveGroups(p),
+    groups: effectiveGroups(p, lang).map(g => g.name),
+    groupDefs: effectiveGroups(p, lang),
     customFormat: !!p.allow_custom_format,
     allowDuplicate: !!p.allow_duplicate,
   }))
