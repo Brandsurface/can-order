@@ -52,11 +52,11 @@ export async function POST(req) {
     if (!label) return back(req, 'invalid')
     const description = String(form.get('description') || '').trim() || null
     const lang = String(form.get('lang') || '') === 'en' ? 'en' : 'da'
+    const optionGroups = parseOptionGroups(form.get('option_groups'))
 
     // Language-neutral fields shared by both languages
     const common = {
       grp: String(form.get('grp') || 'print') === 'some' ? 'some' : 'print',
-      option_groups: parseOptionGroups(form.get('option_groups')),
       formats: [], // option_groups is the single source of truth going forward
       sort: parseInt(form.get('sort'), 10) || 0,
     }
@@ -65,9 +65,10 @@ export async function POST(req) {
       // New products seed both languages so they show regardless of customer language
       const { error } = await supabase.from('products').insert({
         ...common,
-        label, description,
+        label, description, option_groups: optionGroups,
         label_en: label, label_da: label,
         description_en: description, description_da: description,
+        option_groups_en: optionGroups, option_groups_da: optionGroups,
       })
       return back(req, error ? 'error' : 'created')
     }
@@ -77,8 +78,9 @@ export async function POST(req) {
     // Update only the edited language — the other language is left untouched
     const { error } = await supabase.from('products').update({
       ...common,
-      [`label_${lang}`]:       label,
-      [`description_${lang}`]: description,
+      [`label_${lang}`]:         label,
+      [`description_${lang}`]:   description,
+      [`option_groups_${lang}`]: optionGroups,
       active:              form.get('active') === 'on',
       allow_custom_format: form.get('allow_custom_format') === 'on',
       allow_duplicate:     form.get('allow_duplicate') === 'on',

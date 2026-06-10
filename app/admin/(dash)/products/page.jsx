@@ -4,9 +4,11 @@ import OptionGroupsBuilder from './OptionGroupsBuilder'
 
 export const dynamic = 'force-dynamic'
 
-function groupsToJson(p) {
-  if (Array.isArray(p?.option_groups) && p.option_groups.length) {
-    return p.option_groups
+function groupsToJson(p, lang) {
+  const perLang = p?.[`option_groups_${lang}`]
+  const src = (Array.isArray(perLang) && perLang.length) ? perLang : p?.option_groups
+  if (Array.isArray(src) && src.length) {
+    return src
       .filter(g => g && g.name)
       .map(g => ({ name: g.name, options: Array.isArray(g.options) ? g.options : [], recommended: Array.isArray(g.recommended) ? g.recommended : [] }))
   }
@@ -34,7 +36,7 @@ export default async function AdminProducts({ searchParams }) {
 
   const { data: products } = await supabase
     .from('products')
-    .select('id, grp, label, label_en, label_da, description, description_en, description_da, formats, option_groups, sort, active, allow_custom_format, allow_duplicate')
+    .select('id, grp, label, label_en, label_da, description, description_en, description_da, formats, option_groups, option_groups_en, option_groups_da, sort, active, allow_custom_format, allow_duplicate')
     .order('grp', { ascending: true })
     .order('sort', { ascending: true })
 
@@ -111,28 +113,14 @@ export default async function AdminProducts({ searchParams }) {
                 <label className="a-label">{t.products_desc} ({LANG})</label>
                 <input id={`prod-desc-${p.id}`} className="a-input" name="description" defaultValue={p[`description_${lang}`] ?? p.description ?? ''} placeholder="—" />
               </div>
-              <OptionGroupsBuilder initial={groupsToJson(p)} t={ogT} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>{t.products_save}</button>
-                {lang === 'en' && (
-                  <button
-                    type="button"
-                    data-tl={JSON.stringify({
-                      li: `prod-label-${p.id}`,
-                      di: `prod-desc-${p.id}`,
-                      ld: p.label_da ?? p.label ?? '',
-                      dd: p.description_da ?? p.description ?? '',
-                    })}
-                    title="Auto-translate from Danish"
-                    style={{
-                      background: '#1d4ed8', color: '#fff', border: 'none',
-                      borderRadius: 4, fontSize: 11, fontFamily: "'DM Mono',monospace",
-                      letterSpacing: '0.06em', padding: '3px 9px', cursor: 'pointer',
-                      lineHeight: '18px',
-                    }}
-                  >EN</button>
-                )}
-              </div>
+              <OptionGroupsBuilder
+                initial={groupsToJson(p, lang)}
+                t={ogT}
+                enableTranslate={lang === 'en'}
+                labelId={`prod-label-${p.id}`}
+                descId={`prod-desc-${p.id}`}
+              />
+              <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>{t.products_save}</button>
             </form>
             <form method="POST" action="/api/admin/products" style={{ marginTop: 10 }}>
               <input type="hidden" name="action" value="delete" />
@@ -145,48 +133,6 @@ export default async function AdminProducts({ searchParams }) {
           <div className="a-card" style={{ color: '#7a7672' }}>{t.products_empty}</div>
         )}
       </div>
-
-      <script dangerouslySetInnerHTML={{ __html: `
-        document.addEventListener('click', function(e) {
-          var btn = e.target.closest('[data-tl]');
-          if (!btn) return;
-          var d = JSON.parse(btn.dataset.tl);
-          var texts = [d.ld, d.dd].filter(Boolean);
-          if (!texts.length) return;
-          btn.textContent = '…';
-          btn.disabled = true;
-          fetch('/api/admin/translate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texts: texts })
-          })
-          .then(function(r) { return r.json(); })
-          .then(function(res) {
-            if (res.error) throw new Error(res.error);
-            var i = 0, skipped = 0;
-            // Only overwrite a field when the source was actually Danish.
-            // English source text is left untouched.
-            function apply(fieldId, has) {
-              if (!has) return;
-              var item = res.translations[i++];
-              if (!item || item.source === 'EN') { skipped++; return; }
-              var el = document.getElementById(fieldId);
-              if (el) el.value = item.text;
-            }
-            apply(d.li, !!d.ld);
-            apply(d.di, !!d.dd);
-            btn.textContent = 'EN';
-            if (skipped && skipped === (d.ld ? 1 : 0) + (d.dd ? 1 : 0)) {
-              alert('Teksten er allerede på engelsk — intet at oversætte.');
-            }
-          })
-          .catch(function(err) {
-            btn.textContent = 'EN';
-            alert('Oversættelse fejlede: ' + err.message);
-          })
-          .finally(function() { btn.disabled = false; });
-        });
-      ` }} />
     </>
   )
 }
