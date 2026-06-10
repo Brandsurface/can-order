@@ -7,7 +7,7 @@ mail (with a grace-period delay), two languages and a flexible admin.
 
 - **Next.js 14** (App Router) — frontend + serverless API routes
 - **Supabase** — PostgreSQL database (orders, brands, settings, admin users) + file storage
-- **Resend** — transactional mail (customer confirmation + delayed forwarding)
+- **Brevo** — transactional mail (customer confirmation + delayed, cancellable forwarding)
 - **Vercel** — hosting
 
 ## What the customer fills in
@@ -29,8 +29,8 @@ can always go back and edit before submitting.
 Customer fills in the form
   ↓ POST /api/order
 Order saved in Supabase (status: pending)
-  ↓ Resend → customer confirmation (with Edit link)
-  ↓ Resend → Brand Surface order email, SCHEDULED after N minutes (admin-configurable grace period)
+  ↓ Brevo → customer confirmation (with Edit link)
+  ↓ Brevo → Brand Surface order email, SCHEDULED after N minutes (admin-configurable grace period)
   │
   ├── Edit link → /?edit=<id> → form re-loads with all data → resubmit (revision +1, timer resets)
   └── No action → after the delay the order auto-forwards to Brand Surface
@@ -60,10 +60,11 @@ variants and option lists are all editable without code changes.
 2. SQL Editor → run `supabase-schema.sql`, then `admin-schema.sql`
 3. Settings → API → copy the **Project URL** and the **service_role** secret
 
-### 2. Resend
+### 2. Brevo
 
-1. [resend.com](https://resend.com) → API Keys → create with **Sending access**
-2. (Later) verify `brandsurface.dk` under Domains; until then send from `onboarding@resend.dev`
+1. [app.brevo.com](https://app.brevo.com) → SMTP & API → **API Keys** → create a v3 key
+2. Senders, Domains & Dedicated IPs → add & verify your sender address (or the
+   `brandsurface.dk` domain with SPF/DKIM) — Brevo only sends from verified senders
 
 ### 3. Environment variables
 
@@ -73,8 +74,9 @@ Copy `.env.example` → `.env.local` (local) or add them in Vercel:
 |---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API (service_role) |
-| `RESEND_API_KEY` | Resend API key |
-| `RESEND_FROM` | `onboarding@resend.dev` until your domain is verified |
+| `BREVO_API_KEY` | Brevo → SMTP & API → API Keys (v3 key) |
+| `SENDER_EMAIL` | Verified Brevo sender, e.g. `ordre@brandsurface.dk` |
+| `SENDER_NAME` | Display name, e.g. `Brand Surface` (optional) |
 | `BRANDSURFACE_EMAIL` | Fallback recipient (also editable in admin) |
 | `ADMIN_SESSION_SECRET` | Long random string (`openssl rand -hex 32`) |
 | `NEXT_PUBLIC_BASE_URL` | Your deployed URL (used in email links) |

@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase'
-import { Resend } from 'resend'
 import { buildCustomerConfirmEmail, buildBrandsurfaceEmail } from '@/lib/emails'
 import { dispatchToBrandsurface, buildUploadLinks } from '@/lib/dispatch'
+import { sendEmail, cancelScheduled, hasMailKey } from '@/lib/brevo'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,8 +30,6 @@ export async function POST(request) {
       return Response.json({ error: 'Ugyldig e-mailadresse' }, { status: 400 })
     }
 
-    const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
-
     // Determine revision + cancel any previously scheduled send when editing
     let revision = 0
     if (body.previous_id) {
@@ -42,9 +40,7 @@ export async function POST(request) {
         .single()
       if (prev) {
         revision = (prev.revision || 0) + 1
-        if (resend && prev.scheduled_email_id) {
-          try { await resend.emails.cancel(prev.scheduled_email_id) } catch (e) { console.warn('Kunne ikke annullere tidligere planlagt mail:', e?.message) }
-        }
+        if (prev.scheduled_email_id) await cancelScheduled(prev.scheduled_email_id)
         await supabase.from('orders').update({ status: 'cancelled' }).eq('id', body.previous_id)
       }
     }
@@ -88,25 +84,20 @@ export async function POST(request) {
       return Response.json({ error: 'Database fejl' }, { status: 500 })
     }
 
-    if (!resend) {
-      console.error('RESEND_API_KEY mangler')
+    if (!hasMailKey()) {
+      console.error('BREVO_API_KEY mangler')
       return Response.json({ error: 'Mail-service ikke konfigureret' }, { status: 500 })
     }
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(request.url).origin
-    const fromAddress = process.env.RESEND_FROM || 'no-reply@brandsurface.dk'
     const { recipient, delayMinutes } = await getSettings()
 
     // 1) Send order confirmation to the customer immediately
-    const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
-    const { error: mailError } = await resend.emails.send({
-      from: `Brand Surface <${fromAddress}>`,
-      to: order.email,
-      subject,
-      html,
-    })
-    if (mailError) {
-      console.error('Resend fejl (kundebekræftelse):', mailError)
+    try {
+      const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
+      await sendEmail({ to: order.email, senderName: 'Brand Surface', subject, html })
+    } catch (mailError) {
+      console.error('Brevo fejl (kundebekræftelse):', mailError?.message)
       return Response.json({ success: true, orderId: order.id, warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes' })
     }
 
@@ -116,25 +107,23 @@ export async function POST(request) {
         await dispatchToBrandsurface(order)
       } else {
         const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)
+        const batchId = crypto.randomUUID()
         try {
           const uploadLinks = await buildUploadLinks(order)
           const bs = buildBrandsurfaceEmail({ order: { ...order, uploadLinks } })
-          const { data: scheduled, error: schedErr } = await resend.emails.send({
-            from: `Brand Surface Ordre <${fromAddress}>`,
+          await sendEmail({
             to: recipient,
             replyTo: order.email,
-            scheduledAt: sendAfter.toISOString(),
+            senderName: 'Brand Surface Ordre',
             subject: bs.subject,
             html: bs.html,
+            scheduledAt: sendAfter,
+            batchId,
           })
-          if (schedErr) {
-            console.error('Resend planlægning fejl:', schedErr)
-          } else {
-            await supabase
-              .from('orders')
-              .update({ send_after: sendAfter.toISOString(), scheduled_email_id: scheduled?.id || null })
-              .eq('id', order.id)
-          }
+          await supabase
+            .from('orders')
+            .update({ send_after: sendAfter.toISOString(), scheduled_email_id: batchId })
+            .eq('id', order.id)
         } catch (e) {
           console.error('Planlægning af Brand Surface-mail fejlede:', e?.message)
         }
