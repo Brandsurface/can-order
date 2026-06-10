@@ -163,10 +163,22 @@ export default async function AdminProducts({ searchParams }) {
           .then(function(r) { return r.json(); })
           .then(function(res) {
             if (res.error) throw new Error(res.error);
-            var i = 0;
-            if (d.ld) { var el = document.getElementById(d.li); if (el) el.value = res.translations[i++] || ''; }
-            if (d.dd) { var el = document.getElementById(d.di); if (el) el.value = res.translations[i++] || ''; }
+            var i = 0, skipped = 0;
+            // Only overwrite a field when the source was actually Danish.
+            // English source text is left untouched.
+            function apply(fieldId, has) {
+              if (!has) return;
+              var item = res.translations[i++];
+              if (!item || item.source === 'EN') { skipped++; return; }
+              var el = document.getElementById(fieldId);
+              if (el) el.value = item.text;
+            }
+            apply(d.li, !!d.ld);
+            apply(d.di, !!d.dd);
             btn.textContent = 'EN';
+            if (skipped && skipped === (d.ld ? 1 : 0) + (d.dd ? 1 : 0)) {
+              alert('Teksten er allerede på engelsk — intet at oversætte.');
+            }
           })
           .catch(function(err) {
             btn.textContent = 'EN';

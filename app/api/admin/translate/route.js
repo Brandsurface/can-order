@@ -24,7 +24,8 @@ export async function POST(req) {
       Authorization: `DeepL-Auth-Key ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ text: texts, source_lang: 'DA', target_lang: 'EN' }),
+    // No source_lang → DeepL auto-detects. We skip fields that are already English.
+    body: JSON.stringify({ text: texts, target_lang: 'EN-GB' }),
   })
 
   if (!res.ok) {
@@ -34,5 +35,7 @@ export async function POST(req) {
   }
 
   const { translations } = await res.json()
-  return NextResponse.json({ translations: translations.map(t => t.text) })
+  return NextResponse.json({
+    translations: translations.map(t => ({ text: t.text, source: t.detected_source_language })),
+  })
 }
