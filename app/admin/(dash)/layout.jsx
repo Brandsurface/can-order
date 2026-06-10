@@ -6,7 +6,7 @@ import AdminLangSwitcher from '../AdminLangSwitcher'
 export const dynamic = 'force-dynamic'
 
 const ADMIN_CSS = `
-.a-body { margin:0; min-height:100vh; background:linear-gradient(160deg,#221f18 0%,#0e0a00 60%); background-attachment:fixed;
+.a-body { margin:0; min-height:100vh; background:linear-gradient(160deg,#16231c 0%,#0b120e 60%); background-attachment:fixed;
   font-family:'Manrope',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:#f0ede8; }
 .a-nav { display:flex; align-items:center; gap:24px; padding:0 28px; height:60px; border-bottom:1px solid #4a4640;
   background:rgba(14,10,0,0.7); position:sticky; top:0; z-index:10; }

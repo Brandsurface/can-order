@@ -22,7 +22,7 @@ export async function POST(request) {
   try {
     const body = await request.json()
 
-    // Validering
+    // Validation
     if (!body.butiksnavn || !body.navn || !body.email) {
       return Response.json({ error: 'Manglende påkrævede felter' }, { status: 400 })
     }
@@ -32,7 +32,7 @@ export async function POST(request) {
 
     const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-    // Bestem revision + annullér tidligere planlagt afsendelse ved redigering
+    // Determine revision + cancel any previously scheduled send when editing
     let revision = 0
     if (body.previous_id) {
       const { data: prev } = await supabase
@@ -49,34 +49,35 @@ export async function POST(request) {
       }
     }
 
-    // Gem ordre i Supabase
+    // Save order
     const { data: order, error: dbError } = await supabase
       .from('orders')
       .insert({
-        butiksnavn:      body.butiksnavn,
-        navn:            body.navn,
-        email:           body.email,
-        delivery_date:   body.delivery_date || null,
-        produkter:       body.produkter || [],
-        andet:           body.andet || null,
-        addr_type:       body.addr_type || 'butik',
-        gade:            body.gade,
-        postnr:          body.postnr,
-        by:              body.by,
-        att:             body.att || null,
-        tlf:             body.tlf || null,
-        alt_active:      body.alt_active || false,
-        alt_gade:        body.alt_gade || null,
-        alt_postnr:      body.alt_postnr || null,
-        alt_by:          body.alt_by || null,
-        alt_att:         body.alt_att || null,
-        alt_tlf:         body.alt_tlf || null,
-        konsulent_navn:  body.konsulent_navn || null,
-        konsulent_tlf:   body.konsulent_tlf || null,
-        konsulent_email: body.konsulent_email || null,
-        uploads:         Array.isArray(body.uploads) ? body.uploads : [],
-        language:        ['en', 'da'].includes(body.language) ? body.language : 'en',
-        status:          'pending',
+        butiksnavn:    body.butiksnavn,
+        navn:          body.navn,
+        email:         body.email,
+        delivery_date: body.delivery_date || null,
+
+        brand:         body.brand || null,
+        variant:       body.variant || null,
+        size:          body.size || null,
+        region:        body.region || null,
+        label_type:    body.label_type || null,
+        cutterguide:   body.cutterguide || null,
+        finish:        body.finish || null,
+        material_old:  body.material_old || null,
+        material_new:  body.material_new || null,
+        ean:           body.ean || null,
+        pantmaerke:    !!body.pantmaerke,
+        ingredients:   body.ingredients || null,
+
+        andet:         body.andet || null,
+        artwork_help:  !!body.artwork_help,
+        smash_link:    !!body.smash_link,
+        uploads:       Array.isArray(body.uploads) ? body.uploads : [],
+
+        language:      ['en', 'da'].includes(body.language) ? body.language : 'en',
+        status:        'pending',
         revision,
       })
       .select()
@@ -96,7 +97,7 @@ export async function POST(request) {
     const fromAddress = process.env.RESEND_FROM || 'no-reply@brandsurface.dk'
     const { recipient, delayMinutes } = await getSettings()
 
-    // 1) Send ordrebekræftelse til kunden med det samme
+    // 1) Send order confirmation to the customer immediately
     const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
     const { error: mailError } = await resend.emails.send({
       from: `Brand Surface <${fromAddress}>`,
@@ -112,7 +113,6 @@ export async function POST(request) {
     // 2) Forward to Brand Surface — immediately when no delay, otherwise scheduled
     if (recipient) {
       if (delayMinutes <= 0) {
-        // scheduledAt must be in the future, so send right away instead
         await dispatchToBrandsurface(order)
       } else {
         const sendAfter = new Date(Date.now() + delayMinutes * 60 * 1000)

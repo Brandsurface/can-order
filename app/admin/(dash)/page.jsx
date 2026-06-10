@@ -20,16 +20,9 @@ function fmtTime(iso, locale) {
   }
 }
 
-function productSummary(produkter) {
-  if (!Array.isArray(produkter) || !produkter.length) return '—'
-  return produkter.map(p => {
-    const qty = p.antal != null ? ` ×${p.antal}` : ''
-    const opts = p.options
-      ? Object.values(p.options).map(v => Array.isArray(v) ? v.join('/') : v)
-      : (p.format ? [p.format] : [])
-    const extra = opts.length ? ` (${opts.join(', ')})` : ''
-    return `${p.type}${extra}${qty}`
-  }).join(', ')
+function canSummary(o) {
+  const parts = [o.brand, o.variant, o.size, o.region].filter(Boolean)
+  return parts.length ? parts.join(' · ') : '—'
 }
 
 // Derived display status for the badge
@@ -64,7 +57,7 @@ export default async function AdminOrders({ searchParams }) {
 
   const { data: orders, error } = await supabase
     .from('orders')
-    .select('id, created_at, status, butiksnavn, navn, email, produkter, revision, send_after, uploads, pm_status')
+    .select('id, created_at, status, butiksnavn, navn, email, brand, variant, size, region, revision, send_after, uploads, pm_status')
     .order('created_at', { ascending: false })
     .limit(200)
 
@@ -122,7 +115,7 @@ export default async function AdminOrders({ searchParams }) {
                     <div style={{ color: '#7a7672', fontSize: 12 }}>{o.email}</div>
                   </td>
                   <td style={{ color: '#b8b4ae', fontSize: 13, maxWidth: 320 }}>
-                    {productSummary(o.produkter)}
+                    {canSummary(o)}
                     {Array.isArray(o.uploads) && o.uploads.length > 0 && (
                       <div style={{ color: '#7a7672', fontSize: 12, marginTop: 4 }}>📎 {o.uploads.length} {o.uploads.length > 1 ? t.files_many : t.files_one}</div>
                     )}
