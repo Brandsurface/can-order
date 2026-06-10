@@ -44,7 +44,7 @@ create table if not exists orders (
   revision      integer default 0,
   pm_status     text,                   -- internal project-management status
   send_after    timestamptz,           -- when the Brand Surface mail is scheduled
-  scheduled_email_id text               -- Resend id of the scheduled mail (for cancel)
+  scheduled_email_id text               -- Brevo batchId of the scheduled mail (for cancel)
 );
 
 -- Backfill columns for installs that predate the can model (idempotent)
