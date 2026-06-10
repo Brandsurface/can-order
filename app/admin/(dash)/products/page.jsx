@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase'
 import { getAdminT } from '@/lib/admin-i18n'
 import OptionGroupsBuilder from './OptionGroupsBuilder'
+import TranslateButton from './TranslateButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,7 +86,7 @@ export default async function AdminProducts({ searchParams }) {
               <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 2, minWidth: 180 }}>
                   <label className="a-label">{t.products_name} ({LANG})</label>
-                  <input className="a-input" name="label" defaultValue={p[`label_${lang}`] ?? p.label ?? ''} required />
+                  <input id={`prod-label-${p.id}`} className="a-input" name="label" defaultValue={p[`label_${lang}`] ?? p.label ?? ''} required />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 150 }}>
                   <label className="a-label">{t.products_group}</label>
@@ -109,10 +110,20 @@ export default async function AdminProducts({ searchParams }) {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <label className="a-label">{t.products_desc} ({LANG})</label>
-                <input className="a-input" name="description" defaultValue={p[`description_${lang}`] ?? p.description ?? ''} placeholder="—" />
+                <input id={`prod-desc-${p.id}`} className="a-input" name="description" defaultValue={p[`description_${lang}`] ?? p.description ?? ''} placeholder="—" />
               </div>
               <OptionGroupsBuilder initial={groupsToJson(p)} t={ogT} />
-              <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>{t.products_save}</button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <button type="submit" className="a-btn-2" style={{ alignSelf: 'flex-start' }}>{t.products_save}</button>
+                {lang === 'en' && (
+                  <TranslateButton
+                    labelId={`prod-label-${p.id}`}
+                    descId={`prod-desc-${p.id}`}
+                    labelDa={p.label_da ?? p.label ?? ''}
+                    descDa={p.description_da ?? p.description ?? ''}
+                  />
+                )}
+              </div>
             </form>
             <form method="POST" action="/api/admin/products" style={{ marginTop: 10 }}>
               <input type="hidden" name="action" value="delete" />
