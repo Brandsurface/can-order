@@ -203,6 +203,7 @@
           <label>{{ingredients_label}}</label>
           <div class="rich-toolbar">
             <button type="button" id="ing-bold-btn" class="rich-bold-btn" title="{{ingredients_bold}}" onmousedown="event.preventDefault()" onclick="toggleIngredientBold()"><b>B</b></button>
+            <span class="rich-toolbar-hint">{{ingredients_bold_help}}</span>
           </div>
           <div id="ingredients" class="rich-input" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="{{ingredients_ph}}"></div>
           <div id="ingredients-marked" class="marked-box" hidden>
