@@ -22,13 +22,11 @@ export default async function AdminCatalogue({ searchParams }) {
 
   const [{ data: brands }, { data: settingRows }] = await Promise.all([
     supabase.from('brands').select('id, name, variants, sort, active').order('sort', { ascending: true }),
-    supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'label_types', 'finishes', 'pantmaerke_exempt_region']),
+    supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'pantmaerke_exempt_region']),
   ])
   const s = Object.fromEntries((settingRows || []).map(r => [r.key, r.value]))
   const sizes = parseList(s.sizes, ['250 ml', '330 ml', '330 ml slim', '440 ml', '500 ml'])
   const regions = parseList(s.regions, ['DK', 'Border'])
-  const labelTypes = parseList(s.label_types, ['Label', 'Tryk'])
-  const finishes = parseList(s.finishes, ['Mat', 'Gloss', 'To be confirmed'])
   const pantExempt = s.pantmaerke_exempt_region || 'Border'
 
   const note = searchParams?.status ? STATUS[searchParams.status] : null
@@ -113,16 +111,8 @@ export default async function AdminCatalogue({ searchParams }) {
               <ListBuilder initial={sizes} name="sizes" placeholder={t.opts_value_ph} addLabel={t.lb_add} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label className="a-label">{t.opts_finishes}</label>
-              <ListBuilder initial={finishes} name="finishes" placeholder={t.opts_value_ph} addLabel={t.lb_add} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label className="a-label">{t.opts_regions}</label>
               <ListBuilder initial={regions} name="regions" placeholder={t.opts_value_ph} addLabel={t.lb_add} />
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <label className="a-label">{t.opts_label_types}</label>
-              <ListBuilder initial={labelTypes} name="label_types" placeholder={t.opts_value_ph} addLabel={t.lb_add} />
             </div>
           </div>
           <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 8, maxWidth: 320 }}>

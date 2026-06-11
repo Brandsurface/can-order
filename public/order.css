@@ -189,7 +189,7 @@ input:focus, select:focus, textarea:focus {
 input[type="date"] { color-scheme: dark; cursor: pointer; min-height: 45px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.02em; }
 input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(48%) sepia(89%) saturate(2476%) hue-rotate(346deg) brightness(101%) contrast(95%); cursor: pointer; opacity: 0.85; }
 input[type="date"]::-webkit-calendar-picker-indicator:hover { opacity: 1; }
-input.error, textarea.error { border-color: var(--error); box-shadow: 0 0 0 3px var(--error-dim); }
+input.error, textarea.error, select.error { border-color: var(--error); box-shadow: 0 0 0 3px var(--error-dim); }
 textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
 .select-wrap { position: relative; }
