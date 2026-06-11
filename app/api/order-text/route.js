@@ -7,6 +7,23 @@ function row(label, value) {
   return `${label}: ${String(value).trim()}\n`
 }
 
+// Strip bold markers → clean plain text (decode the entities we stored).
+function stripBold(s) {
+  return String(s == null ? '' : s)
+    .replace(/<\s*\/?\s*(b|strong)\s*>/gi, '')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&amp;/g, '&')
+}
+function boldList(s) {
+  const out = []
+  const re = /<\s*(b|strong)\s*>([\s\S]*?)<\s*\/\s*\1\s*>/gi
+  let m
+  while ((m = re.exec(String(s || ''))) !== null) {
+    const t = stripBold(m[2]).trim()
+    if (t) out.push(t)
+  }
+  return out.filter((v, i) => out.indexOf(v) === i)
+}
+
 function section(title, lines) {
   const body = lines.filter(Boolean).join('')
   if (!body) return ''
@@ -58,7 +75,8 @@ export async function GET(request) {
       row('Material No. (new)', o.material_new),
       row('EAN', o.ean),
       String(o.region || '').toLowerCase() !== 'border' ? row('Pantmærke', o.pantmaerke ? 'Yes' : 'No') : '',
-      row('Ingredients / Nutrition', o.ingredients),
+      row('Ingredients / Nutrition', stripBold(o.ingredients)),
+      boldList(o.ingredients).length ? row('Marked in bold', boldList(o.ingredients).join(', ')) : '',
     ]),
 
     section('ARTWORK', [
