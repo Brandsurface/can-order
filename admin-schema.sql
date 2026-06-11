@@ -57,6 +57,34 @@ insert into app_settings (key, value)
 insert into app_settings (key, value) values ('pantmaerke_exempt_region', 'Border')
   on conflict (key) do nothing;
 
+-- ── Editable hero text (page title + description, per language) ──
+insert into app_settings (key, value) values ('hero_title_en', '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('hero_title_da', '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('hero_sub_en',   '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('hero_sub_da',   '') on conflict (key) do nothing;
+
+-- ── Editable Order Process sidebar card (per language) ──
+insert into app_settings (key, value) values ('op_label_en',        '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_label_da',        '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_sub_en',          '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_sub_da',          '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step1_title_en',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step1_title_da',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step1_p_en',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step1_p_da',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step2_title_en',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step2_title_da',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step2_p_en',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step2_p_da',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step3_title_en',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step3_title_da',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step3_p_en',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step3_p_da',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step4_title_en',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step4_title_da',  '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step4_p_en',      '') on conflict (key) do nothing;
+insert into app_settings (key, value) values ('op_step4_p_da',      '') on conflict (key) do nothing;
+
 -- ── Podio integration (job creation from Admin) ──
 -- App ID + field external-ids come from the Podio app's developer settings.
 insert into app_settings (key, value) values ('podio_app_id', '')             on conflict (key) do nothing;
