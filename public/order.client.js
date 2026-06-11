@@ -337,12 +337,7 @@ function closePage() {
     countEl.textContent = Math.max(n, 0);
     if (n <= 0) {
       clearInterval(__closeTimer); __closeTimer = null;
-      window.close();
-      // Browsers block window.close() for tabs they didn't open — leave a fallback message.
-      setTimeout(() => {
-        const label = document.getElementById('close-label');
-        if (label) label.textContent = (T.toast_close_tab || 'You can now close this tab.');
-      }, 250);
+      window.location.href = '/godkendt';
     }
   }, 1000);
 }
