@@ -354,6 +354,16 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 .cs-body .cs-h { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 2px; }
 .cs-body .cs-d { font-size: 13px; color: var(--text-2); line-height: 1.5; }
 
+/* ── Auto-close overlay ── */
+.close-overlay { display: none; position: fixed; inset: 0; z-index: 500; background: rgba(5,9,7,0.80); backdrop-filter: blur(8px); flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding: 24px; }
+.close-overlay.open { display: flex; animation: fadeUp 0.25s ease; }
+.close-card { background: var(--surface); border: 1px solid var(--border-light); border-radius: var(--radius-xl); box-shadow: 0 30px 80px rgba(0,0,0,0.55); padding: 40px 52px; text-align: center; }
+.close-ring { width: 100px; height: 100px; border-radius: 50%; background: var(--mint-dim); border: 2px solid var(--mint-line); display: flex; align-items: center; justify-content: center; margin: 0 auto 22px; }
+.close-count { font-size: 48px; font-weight: 800; line-height: 1; color: var(--mint); font-variant-numeric: tabular-nums; animation: countPop 1s ease-in-out infinite; }
+.close-label { font-size: 14px; color: var(--text-2); letter-spacing: 0.01em; }
+.close-edit-btn { display: inline-flex; align-items: center; gap: 8px; }
+@keyframes countPop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
 /* ── Footer (centered) ── */
 .site-footer { position: relative; z-index: 1; text-align: center; padding: 40px 20px 60px; color: var(--text-3); font-size: 13px; line-height: 1.7; }
 .site-footer a { color: var(--accent); text-decoration: none; }

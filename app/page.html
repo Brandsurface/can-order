@@ -315,6 +315,18 @@
 </div>
 </div><!-- /view-confirm -->
 
+<!-- ── Auto-close overlay (after "Done — Thank You!") ── -->
+<div class="close-overlay" id="close-overlay">
+  <div class="close-card">
+    <div class="close-ring"><span class="close-count" id="close-count">5</span></div>
+    <div class="close-label" id="close-label">{{closing_auto}}</div>
+  </div>
+  <button class="btn-secondary btn-grey close-edit-btn" onclick="cancelAutoClose()">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    {{edit_order_btn}}
+  </button>
+</div>
+
 <footer class="site-footer">
   {{footer_text}}<br>
   {{footer_contact}} <a href="mailto:info@brandsurface.dk">info@brandsurface.dk</a>
