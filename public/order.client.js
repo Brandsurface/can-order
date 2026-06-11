@@ -291,7 +291,7 @@ function collectPayload() {
     pantmaerke,
     ingredients:   serializeRich(document.getElementById('ingredients')),
 
-    andet:         '',
+    andet:         g('andet'),
     artwork_help:  state.artwork,
     smash_link:    state.smash,
     uploads:       uploadedFiles,
@@ -338,6 +338,8 @@ function goToReview() {
     (p.ingredients && extractBold(p.ingredients).length) ? rvRow(T.f_ingredients_marked || 'Marked in bold', extractBold(p.ingredients).join(', '), { full: true }) : '',
   ].join('');
 
+  const additional = p.andet ? `<div class="rv-row full"><div class="rv-val pre">${escHtml(p.andet)}</div></div>` : '';
+
   let artwork = '';
   if (p.artwork_help) artwork += rvRow(T.f_artwork || 'Artwork', T.rv_help_requested || 'Help requested', { full: true });
   if (p.smash_link) artwork += rvRow(T.f_smash || 'Smash upload link', T.rv_smash_requested || 'Requested', { full: true });
@@ -346,6 +348,8 @@ function goToReview() {
     `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_orderer || 'Orderer')}</div><div class="rv-grid">${orderer}</div></div>` +
     `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_can || 'Can brief')}</div><div class="rv-grid">${can}</div></div>` +
     `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_production || 'Production details')}</div><div class="rv-grid">${production}</div></div>`;
+
+  if (additional) html += `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_additional || 'Additional information')}</div><div class="rv-grid">${additional}</div></div>`;
 
   if (artwork) html += `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_artwork_section || 'Artwork')}</div><div class="rv-grid">${artwork}</div></div>`;
 
@@ -495,6 +499,7 @@ async function prefillFromOrder(orderId) {
     const pant = document.getElementById('pantmaerke'); if (pant) pant.checked = !!d.pantmaerke;
     const ingEl = document.getElementById('ingredients');
     if (ingEl) { ingEl.innerHTML = d.ingredients ? richToSafeHtml(d.ingredients) : ''; updateMarked(); }
+    if (d.andet) { const aEl = document.getElementById('andet'); if (aEl) aEl.value = d.andet; }
 
     if (d.artwork_help && !state.artwork) toggleArtwork();
     if (d.smash_link && !state.smash) toggleSmash();

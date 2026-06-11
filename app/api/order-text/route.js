@@ -79,10 +79,11 @@ export async function GET(request) {
       boldList(o.ingredients).length ? row('Marked in bold', boldList(o.ingredients).join(', ')) : '',
     ]),
 
+    o.andet ? section('ADDITIONAL INFORMATION', [`${String(o.andet).trim()}\n`]) : '',
+
     section('ARTWORK', [
       o.artwork_help ? 'Artwork help: Requested\n' : '',
       o.smash_link   ? 'Smash link: Requested\n' : '',
-      o.andet        ? row('Notes', o.andet) : '',
     ]),
 
     o.uploads?.length
