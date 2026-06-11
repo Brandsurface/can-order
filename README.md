@@ -45,7 +45,8 @@ Cookie-session login (each user sets their password on first login).
 
 - **Orders** — list, status, PM-status, approve-now, edit, delete (+ bulk)
 - **Catalogue** — manage **brands & variants** and the option lists
-  (**sizes, regions, label types, finishes** + the region that hides Pantmærke)
+  (**sizes, regions** + the region that hides Pantmærke). Print type
+  (Label/Can) and the per-print-type finish lists are fixed in code.
 - **Settings** — Brand Surface recipient email, forward delay, sidebar help box
 - **Users** (master only) — add/reset/delete admins
 

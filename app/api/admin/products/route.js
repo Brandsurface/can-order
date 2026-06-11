@@ -55,8 +55,6 @@ export async function POST(req) {
     const rows = [
       { key: 'sizes', value: JSON.stringify(parseStringArray(form.get('sizes'))), updated_at: now },
       { key: 'regions', value: JSON.stringify(parseStringArray(form.get('regions'))), updated_at: now },
-      { key: 'label_types', value: JSON.stringify(parseStringArray(form.get('label_types'))), updated_at: now },
-      { key: 'finishes', value: JSON.stringify(parseStringArray(form.get('finishes'))), updated_at: now },
       { key: 'pantmaerke_exempt_region', value: String(form.get('pantmaerke_exempt_region') || '').trim(), updated_at: now },
     ]
     const { error } = await supabase.from('app_settings').upsert(rows, { onConflict: 'key' })

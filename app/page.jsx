@@ -28,7 +28,7 @@ async function loadData(t) {
   try {
     const [{ data: brandRows }, { data: settingRows }] = await Promise.all([
       supabase.from('brands').select('name, variants, active, sort').eq('active', true).order('sort', { ascending: true }),
-      supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'label_types', 'finishes', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html']),
+      supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html']),
     ])
     brands = brandRows || []
     for (const r of settingRows || []) settings[r.key] = r.value
@@ -38,9 +38,14 @@ async function loadData(t) {
 
   const sizes = parseList(settings.sizes, ['250 ml', '330 ml', '330 ml slim', '440 ml', '500 ml'])
   const regions = parseList(settings.regions, ['DK', 'Border'])
-  const labelTypes = parseList(settings.label_types, ['Label', 'Tryk'])
-  const finishes = parseList(settings.finishes, ['Mat', 'Gloss', 'To be confirmed'])
   const pantExempt = settings.pantmaerke_exempt_region || 'Border'
+
+  // Print type + finish are fixed in code; the finish options depend on the print type.
+  const labelTypes = ['Label', 'Can']
+  const finishMap = {
+    Label: ['White', 'Metallic', 'Transparent', 'To be confirmed'],
+    Can: ['Mat', 'Gloss', 'To be confirmed'],
+  }
 
   // Brand tiles + variants map
   const variantsMap = {}
@@ -55,13 +60,16 @@ async function loadData(t) {
   const sizeChips = sizes.map(s => `<button type="button" class="size-chip" data-size="${esc(s)}" onclick="selectSize(this)">${esc(s)}</button>`).join('')
   const regionSeg = regions.map((r, i) => `<button type="button" class="seg-btn${i === 0 ? ' selected' : ''}" data-region="${esc(r)}" onclick="selectRegion(this)">${esc(r)}</button>`).join('')
   const labelSeg = labelTypes.map((l, i) => `<button type="button" class="seg-btn${i === 0 ? ' selected' : ''}" data-labeltype="${esc(l)}" onclick="selectLabelType(this)">${esc(l)}</button>`).join('')
-  const finishOpts = finishes.map((f, i) => `<option value="${esc(f)}"${i === 0 ? ' selected' : ''}>${esc(f)}</option>`).join('')
+  // No finish pre-selected: a disabled placeholder + the default print type's options.
+  const finishOpts = `<option value="" disabled selected hidden>${esc(t.finish_ph)}</option>` +
+    (finishMap[labelTypes[0]] || []).map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')
 
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
   const dataScript =
     `window.__VARIANTS=${JSON.stringify(variantsMap).replace(/</g, '\\u003c')};` +
     `window.__SUPABASE_URL=${JSON.stringify(supabaseUrl)};` +
-    `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};`
+    `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};` +
+    `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};`
 
   return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings) }
 }

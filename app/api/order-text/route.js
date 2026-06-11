@@ -65,7 +65,7 @@ export async function GET(request) {
       row('Variant', o.variant),
       row('Size', o.size),
       row('Region', o.region),
-      row('Label Type', o.label_type),
+      row('Print Type', o.label_type),
       row('Finish', o.finish),
       row('Cutterguide', o.cutterguide),
     ]),

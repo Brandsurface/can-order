@@ -146,6 +146,18 @@ function selectLabelType(el) {
   document.querySelectorAll('#labeltype-seg .seg-btn.selected').forEach(b => b.classList.remove('selected'));
   el.classList.add('selected');
   state.labelType = el.dataset.labeltype || '';
+  populateFinish(state.labelType);
+}
+// Finish options depend on the print type. Nothing is pre-selected unless `selectVal`
+// is passed (used when restoring a saved order) and is valid for the print type.
+function populateFinish(printType, selectVal) {
+  const sel = document.getElementById('finish');
+  if (!sel) return;
+  const opts = (window.__FINISHES && window.__FINISHES[printType]) || [];
+  const keep = selectVal && opts.indexOf(selectVal) !== -1;
+  sel.innerHTML = `<option value="" disabled${keep ? '' : ' selected'} hidden>${escHtml(T.finish_ph || 'Choose finish…')}</option>` +
+    opts.map(o => `<option value="${escHtml(o)}"${o === selectVal ? ' selected' : ''}>${escHtml(o)}</option>`).join('');
+  sel.classList.remove('error');
 }
 // Hide/omit the deposit mark when the exempt region (e.g. Border) is chosen
 function updatePantmaerke() {
@@ -234,6 +246,13 @@ function validate() {
   // Size required
   if (!state.size) { document.getElementById('err-size')?.classList.add('show'); ok = false; }
   else document.getElementById('err-size')?.classList.remove('show');
+
+  // Finish required (no longer pre-selected)
+  const finishSel = document.getElementById('finish');
+  const finishMissing = !finishSel || !finishSel.value;
+  finishSel?.classList.toggle('error', finishMissing);
+  document.getElementById('err-finish')?.classList.toggle('show', finishMissing);
+  if (finishMissing) ok = false;
 
   // GDPR consent
   const legalActive = document.getElementById('legal-toggle').classList.contains('active');
@@ -464,10 +483,10 @@ async function prefillFromOrder(orderId) {
     if (d.size) { const c = Array.from(document.querySelectorAll('#size-chips .size-chip')).find(x => x.dataset.size === d.size); if (c) selectSize(c); }
     // Region
     if (d.region) { const b = Array.from(document.querySelectorAll('#region-seg .seg-btn')).find(x => x.dataset.region === d.region); if (b) selectRegion(b); }
-    // Label type
-    if (d.label_type) { const b = Array.from(document.querySelectorAll('#labeltype-seg .seg-btn')).find(x => x.dataset.labeltype === d.label_type); if (b) selectLabelType(b); }
-    // Finish
-    if (d.finish) { const sel = document.getElementById('finish'); if (Array.from(sel.options).some(o => o.value === d.finish)) sel.value = d.finish; }
+    // Print type (legacy "Tryk" orders map to "Can")
+    if (d.label_type) { const lt = d.label_type === 'Tryk' ? 'Can' : d.label_type; const b = Array.from(document.querySelectorAll('#labeltype-seg .seg-btn')).find(x => x.dataset.labeltype === lt); if (b) selectLabelType(b); }
+    // Finish — repopulate for the current print type and restore the saved value if valid
+    if (d.finish) populateFinish(state.labelType, d.finish);
 
     if (d.cutterguide) document.getElementById('cutterguide').value = d.cutterguide;
     if (d.material_old) document.getElementById('material_old').value = d.material_old;
@@ -503,6 +522,7 @@ function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;
   // Read server-rendered default selections into state
   state.region = document.querySelector('#region-seg .seg-btn.selected')?.dataset.region || '';
   state.labelType = document.querySelector('#labeltype-seg .seg-btn.selected')?.dataset.labeltype || '';
+  populateFinish(state.labelType);
   updatePantmaerke();
 
   // Ingredients rich-text: live marked list + bold-button state
