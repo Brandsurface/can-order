@@ -15,6 +15,20 @@ export async function POST(req) {
   const helpActive = form.get('help_box_active') === '1' ? '1' : '0'
   const helpHtml = String(form.get('help_box_html') || '').trim()
 
+  const podioAppId = String(form.get('podio_app_id') || '').replace(/\D/g, '')
+  const podioFieldJobNo = String(form.get('podio_field_job_no') || '').trim()
+  const podioFieldJobName = String(form.get('podio_field_job_name') || '').trim()
+  const podioFieldResp = String(form.get('podio_field_responsible') || '').trim()
+  let podioEmployees = '[]'
+  try {
+    const parsed = JSON.parse(String(form.get('podio_employees') || '[]'))
+    if (Array.isArray(parsed)) {
+      podioEmployees = JSON.stringify(parsed
+        .map(e => ({ name: String(e.name || '').trim(), podio_id: String(e.podio_id || '').trim() }))
+        .filter(e => e.name))
+    }
+  } catch {}
+
   const now = new Date().toISOString()
   const { error: e1 } = await supabase
     .from('app_settings')
@@ -30,7 +44,17 @@ export async function POST(req) {
       { key: 'help_box_html', value: helpHtml, updated_at: now },
     ], { onConflict: 'key' })
 
-  const error = e1 || e2
+  const { error: e3 } = await supabase
+    .from('app_settings')
+    .upsert([
+      { key: 'podio_app_id', value: podioAppId, updated_at: now },
+      { key: 'podio_field_job_no', value: podioFieldJobNo, updated_at: now },
+      { key: 'podio_field_job_name', value: podioFieldJobName, updated_at: now },
+      { key: 'podio_field_responsible', value: podioFieldResp, updated_at: now },
+      { key: 'podio_employees', value: podioEmployees, updated_at: now },
+    ], { onConflict: 'key' })
+
+  const error = e1 || e2 || e3
   if (error) console.error('[settings] upsert error:', error.message)
   const status = error ? 'error' : 'saved'
   return NextResponse.redirect(new URL(`/admin/settings?status=${status}`, req.url), 303)
