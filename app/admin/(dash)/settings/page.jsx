@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { getAdminT } from '@/lib/admin-i18n'
+import EmployeeBuilder from './EmployeeBuilder'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,12 +9,15 @@ export default async function AdminSettings({ searchParams }) {
   const { data } = await supabase
     .from('app_settings')
     .select('key, value')
-    .in('key', ['brandsurface_email', 'confirm_delay_minutes', 'help_box_active', 'help_box_html'])
+    .in('key', ['brandsurface_email', 'confirm_delay_minutes', 'help_box_active', 'help_box_html',
+      'podio_app_id', 'podio_field_job_no', 'podio_field_job_name', 'podio_field_responsible', 'podio_employees'])
   const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
   const currentEmail = map.brandsurface_email || ''
   const currentDelay = map.confirm_delay_minutes ?? '10'
   const helpBoxActive = map.help_box_active === '1'
   const helpBoxHtml = map.help_box_html || ''
+  let employees = []
+  try { employees = JSON.parse(map.podio_employees || '[]') } catch {}
   const status = searchParams?.status
 
   return (
@@ -70,6 +74,38 @@ export default async function AdminSettings({ searchParams }) {
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;br&gt;</code> {t.word_linebreak},{' '}
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;a href=""&gt;</code> {t.word_link}.
             </p>
+          </div>
+
+          <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <span className="a-label">{t.settings_podio_heading}</span>
+            <p style={{ fontSize: 12, color: '#7a7672', margin: 0, lineHeight: 1.5 }}>{t.settings_podio_help}</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label className="a-label" htmlFor="podio-app">{t.settings_podio_appid}</label>
+              <input id="podio-app" className="a-input" name="podio_app_id" inputMode="numeric"
+                defaultValue={map.podio_app_id || ''} placeholder="123456789" style={{ maxWidth: 220 }} />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="pf-jobno">{t.settings_podio_field_jobno}</label>
+                <input id="pf-jobno" className="a-input" name="podio_field_job_no" defaultValue={map.podio_field_job_no || ''} placeholder="job-number" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="pf-jobname">{t.settings_podio_field_jobname}</label>
+                <input id="pf-jobname" className="a-input" name="podio_field_job_name" defaultValue={map.podio_field_job_name || ''} placeholder="title" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="pf-resp">{t.settings_podio_field_resp}</label>
+                <input id="pf-resp" className="a-input" name="podio_field_responsible" defaultValue={map.podio_field_responsible || ''} placeholder="responsible" />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <label className="a-label">{t.settings_podio_employees}</label>
+              <EmployeeBuilder initial={employees} name="podio_employees"
+                nameLabel={t.settings_podio_emp_name} idLabel={t.settings_podio_emp_id} addLabel={t.settings_podio_add_emp} />
+            </div>
           </div>
 
           <button type="submit" className="a-btn" style={{ alignSelf: 'flex-start' }}>{t.settings_save}</button>

@@ -44,7 +44,13 @@ create table if not exists orders (
   revision      integer default 0,
   pm_status     text,                   -- internal project-management status
   send_after    timestamptz,           -- when the Brand Surface mail is scheduled
-  scheduled_email_id text               -- Brevo batchId of the scheduled mail (for cancel)
+  scheduled_email_id text,              -- Brevo batchId of the scheduled mail (for cancel)
+
+  -- Podio job (created from Admin)
+  podio_item_id  bigint,
+  podio_job_no   text,
+  podio_job_name text,
+  podio_link     text
 );
 
 -- Backfill columns for installs that predate the can model (idempotent)
@@ -68,6 +74,10 @@ alter table orders add column if not exists revision     integer default 0;
 alter table orders add column if not exists pm_status    text;
 alter table orders add column if not exists send_after   timestamptz;
 alter table orders add column if not exists scheduled_email_id text;
+alter table orders add column if not exists podio_item_id  bigint;
+alter table orders add column if not exists podio_job_no   text;
+alter table orders add column if not exists podio_job_name text;
+alter table orders add column if not exists podio_link     text;
 
 -- Keep updated_at fresh.
 -- search_path pinned to '' to avoid the "Function Search Path Mutable" linter

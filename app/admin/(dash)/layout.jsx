@@ -53,6 +53,11 @@ const ADMIN_CSS = `
 .og-del:hover { background:rgba(248,113,113,0.1); }
 .og-add-opt, .og-add-group { align-self:flex-start; padding:7px 14px; background:#2e2e2e; border:1px solid #4a4640; border-radius:999px; color:#b8b4ae; font-size:12px; cursor:pointer; font-family:inherit; }
 .og-add-opt:hover, .og-add-group:hover { color:#f0ede8; border-color:#5a5650; }
+.podio-overlay { position:fixed; inset:0; z-index:100; background:rgba(5,9,7,0.72); backdrop-filter:blur(5px); display:flex; align-items:flex-start; justify-content:center; padding:60px 20px; overflow-y:auto; }
+.podio-modal { width:100%; max-width:460px; background:#1e1d1a; border:1px solid #4a4640; border-radius:16px; padding:24px; box-shadow:0 30px 80px rgba(0,0,0,0.55); }
+.podio-modal-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.podio-x { background:#242220; border:1px solid #4a4640; color:#b8b4ae; width:32px; height:32px; border-radius:50%; font-size:20px; line-height:1; cursor:pointer; font-family:inherit; }
+.podio-x:hover { color:#f0ede8; border-color:#5a5650; }
 `
 
 export default async function DashLayout({ children }) {

@@ -57,6 +57,15 @@ insert into app_settings (key, value)
 insert into app_settings (key, value) values ('pantmaerke_exempt_region', 'Border')
   on conflict (key) do nothing;
 
+-- ── Podio integration (job creation from Admin) ──
+-- App ID + field external-ids come from the Podio app's developer settings.
+insert into app_settings (key, value) values ('podio_app_id', '')             on conflict (key) do nothing;
+insert into app_settings (key, value) values ('podio_field_job_no', '')       on conflict (key) do nothing;
+insert into app_settings (key, value) values ('podio_field_job_name', '')     on conflict (key) do nothing;
+insert into app_settings (key, value) values ('podio_field_responsible', '')  on conflict (key) do nothing;
+-- Admin-managed employees for the responsible picker: [{"name","podio_id"}]
+insert into app_settings (key, value) values ('podio_employees', '[]')        on conflict (key) do nothing;
+
 -- ── Editable brand catalogue (rendered as tiles on the form) ──
 create table if not exists brands (
   id          uuid primary key default gen_random_uuid(),

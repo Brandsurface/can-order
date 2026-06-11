@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { getAdminT } from '@/lib/admin-i18n'
+import PodioModal from './PodioModal'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,6 +61,28 @@ export default async function AdminOrders({ searchParams }) {
     .select('id, created_at, status, butiksnavn, navn, email, brand, variant, size, region, revision, send_after, uploads, pm_status')
     .order('created_at', { ascending: false })
     .limit(200)
+
+  // Podio data loaded separately + fault-tolerant: if the columns don't exist
+  // yet (migration not run), the page still renders without Podio status.
+  let podioMap = {}
+  try {
+    const ids = (orders || []).map(o => o.id)
+    if (ids.length) {
+      const { data: pds } = await supabase.from('orders').select('id, podio_item_id, podio_link, podio_job_no').in('id', ids)
+      podioMap = Object.fromEntries((pds || []).map(r => [r.id, r]))
+    }
+  } catch {}
+
+  const { data: empRow } = await supabase.from('app_settings').select('value').eq('key', 'podio_employees').single()
+  let employees = []
+  try { employees = JSON.parse(empRow?.value || '[]') } catch {}
+  const podioT = {
+    podio_modal_title: t.podio_modal_title, podio_jobno_label: t.podio_jobno_label,
+    podio_jobname_label: t.podio_jobname_label, podio_employee_label: t.podio_employee_label,
+    podio_employee_none: t.podio_employee_none, podio_create: t.podio_create,
+    podio_creating: t.podio_creating, podio_cancel: t.podio_cancel,
+    podio_err_jobno: t.podio_err_jobno, podio_err_jobname: t.podio_err_jobname,
+  }
 
   const note = searchParams?.status ? STATUS[searchParams.status] : null
 
@@ -146,6 +169,16 @@ export default async function AdminOrders({ searchParams }) {
                         </form>
                       )}
                       <a className="a-btn-2" href={`/?edit=${o.id}`} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>{t.btn_edit}</a>
+                      {(() => {
+                        const pd = podioMap[o.id] || {}
+                        const tag = `${t.podio_done}${pd.podio_job_no ? ` · ${pd.podio_job_no}` : ''}`
+                        if (pd.podio_item_id) {
+                          return pd.podio_link
+                            ? <a className="a-btn-2" href={pd.podio_link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: '#4ade80', borderColor: 'rgba(74,222,128,0.4)' }}>{tag}</a>
+                            : <span className="a-btn-2" style={{ color: '#4ade80', borderColor: 'rgba(74,222,128,0.4)' }}>{tag}</span>
+                        }
+                        return <button type="button" className="a-btn-2 podio-btn" data-order-id={o.id} data-campaign={o.butiksnavn || ''}>{t.podio_btn}</button>
+                      })()}
                       <form method="POST" action="/api/admin/orders">
                         <input type="hidden" name="action" value="delete" />
                         <input type="hidden" name="id" value={o.id} />
@@ -170,6 +203,8 @@ export default async function AdminOrders({ searchParams }) {
         if(all)all.addEventListener('change',function(){boxes().forEach(function(x){x.checked=all.checked;});upd();});
         document.addEventListener('change',function(e){if(e.target&&e.target.classList&&e.target.classList.contains('ord-check'))upd();});
       })();` }} />
+
+      <PodioModal employees={employees} t={podioT} />
     </>
   )
 }
