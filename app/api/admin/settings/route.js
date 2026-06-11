@@ -20,6 +20,15 @@ export async function POST(req) {
   const heroSubEn = String(form.get('hero_sub_en') || '').trim()
   const heroSubDa = String(form.get('hero_sub_da') || '').trim()
 
+  const opKeys = ['label', 'sub',
+    'step1_title', 'step1_p', 'step2_title', 'step2_p',
+    'step3_title', 'step3_p', 'step4_title', 'step4_p']
+  const opValues = {}
+  for (const k of opKeys) {
+    opValues[`op_${k}_en`] = String(form.get(`op_${k}_en`) || '').trim()
+    opValues[`op_${k}_da`] = String(form.get(`op_${k}_da`) || '').trim()
+  }
+
   const podioAppId = String(form.get('podio_app_id') || '').replace(/\D/g, '')
   const podioFieldJobNo = String(form.get('podio_field_job_no') || '').trim()
   const podioFieldJobName = String(form.get('podio_field_job_name') || '').trim()
@@ -51,6 +60,7 @@ export async function POST(req) {
       { key: 'hero_title_da', value: heroTitleDa, updated_at: now },
       { key: 'hero_sub_en', value: heroSubEn, updated_at: now },
       { key: 'hero_sub_da', value: heroSubDa, updated_at: now },
+      ...Object.entries(opValues).map(([key, value]) => ({ key, value, updated_at: now })),
     ], { onConflict: 'key' })
 
   const { error: e3 } = await supabase
