@@ -219,6 +219,20 @@
         </div>
       </div>
 
+      <!-- Additional information -->
+      <div class="card">
+        <div class="card-label"><span class="card-dot"></span>{{card_additional_label}}</div>
+        <div class="field" style="margin-top:4px;gap:10px;">
+          <textarea id="andet" rows="4" placeholder="{{additional_ph}}"></textarea>
+          <div class="attach-inline">
+            <button type="button" class="brief-attach-btn" onclick="document.getElementById('file-input').click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+              {{attach_btn}}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Artwork -->
       <div class="card">
         <div class="card-label"><span class="card-dot"></span>{{card_artwork_label}}</div>
