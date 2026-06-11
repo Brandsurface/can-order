@@ -66,6 +66,7 @@ alter table orders add column if not exists material_new text;
 alter table orders add column if not exists ean          text;
 alter table orders add column if not exists pantmaerke   boolean default false;
 alter table orders add column if not exists ingredients  text;
+alter table orders add column if not exists andet        text;
 alter table orders add column if not exists artwork_help boolean default false;
 alter table orders add column if not exists smash_link   boolean default false;
 alter table orders add column if not exists uploads      jsonb not null default '[]';
