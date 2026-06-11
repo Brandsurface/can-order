@@ -200,7 +200,14 @@
 
         <div class="field" style="margin-top:16px;gap:10px;">
           <label>{{ingredients_label}}</label>
-          <textarea id="ingredients" rows="4" placeholder="{{ingredients_ph}}"></textarea>
+          <div class="rich-toolbar">
+            <button type="button" id="ing-bold-btn" class="rich-bold-btn" title="{{ingredients_bold}}" onmousedown="event.preventDefault()" onclick="toggleIngredientBold()"><b>B</b></button>
+          </div>
+          <div id="ingredients" class="rich-input" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="{{ingredients_ph}}"></div>
+          <div id="ingredients-marked" class="marked-box" hidden>
+            <div class="marked-label">{{ingredients_marked_label}}</div>
+            <div id="ingredients-marked-list" class="marked-list"></div>
+          </div>
           <div class="attach-inline">
             <span class="attach-or">{{or_label}}</span>
             <button type="button" class="brief-attach-btn" onclick="document.getElementById('file-input').click()">

@@ -22,6 +22,88 @@ window.__editId = null;
 function g(id) { return document.getElementById(id)?.value?.trim() || ''; }
 function escHtml(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
 
+// ── Ingredients rich text (bold support) ──
+// Canonical stored format: HTML-escaped text + <b>…</b> for bold + literal "\n".
+function boldWrap(text, bold) { return text === '' ? '' : (bold ? '<b>' + text + '</b>' : text); }
+function serializeRich(el) {
+  if (!el) return '';
+  let out = '';
+  (function walk(node, bold) {
+    node.childNodes.forEach(n => {
+      if (n.nodeType === 3) { out += boldWrap(escHtml(n.nodeValue), bold); return; }
+      if (n.nodeType !== 1) return;
+      const tag = n.tagName;
+      if (tag === 'BR') { out += '\n'; return; }
+      let b = bold;
+      const fw = n.style && n.style.fontWeight;
+      if (tag === 'B' || tag === 'STRONG' || fw === 'bold' || (fw && parseInt(fw, 10) >= 600)) b = true;
+      const block = (tag === 'DIV' || tag === 'P');
+      if (block && out && !out.endsWith('\n')) out += '\n';
+      walk(n, b);
+      if (block && !out.endsWith('\n')) out += '\n';
+    });
+  })(el, false);
+  return out.replace(/<\/b><b>/g, '').replace(/\n{3,}/g, '\n\n').replace(/^\n+|\n+$/g, '');
+}
+// Render stored value to safe HTML: keep only <b>, neutralise stray tags, \n → <br>.
+function richToSafeHtml(stored) {
+  const s = String(stored == null ? '' : stored);
+  const re = /<\s*(\/?)\s*(b|strong)\s*>/gi;
+  let out = '', last = 0, m;
+  while ((m = re.exec(s)) !== null) {
+    out += s.slice(last, m.index).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    out += m[1] ? '</b>' : '<b>';
+    last = re.lastIndex;
+  }
+  out += s.slice(last).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return out.replace(/\r\n|\r|\n/g, '<br>');
+}
+function decodeEntities(s) {
+  return String(s).replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&amp;/g, '&');
+}
+function extractBold(stored) {
+  const out = [];
+  const re = /<\s*(b|strong)\s*>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
+  let m;
+  while ((m = re.exec(String(stored || ''))) !== null) {
+    const t = decodeEntities(m[2].replace(/<[^>]*>/g, '')).trim();
+    if (t) out.push(t);
+  }
+  return out.filter((v, i) => out.indexOf(v) === i);
+}
+function updateMarked() {
+  const el = document.getElementById('ingredients');
+  if (!el) return;
+  el.classList.toggle('is-empty', el.textContent.trim() === '');
+  const marks = extractBold(serializeRich(el));
+  const box = document.getElementById('ingredients-marked');
+  const list = document.getElementById('ingredients-marked-list');
+  if (!box || !list) return;
+  if (marks.length) {
+    list.innerHTML = marks.map(m => `<span class="marked-chip">${escHtml(m)}</span>`).join('');
+    box.hidden = false;
+  } else {
+    list.innerHTML = '';
+    box.hidden = true;
+  }
+}
+function refreshBoldBtn() {
+  const btn = document.getElementById('ing-bold-btn');
+  if (!btn) return;
+  let on = false;
+  try { on = document.queryCommandState('bold'); } catch (e) {}
+  btn.classList.toggle('active', on);
+}
+function toggleIngredientBold() {
+  const el = document.getElementById('ingredients');
+  if (!el) return;
+  el.focus();
+  try { document.execCommand('styleWithCSS', false, false); } catch (e) {}
+  document.execCommand('bold');
+  updateMarked();
+  refreshBoldBtn();
+}
+
 // ── Brand selection ──
 function selectBrand(el) {
   document.querySelectorAll('.brand-tile.selected').forEach(t => t.classList.remove('selected'));
@@ -188,7 +270,7 @@ function collectPayload() {
     material_new:  g('material_new'),
     ean:           g('ean'),
     pantmaerke,
-    ingredients:   g('ingredients'),
+    ingredients:   serializeRich(document.getElementById('ingredients')),
 
     andet:         '',
     artwork_help:  state.artwork,
@@ -233,7 +315,8 @@ function goToReview() {
     rvRow(T.f_material_new || 'Material no. (new)', p.material_new),
     rvRow(T.f_ean || 'EAN', p.ean),
     exempt ? '' : rvRow(T.f_pantmaerke || 'Pantmærke', p.pantmaerke ? (T.rv_yes || 'Yes') : (T.rv_no || 'No')),
-    p.ingredients ? rvRow(T.f_ingredients || 'Ingredients', p.ingredients, { full: true, mod: 'pre' }) : '',
+    p.ingredients ? rvRow(T.f_ingredients || 'Ingredients', richToSafeHtml(p.ingredients), { full: true, mod: 'pre', html: true }) : '',
+    (p.ingredients && extractBold(p.ingredients).length) ? rvRow(T.f_ingredients_marked || 'Marked in bold', extractBold(p.ingredients).join(', '), { full: true }) : '',
   ].join('');
 
   let artwork = '';
@@ -391,7 +474,8 @@ async function prefillFromOrder(orderId) {
     if (d.material_new) document.getElementById('material_new').value = d.material_new;
     if (d.ean) document.getElementById('ean').value = d.ean;
     const pant = document.getElementById('pantmaerke'); if (pant) pant.checked = !!d.pantmaerke;
-    if (d.ingredients) document.getElementById('ingredients').value = d.ingredients;
+    const ingEl = document.getElementById('ingredients');
+    if (ingEl) { ingEl.innerHTML = d.ingredients ? richToSafeHtml(d.ingredients) : ''; updateMarked(); }
 
     if (d.artwork_help && !state.artwork) toggleArtwork();
     if (d.smash_link && !state.smash) toggleSmash();
@@ -420,6 +504,15 @@ function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;
   state.region = document.querySelector('#region-seg .seg-btn.selected')?.dataset.region || '';
   state.labelType = document.querySelector('#labeltype-seg .seg-btn.selected')?.dataset.labeltype || '';
   updatePantmaerke();
+
+  // Ingredients rich-text: live marked list + bold-button state
+  const ingEl = document.getElementById('ingredients');
+  if (ingEl) {
+    ingEl.addEventListener('input', updateMarked);
+    ingEl.addEventListener('blur', updateMarked);
+    document.addEventListener('selectionchange', () => { if (document.activeElement === ingEl) refreshBoldBtn(); });
+    updateMarked();
+  }
 
   // Close modal on Escape
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('review-modal').classList.contains('open')) goBack(); });
