@@ -325,9 +325,31 @@ function editSubmittedOrder() {
   if (window.__submittedOrderId) window.location.href = '/?edit=' + window.__submittedOrderId;
   else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
+let __closeTimer = null;
 function closePage() {
-  window.close();
-  setTimeout(() => showToast(T.toast_close_tab || 'Thank you! You can now close this tab.', 'success'), 150);
+  const overlay = document.getElementById('close-overlay');
+  const countEl = document.getElementById('close-count');
+  let n = 5;
+  countEl.textContent = n;
+  overlay.classList.add('open');
+  __closeTimer = setInterval(() => {
+    n -= 1;
+    countEl.textContent = Math.max(n, 0);
+    if (n <= 0) {
+      clearInterval(__closeTimer); __closeTimer = null;
+      window.close();
+      // Browsers block window.close() for tabs they didn't open — leave a fallback message.
+      setTimeout(() => {
+        const label = document.getElementById('close-label');
+        if (label) label.textContent = (T.toast_close_tab || 'You can now close this tab.');
+      }, 250);
+    }
+  }, 1000);
+}
+function cancelAutoClose() {
+  if (__closeTimer) { clearInterval(__closeTimer); __closeTimer = null; }
+  document.getElementById('close-overlay').classList.remove('open');
+  editSubmittedOrder();
 }
 
 // ── Prefill from ?edit= (when a customer edits via the email link) ──
