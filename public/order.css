@@ -257,10 +257,16 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 /* ── Rich ingredients field (bold support) ── */
 .rich-toolbar { display: flex; gap: 10px; align-items: center; }
 .rich-toolbar-hint { font-size: 12px; color: var(--text-3); line-height: 1.4; }
-.rich-bold-btn { width: 34px; height: 30px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-2); font-family: inherit; font-size: 14px; cursor: pointer; transition: all 0.15s; }
+.rich-bold-btn { width: 34px; height: 30px; display: inline-flex; align-items: center; justify-content: center; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; color: var(--text-2); font-family: inherit; font-size: 14px; cursor: pointer; transition: all 0.15s; animation: bold-pulse 2.8s ease-out infinite; }
 .rich-bold-btn b { font-weight: 800; }
-.rich-bold-btn:hover { border-color: var(--mint-line); color: var(--text); }
-.rich-bold-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+.rich-bold-btn:hover { border-color: var(--mint-line); color: var(--text); animation: none; }
+.rich-bold-btn.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); animation: none; }
+@keyframes bold-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(241,86,46,0.5); border-color: var(--accent); }
+  70%  { box-shadow: 0 0 0 9px rgba(241,86,46,0); border-color: var(--border); }
+  100% { box-shadow: 0 0 0 0 rgba(241,86,46,0); border-color: var(--border); }
+}
+@media (prefers-reduced-motion: reduce) { .rich-bold-btn { animation: none; } }
 .rich-input { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; color: var(--text); font-family: 'Manrope', sans-serif; font-size: 14px; line-height: 1.5; min-height: 96px; outline: none; white-space: pre-wrap; word-break: break-word; }
 .rich-input:focus { border-color: rgba(241,86,46,0.55); box-shadow: 0 0 0 3px var(--accent-dim2); background: var(--surface-3); }
 .rich-input.error { border-color: var(--error); box-shadow: 0 0 0 3px var(--error-dim); }
