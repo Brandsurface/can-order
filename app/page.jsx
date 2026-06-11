@@ -70,7 +70,7 @@ function buildHelpBox(settings) {
   if (settings.help_box_active !== '1') return ''
   const content = settings.help_box_html || ''
   if (!content) return ''
-  return `<div class="oh-divider"></div><div class="help-box">${content}</div>`
+  return `<div class="help-box">${content}</div>`
 }
 
 export default async function Home() {
