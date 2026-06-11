@@ -28,7 +28,7 @@ async function loadData(t) {
   try {
     const [{ data: brandRows }, { data: settingRows }] = await Promise.all([
       supabase.from('brands').select('name, variants, active, sort').eq('active', true).order('sort', { ascending: true }),
-      supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html']),
+      supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html', 'hero_title_en', 'hero_title_da', 'hero_sub_en', 'hero_sub_da']),
     ])
     brands = brandRows || []
     for (const r of settingRows || []) settings[r.key] = r.value
@@ -71,7 +71,12 @@ async function loadData(t) {
     `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};` +
     `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};`
 
-  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings) }
+  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings), heroOverrides: {
+    hero_title_en: settings.hero_title_en || '',
+    hero_title_da: settings.hero_title_da || '',
+    hero_sub_en: settings.hero_sub_en || '',
+    hero_sub_da: settings.hero_sub_da || '',
+  } }
 }
 
 function buildHelpBox(settings) {
@@ -83,12 +88,17 @@ function buildHelpBox(settings) {
 
 export default async function Home() {
   const lang = (await cookies()).get('lang')?.value === 'da' ? 'da' : 'en'
-  const t = translations[lang]
+  const t = { ...translations[lang] }
 
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox } = await loadData(t)
+  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox, heroOverrides } = await loadData(t)
+
+  if (heroOverrides.hero_title_en && lang === 'en') t.hero_title = heroOverrides.hero_title_en
+  if (heroOverrides.hero_title_da && lang === 'da') t.hero_title = heroOverrides.hero_title_da
+  if (heroOverrides.hero_sub_en && lang === 'en') t.hero_sub = heroOverrides.hero_sub_en
+  if (heroOverrides.hero_sub_da && lang === 'da') t.hero_sub = heroOverrides.hero_sub_da
 
   html = html.replace('<!--BRAND_TILES-->', brandTiles)
   html = html.replace('<!--SIZE_CHIPS-->', sizeChips)

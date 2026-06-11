@@ -10,6 +10,7 @@ export default async function AdminSettings({ searchParams }) {
     .from('app_settings')
     .select('key, value')
     .in('key', ['brandsurface_email', 'confirm_delay_minutes', 'help_box_active', 'help_box_html',
+      'hero_title_en', 'hero_title_da', 'hero_sub_en', 'hero_sub_da',
       'podio_app_id', 'podio_field_job_no', 'podio_field_job_name', 'podio_field_responsible', 'podio_employees'])
   const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
   const currentEmail = map.brandsurface_email || ''
@@ -74,6 +75,37 @@ export default async function AdminSettings({ searchParams }) {
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;br&gt;</code> {t.word_linebreak},{' '}
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;a href=""&gt;</code> {t.word_link}.
             </p>
+          </div>
+
+          <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <span className="a-label">{t.settings_hero_heading}</span>
+            <p style={{ fontSize: 12, color: '#7a7672', margin: 0, lineHeight: 1.5 }}>{t.settings_hero_help}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="hero-title-en">{t.settings_hero_title_en}</label>
+                <input id="hero-title-en" className="a-input" name="hero_title_en"
+                  defaultValue={map.hero_title_en || ''} placeholder="Can Artwork & Production - Brief" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="hero-title-da">{t.settings_hero_title_da}</label>
+                <input id="hero-title-da" className="a-input" name="hero_title_da"
+                  defaultValue={map.hero_title_da || ''} placeholder="Can Artwork & Production - Brief" />
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label className="a-label" htmlFor="hero-sub-en">{t.settings_hero_sub_en}</label>
+              <textarea id="hero-sub-en" className="a-input" name="hero_sub_en" rows={3}
+                defaultValue={map.hero_sub_en || ''}
+                placeholder="Choose brand, set the technical specs and fill in the details…"
+                style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label className="a-label" htmlFor="hero-sub-da">{t.settings_hero_sub_da}</label>
+              <textarea id="hero-sub-da" className="a-input" name="hero_sub_da" rows={3}
+                defaultValue={map.hero_sub_da || ''}
+                placeholder="Vælg mærke, angiv de tekniske specifikationer og udfyld detaljerne…"
+                style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, resize: 'vertical' }} />
+            </div>
           </div>
 
           <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>

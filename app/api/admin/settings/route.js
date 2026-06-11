@@ -15,6 +15,11 @@ export async function POST(req) {
   const helpActive = form.get('help_box_active') === '1' ? '1' : '0'
   const helpHtml = String(form.get('help_box_html') || '').trim()
 
+  const heroTitleEn = String(form.get('hero_title_en') || '').trim()
+  const heroTitleDa = String(form.get('hero_title_da') || '').trim()
+  const heroSubEn = String(form.get('hero_sub_en') || '').trim()
+  const heroSubDa = String(form.get('hero_sub_da') || '').trim()
+
   const podioAppId = String(form.get('podio_app_id') || '').replace(/\D/g, '')
   const podioFieldJobNo = String(form.get('podio_field_job_no') || '').trim()
   const podioFieldJobName = String(form.get('podio_field_job_name') || '').trim()
@@ -42,6 +47,10 @@ export async function POST(req) {
     .upsert([
       { key: 'help_box_active', value: helpActive, updated_at: now },
       { key: 'help_box_html', value: helpHtml, updated_at: now },
+      { key: 'hero_title_en', value: heroTitleEn, updated_at: now },
+      { key: 'hero_title_da', value: heroTitleDa, updated_at: now },
+      { key: 'hero_sub_en', value: heroSubEn, updated_at: now },
+      { key: 'hero_sub_da', value: heroSubDa, updated_at: now },
     ], { onConflict: 'key' })
 
   const { error: e3 } = await supabase
