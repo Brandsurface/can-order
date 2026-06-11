@@ -524,6 +524,10 @@ function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;
   const btn = document.getElementById('lang-' + LANG);
   if (btn) btn.classList.add('active');
 
+  document.getElementById('pill-1').addEventListener('click', () => {
+    if (document.getElementById('pill-1').classList.contains('done')) goBack();
+  });
+
   // Read server-rendered default selections into state
   state.region = document.querySelector('#region-seg .seg-btn.selected')?.dataset.region || '';
   state.labelType = document.querySelector('#labeltype-seg .seg-btn.selected')?.dataset.labeltype || '';

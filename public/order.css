@@ -80,7 +80,8 @@ header {
   0%,100% { box-shadow: 0 0 0 0 rgba(158,214,184,0); border-color: var(--mint-line); }
   50%      { box-shadow: 0 0 0 4px rgba(158,214,184,0.12); border-color: var(--mint); }
 }
-.step-pill.done { color: var(--mint); border-color: rgba(158,214,184,0.25); background: var(--mint-dim2); }
+.step-pill.done { color: var(--mint); border-color: rgba(158,214,184,0.25); background: var(--mint-dim2); cursor: pointer; }
+.step-pill.done:hover { border-color: var(--mint-line); background: var(--mint-dim); }
 .step-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .step-sep { color: var(--text-3); font-size: 12px; }
 
