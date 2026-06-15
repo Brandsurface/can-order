@@ -185,7 +185,14 @@ function toggleSmash() {
 
 // ── File uploads (direct to Supabase Storage via signed URL) ──
 const MAX_UPLOAD = 50 * 1024 * 1024;
+const UPLOAD_SLOTS = ['cutterguide', 'ingredients', 'additional', 'artwork'];
+// Open the file picker for a given slot so the files attach (and display) there.
+function pickFiles(slot) {
+  window.__uploadSlot = slot;
+  document.getElementById('file-input').click();
+}
 async function handleFiles(input) {
+  const slot = UPLOAD_SLOTS.indexOf(window.__uploadSlot) !== -1 ? window.__uploadSlot : 'artwork';
   const files = Array.from(input.files || []);
   input.value = '';
   for (const file of files) {
@@ -197,7 +204,7 @@ async function handleFiles(input) {
       if (!r.ok) throw new Error(d.error || 'Upload failed');
       const put = await fetch(d.uploadUrl, { method: 'PUT', headers: { 'content-type': file.type || 'application/octet-stream', 'x-upsert': 'true' }, body: file });
       if (!put.ok) throw new Error('Upload failed (' + put.status + ')');
-      uploadedFiles.push({ path: d.path, name: file.name, size: file.size });
+      uploadedFiles.push({ path: d.path, name: file.name, size: file.size, slot });
       renderUploads();
       showToast(file.name + ' ' + (T.upload_uploaded || 'uploaded'), 'success');
     } catch (e) {
@@ -207,11 +214,13 @@ async function handleFiles(input) {
 }
 function removeUpload(i) { uploadedFiles.splice(i, 1); renderUploads(); }
 function renderUploads() {
-  const c = document.getElementById('upload-list');
-  if (!c) return;
-  c.innerHTML = uploadedFiles.map((f, i) =>
-    `<div class="upload-item"><span>📎 ${escHtml(f.name)}</span><button type="button" class="upload-remove" onclick="removeUpload(${i})" aria-label="Remove">×</button></div>`
-  ).join('');
+  const buckets = {};
+  UPLOAD_SLOTS.forEach(s => { buckets[s] = ''; });
+  uploadedFiles.forEach((f, i) => {
+    const slot = buckets.hasOwnProperty(f.slot) ? f.slot : 'artwork';
+    buckets[slot] += `<div class="upload-item"><span>📎 ${escHtml(f.name)}</span><button type="button" class="upload-remove" onclick="removeUpload(${i})" aria-label="Remove">×</button></div>`;
+  });
+  UPLOAD_SLOTS.forEach(s => { const c = document.getElementById('upload-list-' + s); if (c) c.innerHTML = buckets[s]; });
 }
 
 // ── Validation ──
@@ -503,7 +512,7 @@ async function prefillFromOrder(orderId) {
 
     if (d.artwork_help && !state.artwork) toggleArtwork();
     if (d.smash_link && !state.smash) toggleSmash();
-    if (Array.isArray(d.uploads)) { uploadedFiles = d.uploads.slice(); renderUploads(); }
+    if (Array.isArray(d.uploads)) { uploadedFiles = d.uploads.map(f => ({ ...f, slot: f.slot || 'artwork' })); renderUploads(); }
 
     updatePantmaerke();
     showToast(T.toast_order_loaded || 'Order loaded — edit and resubmit', '');
