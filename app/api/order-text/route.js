@@ -7,6 +7,13 @@ function row(label, value) {
   return `${label}: ${String(value).trim()}\n`
 }
 
+// Combine the two energy values into one readable line (drops empties).
+function energyText(o) {
+  const kj = o.energy_kj != null && String(o.energy_kj).trim() !== '' ? String(o.energy_kj).trim() + ' kJ' : ''
+  const kcal = o.energy_kcal != null && String(o.energy_kcal).trim() !== '' ? String(o.energy_kcal).trim() + ' kcal' : ''
+  return [kj, kcal].filter(Boolean).join(' / ')
+}
+
 // Strip bold markers → clean plain text (decode the entities we stored).
 function stripBold(s) {
   return String(s == null ? '' : s)
@@ -67,6 +74,8 @@ export async function GET(request) {
       row('Region', o.region),
       row('Print Type', o.label_type),
       row('Finish', o.finish),
+      row('Energy / 100 ml', energyText(o)),
+      row('Number of units', o.units),
       row('Cutterguide', o.cutterguide),
     ]),
 
