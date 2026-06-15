@@ -22,10 +22,13 @@
     <div class="step-sep">›</div>
     <div class="step-pill" id="pill-3"><span class="step-dot"></span>{{step_sent}}</div>
   </div>
-  <div class="lang-switcher">
-    <button type="button" class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
-    <span class="lang-sep">|</span>
-    <button type="button" class="lang-btn" id="lang-da" onclick="setLang('da')">DA</button>
+  <div class="header-right">
+    <!--ACCOUNT_LINK-->
+    <div class="lang-switcher">
+      <button type="button" class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+      <span class="lang-sep">|</span>
+      <button type="button" class="lang-btn" id="lang-da" onclick="setLang('da')">DA</button>
+    </div>
   </div>
 </header>
 
@@ -346,6 +349,10 @@
     <button class="btn-secondary btn-grey" onclick="editSubmittedOrder()" style="width:100%;justify-content:center;">
       <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M11 7H3M7 3l-4 4 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       {{edit_order_btn}}
+    </button>
+    <button class="btn-secondary" id="dup-btn" onclick="duplicateOrder()" style="width:100%;justify-content:center;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      {{duplicate_btn}}
     </button>
     <button class="btn-primary" onclick="closePage()" style="width:100%;justify-content:center;">
       {{confirm_done_btn}}

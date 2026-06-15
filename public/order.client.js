@@ -452,6 +452,35 @@ function editSubmittedOrder() {
   if (window.__submittedOrderId) window.location.href = '/?edit=' + window.__submittedOrderId;
   else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
+
+// Duplicate the order just placed: re-submit the (still-populated) form as a
+// brand-new order. Forcing previous_id=null means no revision bump and the
+// original order is left untouched. Re-sends the order emails (expected).
+let __dupBusy = false;
+async function duplicateOrder() {
+  if (__dupBusy) return;
+  __dupBusy = true;
+  const btn = document.getElementById('dup-btn');
+  const orig = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = (T.toast_sending || 'Sending…'); }
+  const payload = collectPayload();
+  payload.previous_id = null;
+  try {
+    const res = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+    window.__submittedOrderId = data.orderId;
+    document.getElementById('conf-email').textContent = payload.email;
+    showToast(T.toast_duplicated || 'New order created from your last one.', 'success');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (err) {
+    showToast('Error: ' + err.message, 'error');
+  } finally {
+    __dupBusy = false;
+    if (btn) { btn.disabled = false; btn.innerHTML = orig; }
+  }
+}
+
 let __closeTimer = null;
 function closePage() {
   const overlay = document.getElementById('close-overlay');
@@ -475,12 +504,14 @@ function cancelAutoClose() {
 }
 
 // ── Prefill from ?edit= (when a customer edits via the email link) ──
-async function prefillFromOrder(orderId) {
+async function prefillFromOrder(orderId, asCopy = false) {
   try {
     const res = await fetch('/api/order-data?id=' + orderId);
     if (!res.ok) return;
     const d = await res.json();
-    window.__editId = orderId;
+    // Copy → keep __editId null so the submit creates a brand-new order
+    // (no revision bump, the source order is not cancelled).
+    window.__editId = asCopy ? null : orderId;
 
     if (d.butiksnavn) document.getElementById('butiksnavn').value = d.butiksnavn;
     if (d.navn) document.getElementById('bestiller_navn').value = d.navn;
@@ -530,7 +561,8 @@ async function prefillFromOrder(orderId) {
     if (Array.isArray(d.uploads)) { uploadedFiles = d.uploads.map(f => ({ ...f, slot: f.slot || 'artwork' })); renderUploads(); }
 
     updatePantmaerke();
-    showToast(T.toast_order_loaded || 'Order loaded — edit and resubmit', '');
+    showToast(asCopy ? (T.toast_order_copied || 'Order copied — review and submit as a new order.')
+                     : (T.toast_order_loaded || 'Order loaded — edit and resubmit'), '');
   } catch (err) {
     console.error('Prefill error:', err);
   }
@@ -570,6 +602,9 @@ function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;
   // Close modal on Escape
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('review-modal').classList.contains('open')) goBack(); });
 
-  const editId = new URLSearchParams(window.location.search).get('edit');
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get('edit');
+  const copyId = params.get('copy');
   if (editId) prefillFromOrder(editId);
+  else if (copyId) prefillFromOrder(copyId, true);
 })();
