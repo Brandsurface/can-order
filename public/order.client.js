@@ -213,12 +213,14 @@ async function handleFiles(input) {
   }
 }
 function removeUpload(i) { uploadedFiles.splice(i, 1); renderUploads(); }
+// Render each uploaded file as an icon card in the box belonging to the button it
+// was attached with (cutterguide / ingredients / additional / artwork).
 function renderUploads() {
   const buckets = {};
   UPLOAD_SLOTS.forEach(s => { buckets[s] = ''; });
   uploadedFiles.forEach((f, i) => {
     const slot = buckets.hasOwnProperty(f.slot) ? f.slot : 'artwork';
-    buckets[slot] += `<div class="upload-item"><span>📎 ${escHtml(f.name)}</span><button type="button" class="upload-remove" onclick="removeUpload(${i})" aria-label="Remove">×</button></div>`;
+    buckets[slot] += `<div class="upload-card">${fileVisual(f)}<div class="rv-file-info"><div class="rv-file-name">${escHtml(f.name)}</div>${f.size ? `<div class="rv-file-size">${fmtSize(f.size)}</div>` : ''}</div><button type="button" class="upload-remove" onclick="removeUpload(${i})" aria-label="Remove">×</button></div>`;
   });
   UPLOAD_SLOTS.forEach(s => { const c = document.getElementById('upload-list-' + s); if (c) c.innerHTML = buckets[s]; });
 }
@@ -387,7 +389,9 @@ function fmtSize(bytes) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
 }
 function makeBadge(ext, bg, color) { const el = document.createElement('div'); el.className = 'rv-file-badge'; el.style.background = bg; el.style.color = color; el.textContent = ext.slice(0, 4) || '?'; return el; }
-function fileCardHtml(f) {
+// Build the visual (image thumbnail or coloured extension badge) for a file.
+// Shared by the review modal cards and the per-section upload boxes.
+function fileVisual(f) {
   const ext = (f.name.split('.').pop() || '').toLowerCase();
   const isImg = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'tif', 'tiff'].includes(ext);
   const supaUrl = (window.__SUPABASE_URL || '').replace(/\/+$/, '');
@@ -401,10 +405,12 @@ function fileCardHtml(f) {
   const imgBadge = { bg: 'rgba(158,214,184,0.14)', color: '#9ed6b8' };
   const defBadge = { bg: 'var(--surface-3)', color: 'var(--text-3)' };
   const badge = isImg ? imgBadge : (BADGE[ext] || defBadge);
-  const visual = (isImg && pubUrl)
+  return (isImg && pubUrl)
     ? `<img class="rv-file-thumb" src="${pubUrl}" alt="${escHtml(f.name)}" onerror="this.replaceWith(makeBadge('${ext}','${badge.bg}','${badge.color}'))"/>`
     : `<div class="rv-file-badge" style="background:${badge.bg};color:${badge.color};">${escHtml(ext.slice(0, 4) || '?')}</div>`;
-  return `<div class="rv-file-card">${visual}<div class="rv-file-info"><div class="rv-file-name">${escHtml(f.name)}</div>${f.size ? `<div class="rv-file-size">${fmtSize(f.size)}</div>` : ''}</div></div>`;
+}
+function fileCardHtml(f) {
+  return `<div class="rv-file-card">${fileVisual(f)}<div class="rv-file-info"><div class="rv-file-name">${escHtml(f.name)}</div>${f.size ? `<div class="rv-file-size">${fmtSize(f.size)}</div>` : ''}</div></div>`;
 }
 
 // ── Submit ──
