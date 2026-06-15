@@ -302,13 +302,15 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 .artwork-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .artwork-card .toggle-pill { background: var(--surface-3); }
 .artwork-note { font-size: 13px; color: var(--text-2); line-height: 1.55; }
-.upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; background: var(--surface-3); border: 1px dashed var(--border-light); border-radius: var(--radius); color: var(--text-2); cursor: pointer; font-size: 13px; width: fit-content; transition: all 0.2s; }
+.upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; background: var(--surface-3); border: 1px dashed var(--border-light); border-radius: var(--radius); color: var(--text-2); cursor: pointer; font-family: inherit; font-size: 13px; width: fit-content; transition: all 0.2s; }
 .upload-btn:hover { border-color: var(--mint-line); color: var(--text); }
 .upload-btn svg { color: var(--mint); }
 .upload-list { display: flex; flex-direction: column; gap: 6px; }
 .upload-list:empty { display: none; }
 .upload-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text); }
-.upload-remove { background: none; border: none; color: var(--text-3); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
+.upload-card { display: flex; align-items: center; gap: 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; overflow: hidden; }
+.upload-card .rv-file-info { flex: 1; min-width: 0; }
+.upload-remove { background: none; border: none; color: var(--text-3); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; flex-shrink: 0; }
 .upload-remove:hover { color: var(--error); }
 
 /* ── Help box ── */
