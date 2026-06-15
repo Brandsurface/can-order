@@ -10,6 +10,12 @@ export default async function AdminSettings({ searchParams }) {
     .from('app_settings')
     .select('key, value')
     .in('key', ['brandsurface_email', 'confirm_delay_minutes', 'help_box_active', 'help_box_html',
+      'hero_title_en', 'hero_title_da', 'hero_sub_en', 'hero_sub_da',
+      'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
+      'op_step1_title_en', 'op_step1_title_da', 'op_step1_p_en', 'op_step1_p_da',
+      'op_step2_title_en', 'op_step2_title_da', 'op_step2_p_en', 'op_step2_p_da',
+      'op_step3_title_en', 'op_step3_title_da', 'op_step3_p_en', 'op_step3_p_da',
+      'op_step4_title_en', 'op_step4_title_da', 'op_step4_p_en', 'op_step4_p_da',
       'podio_app_id', 'podio_field_job_no', 'podio_field_job_name', 'podio_field_responsible', 'podio_employees'])
   const map = Object.fromEntries((data || []).map(r => [r.key, r.value]))
   const currentEmail = map.brandsurface_email || ''
@@ -74,6 +80,87 @@ export default async function AdminSettings({ searchParams }) {
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;br&gt;</code> {t.word_linebreak},{' '}
               <code style={{ fontFamily: "'DM Mono',monospace" }}>&lt;a href=""&gt;</code> {t.word_link}.
             </p>
+          </div>
+
+          <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <span className="a-label">{t.settings_hero_heading}</span>
+            <p style={{ fontSize: 12, color: '#7a7672', margin: 0, lineHeight: 1.5 }}>{t.settings_hero_help}</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="hero-title-en">{t.settings_hero_title_en}</label>
+                <input id="hero-title-en" className="a-input" name="hero_title_en"
+                  defaultValue={map.hero_title_en || ''} placeholder="Can Artwork & Production - Brief" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label" htmlFor="hero-title-da">{t.settings_hero_title_da}</label>
+                <input id="hero-title-da" className="a-input" name="hero_title_da"
+                  defaultValue={map.hero_title_da || ''} placeholder="Can Artwork & Production - Brief" />
+              </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label className="a-label" htmlFor="hero-sub-en">{t.settings_hero_sub_en}</label>
+              <textarea id="hero-sub-en" className="a-input" name="hero_sub_en" rows={3}
+                defaultValue={map.hero_sub_en || ''}
+                placeholder="Choose brand, set the technical specs and fill in the details…"
+                style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <label className="a-label" htmlFor="hero-sub-da">{t.settings_hero_sub_da}</label>
+              <textarea id="hero-sub-da" className="a-input" name="hero_sub_da" rows={3}
+                defaultValue={map.hero_sub_da || ''}
+                placeholder="Vælg mærke, angiv de tekniske specifikationer og udfyld detaljerne…"
+                style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, resize: 'vertical' }} />
+            </div>
+          </div>
+
+          <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <span className="a-label">{t.settings_op_heading}</span>
+            <p style={{ fontSize: 12, color: '#7a7672', margin: 0, lineHeight: 1.5 }}>{t.settings_op_help}</p>
+            {/* Label + subtitle */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label">{t.settings_op_label} — {t.settings_op_en}</label>
+                <input className="a-input" name="op_label_en" defaultValue={map.op_label_en || ''} placeholder="Order Process" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label">{t.settings_op_label} — {t.settings_op_da}</label>
+                <input className="a-input" name="op_label_da" defaultValue={map.op_label_da || ''} placeholder="Ordreproces" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label">{t.settings_op_sub} — {t.settings_op_en}</label>
+                <input className="a-input" name="op_sub_en" defaultValue={map.op_sub_en || ''} placeholder="Manage your can production workflow" />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <label className="a-label">{t.settings_op_sub} — {t.settings_op_da}</label>
+                <input className="a-input" name="op_sub_da" defaultValue={map.op_sub_da || ''} placeholder="Styr dit dåse-produktionsflow" />
+              </div>
+            </div>
+            {/* Steps 1–4 */}
+            {[1, 2, 3, 4].map(n => (
+              <div key={n} style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingTop: 6, borderTop: '1px solid #2a2a2a' }}>
+                <span style={{ fontSize: 12, color: '#7a7672', fontFamily: "'DM Mono',monospace" }}>{t.settings_op_step} {n}</span>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label className="a-label">{t.settings_op_title} — {t.settings_op_en}</label>
+                    <input className="a-input" name={`op_step${n}_title_en`} defaultValue={map[`op_step${n}_title_en`] || ''} placeholder={['Order Details','Brand Selection & Technical','Artwork','Review & Submit'][n-1]} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label className="a-label">{t.settings_op_title} — {t.settings_op_da}</label>
+                    <input className="a-input" name={`op_step${n}_title_da`} defaultValue={map[`op_step${n}_title_da`] || ''} placeholder={['Ordredetaljer','Mærkevalg & Teknisk','Artwork','Gennemse & Indsend'][n-1]} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label className="a-label">{t.settings_op_desc} — {t.settings_op_en}</label>
+                    <textarea className="a-input" name={`op_step${n}_p_en`} rows={2} defaultValue={map[`op_step${n}_p_en`] || ''}
+                      style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, resize: 'vertical' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label className="a-label">{t.settings_op_desc} — {t.settings_op_da}</label>
+                    <textarea className="a-input" name={`op_step${n}_p_da`} rows={2} defaultValue={map[`op_step${n}_p_da`] || ''}
+                      style={{ fontFamily: "'DM Mono',monospace", fontSize: 12, resize: 'vertical' }} />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div style={{ borderTop: '1px solid #2e2e2e', paddingTop: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>

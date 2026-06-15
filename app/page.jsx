@@ -28,7 +28,15 @@ async function loadData(t) {
   try {
     const [{ data: brandRows }, { data: settingRows }] = await Promise.all([
       supabase.from('brands').select('name, variants, active, sort').eq('active', true).order('sort', { ascending: true }),
-      supabase.from('app_settings').select('key, value').in('key', ['sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html']),
+      supabase.from('app_settings').select('key, value').in('key', [
+        'sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html',
+        'hero_title_en', 'hero_title_da', 'hero_sub_en', 'hero_sub_da',
+        'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
+        'op_step1_title_en', 'op_step1_title_da', 'op_step1_p_en', 'op_step1_p_da',
+        'op_step2_title_en', 'op_step2_title_da', 'op_step2_p_en', 'op_step2_p_da',
+        'op_step3_title_en', 'op_step3_title_da', 'op_step3_p_en', 'op_step3_p_da',
+        'op_step4_title_en', 'op_step4_title_da', 'op_step4_p_en', 'op_step4_p_da',
+      ]),
     ])
     brands = brandRows || []
     for (const r of settingRows || []) settings[r.key] = r.value
@@ -71,7 +79,22 @@ async function loadData(t) {
     `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};` +
     `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};`
 
-  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings) }
+  const opKeys = [
+    'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
+    'op_step1_title_en', 'op_step1_title_da', 'op_step1_p_en', 'op_step1_p_da',
+    'op_step2_title_en', 'op_step2_title_da', 'op_step2_p_en', 'op_step2_p_da',
+    'op_step3_title_en', 'op_step3_title_da', 'op_step3_p_en', 'op_step3_p_da',
+    'op_step4_title_en', 'op_step4_title_da', 'op_step4_p_en', 'op_step4_p_da',
+  ]
+  const heroOverrides = {
+    hero_title_en: settings.hero_title_en || '',
+    hero_title_da: settings.hero_title_da || '',
+    hero_sub_en: settings.hero_sub_en || '',
+    hero_sub_da: settings.hero_sub_da || '',
+  }
+  for (const k of opKeys) heroOverrides[k] = settings[k] || ''
+
+  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings), heroOverrides }
 }
 
 function buildHelpBox(settings) {
@@ -83,12 +106,34 @@ function buildHelpBox(settings) {
 
 export default async function Home() {
   const lang = (await cookies()).get('lang')?.value === 'da' ? 'da' : 'en'
-  const t = translations[lang]
+  const t = { ...translations[lang] }
 
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox } = await loadData(t)
+  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox, heroOverrides } = await loadData(t)
+
+  if (heroOverrides.hero_title_en && lang === 'en') t.hero_title = heroOverrides.hero_title_en
+  if (heroOverrides.hero_title_da && lang === 'da') t.hero_title = heroOverrides.hero_title_da
+  if (heroOverrides.hero_sub_en && lang === 'en') t.hero_sub = heroOverrides.hero_sub_en
+  if (heroOverrides.hero_sub_da && lang === 'da') t.hero_sub = heroOverrides.hero_sub_da
+
+  const opMap = {
+    order_process_label: [`op_label_en`, `op_label_da`],
+    order_process_sub: [`op_sub_en`, `op_sub_da`],
+    oh_step1_title: [`op_step1_title_en`, `op_step1_title_da`],
+    oh_step1_p: [`op_step1_p_en`, `op_step1_p_da`],
+    oh_step2_title: [`op_step2_title_en`, `op_step2_title_da`],
+    oh_step2_p: [`op_step2_p_en`, `op_step2_p_da`],
+    oh_step3_title: [`op_step3_title_en`, `op_step3_title_da`],
+    oh_step3_p: [`op_step3_p_en`, `op_step3_p_da`],
+    oh_step4_title: [`op_step4_title_en`, `op_step4_title_da`],
+    oh_step4_p: [`op_step4_p_en`, `op_step4_p_da`],
+  }
+  for (const [tKey, [enKey, daKey]] of Object.entries(opMap)) {
+    const val = lang === 'en' ? heroOverrides[enKey] : heroOverrides[daKey]
+    if (val) t[tKey] = val
+  }
 
   html = html.replace('<!--BRAND_TILES-->', brandTiles)
   html = html.replace('<!--SIZE_CHIPS-->', sizeChips)
