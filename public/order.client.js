@@ -296,6 +296,9 @@ function collectPayload() {
     label_type:    state.labelType,
     cutterguide:   g('cutterguide'),
     finish:        g('finish'),
+    energy_kj:     g('energy_kj'),
+    energy_kcal:   g('energy_kcal'),
+    units:         g('units'),
     material_old:  g('material_old'),
     material_new:  g('material_new'),
     ean:           g('ean'),
@@ -322,6 +325,7 @@ function goToReview() {
   if (!validate()) return;
   const p = collectPayload();
   const exempt = p.region && p.region.toLowerCase() === String(PANT_EXEMPT).toLowerCase();
+  const energyStr = [p.energy_kj && (p.energy_kj + ' kJ'), p.energy_kcal && (p.energy_kcal + ' kcal')].filter(Boolean).join(' / ');
 
   const orderer = [
     rvRow(T.f_campaign || 'Campaign', p.butiksnavn),
@@ -337,6 +341,8 @@ function goToReview() {
     rvRow(T.f_region || 'Region', p.region),
     rvRow(T.f_label_type || 'Label type', p.label_type),
     rvRow(T.f_finish || 'Finish', p.finish),
+    rvRow(T.f_energy || 'Energy / 100 ml', energyStr),
+    rvRow(T.f_units || 'Number of units', p.units),
     rvRow(T.f_cutterguide || 'Cutterguide', p.cutterguide, { full: true }),
   ].join('');
 
@@ -508,6 +514,9 @@ async function prefillFromOrder(orderId) {
     if (d.finish) populateFinish(state.labelType, d.finish);
 
     if (d.cutterguide) document.getElementById('cutterguide').value = d.cutterguide;
+    if (d.energy_kj) document.getElementById('energy_kj').value = d.energy_kj;
+    if (d.energy_kcal) document.getElementById('energy_kcal').value = d.energy_kcal;
+    if (d.units) document.getElementById('units').value = d.units;
     if (d.material_old) document.getElementById('material_old').value = d.material_old;
     if (d.material_new) document.getElementById('material_new').value = d.material_new;
     if (d.ean) document.getElementById('ean').value = d.ean;

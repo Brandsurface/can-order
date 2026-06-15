@@ -27,6 +27,9 @@ create table if not exists orders (
   label_type    text,                   -- 'Label' | 'Tryk'
   cutterguide   text,
   finish        text,                   -- 'Mat' | 'Gloss' | 'To be confirmed'
+  energy_kj     text,                   -- energy per 100 ml (kJ)
+  energy_kcal   text,                   -- energy per 100 ml (kcal)
+  units         text,                   -- number of units (genstande)
   material_old  text,
   material_new  text,
   ean           text,
@@ -61,6 +64,9 @@ alter table orders add column if not exists region       text;
 alter table orders add column if not exists label_type   text;
 alter table orders add column if not exists cutterguide  text;
 alter table orders add column if not exists finish       text;
+alter table orders add column if not exists energy_kj     text;
+alter table orders add column if not exists energy_kcal   text;
+alter table orders add column if not exists units         text;
 alter table orders add column if not exists material_old text;
 alter table orders add column if not exists material_new text;
 alter table orders add column if not exists ean          text;
