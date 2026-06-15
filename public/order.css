@@ -306,6 +306,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 .upload-btn:hover { border-color: var(--mint-line); color: var(--text); }
 .upload-btn svg { color: var(--mint); }
 .upload-list { display: flex; flex-direction: column; gap: 6px; }
+.upload-list:empty { display: none; }
 .upload-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--surface-3); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; color: var(--text); }
 .upload-remove { background: none; border: none; color: var(--text-3); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; }
 .upload-remove:hover { color: var(--error); }
