@@ -350,7 +350,7 @@ function goToReview() {
     rvRow(T.f_material_old || 'Material no. (old)', p.material_old),
     rvRow(T.f_material_new || 'Material no. (new)', p.material_new),
     rvRow(T.f_ean || 'EAN', p.ean),
-    exempt ? '' : rvRow(T.f_pantmaerke || 'Pantmærke', p.pantmaerke ? (T.rv_yes || 'Yes') : (T.rv_no || 'No')),
+    exempt ? '' : rvRow(T.f_pantmaerke || 'Deposit mark', p.pantmaerke ? (T.rv_yes || 'Yes') : (T.rv_no || 'No')),
     p.ingredients ? rvRow(T.f_ingredients || 'Ingredients', richToSafeHtml(p.ingredients), { full: true, mod: 'pre', html: true }) : '',
     (p.ingredients && extractBold(p.ingredients).length) ? rvRow(T.f_ingredients_marked || 'Marked in bold', extractBold(p.ingredients).join(', '), { full: true }) : '',
   ].join('');

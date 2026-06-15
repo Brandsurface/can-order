@@ -83,7 +83,7 @@ export async function GET(request) {
       row('Material No. (old)', o.material_old),
       row('Material No. (new)', o.material_new),
       row('EAN', o.ean),
-      String(o.region || '').toLowerCase() !== 'border' ? row('Pantmærke', o.pantmaerke ? 'Yes' : 'No') : '',
+      String(o.region || '').toLowerCase() !== 'border' ? row('Deposit mark', o.pantmaerke ? 'Yes' : 'No') : '',
       row('Ingredients / Nutrition', stripBold(o.ingredients)),
       boldList(o.ingredients).length ? row('Marked in bold', boldList(o.ingredients).join(', ')) : '',
     ]),
