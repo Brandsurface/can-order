@@ -172,12 +172,12 @@ function populatePaper(selectVal) {
     opts.map(o => `<option value="${escHtml(o)}"${o === selectVal ? ' selected' : ''}>${escHtml(o)}</option>`).join('');
   sel.classList.remove('error');
 }
-// Show the paper field for "Label" only; reset it (and clear errors) when hidden.
+// Show/hide the paper column only; Finish stays visible in the same row regardless.
 function updatePaperVisibility() {
-  const row = document.getElementById('paper-row');
-  if (!row) return;
+  const paperField = document.getElementById('paper-field');
+  if (!paperField) return;
   const show = state.labelType === 'Label';
-  row.hidden = !show;
+  paperField.hidden = !show;
   if (!show) {
     const sel = document.getElementById('paper');
     if (sel) { sel.value = ''; sel.classList.remove('error'); }
@@ -290,10 +290,10 @@ function validate() {
   document.getElementById('err-finish')?.classList.toggle('show', finishMissing);
   if (finishMissing) ok = false;
 
-  // Paper required when the print type is Label (the field is hidden otherwise)
-  const paperRow = document.getElementById('paper-row');
+  // Paper required when the print type is Label (the field is hidden for Can)
+  const paperField = document.getElementById('paper-field');
   const paperSel = document.getElementById('paper');
-  if (paperRow && !paperRow.hidden) {
+  if (paperField && !paperField.hidden) {
     const paperMissing = !paperSel || !paperSel.value;
     paperSel?.classList.toggle('error', paperMissing);
     document.getElementById('err-paper')?.classList.toggle('show', paperMissing);

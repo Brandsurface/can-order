@@ -176,6 +176,7 @@ header {
 
 /* ── Fields ── */
 .field { display: flex; flex-direction: column; gap: 6px; }
+.field[hidden] { display: none; }
 .field label {
   font-family: 'IBM Plex Mono', monospace; font-size: 11px; font-weight: 500;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2);
