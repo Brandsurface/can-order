@@ -2,8 +2,8 @@ import { cookies } from 'next/headers'
 
 const T = {
   en: {
-    ok_h: 'Order approved!',
-    ok_b: 'Thank you — your order has been confirmed and forwarded to Brand Surface. We will contact you shortly with next steps.',
+    ok_h: 'This tab can be closed.',
+    ok_b: 'Your order is being submitted to Brand Surface. You will receive an order confirmation shortly.',
     already_h: 'Already approved',
     already_b: 'This order has already been approved and forwarded to Brand Surface.',
     err_h: 'Something went wrong',
@@ -11,8 +11,8 @@ const T = {
     back: '← Place new order',
   },
   da: {
-    ok_h: 'Ordre godkendt!',
-    ok_b: 'Tak — din ordre er bekræftet og videresendt til Brand Surface. Vi kontakter dig snarest med de næste skridt.',
+    ok_h: 'Denne fane kan lukkes.',
+    ok_b: 'Din ordre sendes til Brand Surface. Du modtager en ordrebekræftelse snarest.',
     already_h: 'Allerede godkendt',
     already_b: 'Denne ordre er allerede godkendt og videresendt til Brand Surface.',
     err_h: 'Noget gik galt',
