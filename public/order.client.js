@@ -211,6 +211,18 @@ function toggleSmash() {
 // ── File uploads (direct to Supabase Storage via signed URL) ──
 const MAX_UPLOAD = 50 * 1024 * 1024;
 const UPLOAD_SLOTS = ['cutterguide', 'ingredients', 'additional', 'artwork'];
+// Translation keys + fallbacks for each upload category header (review + flow).
+const UPLOAD_SLOT_LABEL_KEY = { cutterguide: 'upload_cat_cutterguide', ingredients: 'upload_cat_ingredients', additional: 'upload_cat_additional', artwork: 'upload_cat_artwork' };
+const UPLOAD_SLOT_FALLBACK = { cutterguide: 'Cutterguide', ingredients: 'Ingredients & nutrition', additional: 'Additional information', artwork: 'Artwork' };
+// Group uploaded files under their slot, keeping the slot display order.
+function groupUploadsBySlot(files) {
+  return UPLOAD_SLOTS
+    .map(slot => ({
+      label: T[UPLOAD_SLOT_LABEL_KEY[slot]] || UPLOAD_SLOT_FALLBACK[slot],
+      files: files.filter(f => (UPLOAD_SLOTS.indexOf(f.slot) !== -1 ? f.slot : 'artwork') === slot),
+    }))
+    .filter(g => g.files.length);
+}
 // Open the file picker for a given slot so the files attach (and display) there.
 function pickFiles(slot) {
   window.__uploadSlot = slot;
@@ -411,7 +423,10 @@ function goToReview() {
   if (artwork) html += `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_artwork_section || 'Artwork')}</div><div class="rv-grid">${artwork}</div></div>`;
 
   if (uploadedFiles.length) {
-    html += `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_files || 'Attached files')}</div><div class="rv-files-grid">${uploadedFiles.map(fileCardHtml).join('')}</div></div>`;
+    const groupsHtml = groupUploadsBySlot(uploadedFiles).map(g =>
+      `<div class="rv-files-group"><div class="rv-files-cat">${escHtml(g.label)}</div><div class="rv-files-grid">${g.files.map(fileCardHtml).join('')}</div></div>`
+    ).join('');
+    html += `<div class="rv-section"><div class="rv-section-label">${escHtml(T.review_files || 'Attached files')}</div>${groupsHtml}</div>`;
   }
 
   document.getElementById('rv-body').innerHTML = html;
