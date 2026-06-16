@@ -13,6 +13,15 @@ function canSummary(o) {
 
 // Customer-facing status badge (mirrors the admin logic, customer palette).
 function statusBadge(o, t) {
+  if (o.pm_status && o.pm_status !== 'taken_further') {
+    const pmBadges = {
+      not_handled:    { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', text: t.cust_pm_not_handled },
+      quote_approval: { bg: 'rgba(249,115,22,0.12)',  color: '#f97316', text: t.cust_pm_quote_approval },
+      awaiting_info:  { bg: 'rgba(248,113,113,0.12)', color: '#f87171', text: t.cust_pm_awaiting_info },
+      completed:      { bg: 'rgba(158,214,184,0.14)', color: '#9ed6b8', text: t.cust_pm_completed },
+    }
+    if (pmBadges[o.pm_status]) return pmBadges[o.pm_status]
+  }
   if (o.status === 'confirmed') return { bg: 'rgba(158,214,184,0.14)', color: '#9ed6b8', text: t.cust_badge_sent }
   if (o.status === 'cancelled') return { bg: 'rgba(248,113,113,0.10)', color: '#f87171', text: t.cust_badge_edited }
   if (o.send_after) {
@@ -32,7 +41,7 @@ export default async function MyOrders() {
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('id, created_at, status, butiksnavn, brand, variant, size, region, revision, send_after')
+    .select('id, created_at, status, butiksnavn, brand, variant, size, region, revision, send_after, pm_status')
     .ilike('email', me.email)
     .order('created_at', { ascending: false })
     .limit(200)
