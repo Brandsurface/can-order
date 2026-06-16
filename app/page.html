@@ -153,12 +153,19 @@
         </div>
 
         <div class="row-2" id="paper-row" style="margin-top:18px;">
-          <div class="field">
+          <div class="field" id="paper-field">
             <label>{{paper_label}} <span class="req">*</span></label>
             <div class="select-wrap">
               <select id="paper"><!--PAPER_OPTIONS--></select>
             </div>
             <div class="field-error" id="err-paper">{{paper_err}}</div>
+          </div>
+          <div class="field">
+            <label>{{finish_label}} <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="finish"><!--FINISH_OPTIONS--></select>
+            </div>
+            <div class="field-error" id="err-finish">{{finish_err}}</div>
           </div>
         </div>
 
@@ -172,13 +179,6 @@
               </button>
             </div>
             <div class="upload-list" id="upload-list-cutterguide"></div>
-          </div>
-          <div class="field">
-            <label>{{finish_label}} <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="finish"><!--FINISH_OPTIONS--></select>
-            </div>
-            <div class="field-error" id="err-finish">{{finish_err}}</div>
           </div>
         </div>
 
