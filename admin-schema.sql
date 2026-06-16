@@ -124,8 +124,35 @@ insert into storage.buckets (id, name, public, file_size_limit)
 values ('order-uploads', 'order-uploads', false, 52428800)
 on conflict (id) do update set public = false, file_size_limit = 52428800;
 
+-- ── Customer accounts (self-signup, email-verified, cookie session) ──
+-- Lets an orderer log in to see their orders, copy old ones and track status.
+-- Emails are stored lowercased at the application layer.
+create table if not exists customers (
+  id             uuid primary key default gen_random_uuid(),
+  email          text unique not null,
+  password_hash  text,                          -- scrypt saltHex:hashHex (lib/admin-auth format)
+  email_verified boolean not null default false,
+  verify_code    text,                          -- 6-digit code, null after use
+  verify_expires timestamptz,                   -- code time-to-live
+  verify_sent_at timestamptz,                   -- last send (resend throttle)
+  verify_attempts int not null default 0,       -- wrong-code counter (lockout)
+  created_at     timestamptz default now()
+);
+
+-- Backfill columns for idempotent re-runs
+alter table customers add column if not exists password_hash   text;
+alter table customers add column if not exists email_verified  boolean not null default false;
+alter table customers add column if not exists verify_code     text;
+alter table customers add column if not exists verify_expires  timestamptz;
+alter table customers add column if not exists verify_sent_at  timestamptz;
+alter table customers add column if not exists verify_attempts int not null default 0;
+
+-- Case-insensitive uniqueness guard (Foo@x.com == foo@x.com)
+create unique index if not exists customers_email_lower_idx on customers (lower(email));
+
 -- No public access — all access goes through Next.js server routes
 -- using the service_role key (which bypasses RLS).
 alter table admin_users  enable row level security;
 alter table app_settings enable row level security;
 alter table brands       enable row level security;
+alter table customers    enable row level security;

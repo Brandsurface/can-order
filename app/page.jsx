@@ -3,6 +3,7 @@ import path from 'path'
 import { cookies } from 'next/headers'
 import { supabase } from '@/lib/supabase'
 import { translations } from '@/lib/translations'
+import { getCustomerUser } from '@/lib/customer-auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -134,6 +135,12 @@ export default async function Home() {
     const val = lang === 'en' ? heroOverrides[enKey] : heroOverrides[daKey]
     if (val) t[tKey] = val
   }
+
+  const me = await getCustomerUser()
+  const accountLink = me
+    ? `<a class="account-link" href="/mine-ordrer">${esc(t.nav_my_orders)}</a>`
+    : `<a class="account-link" href="/login">${esc(t.nav_login)}</a>`
+  html = html.replace('<!--ACCOUNT_LINK-->', accountLink)
 
   html = html.replace('<!--BRAND_TILES-->', brandTiles)
   html = html.replace('<!--SIZE_CHIPS-->', sizeChips)
