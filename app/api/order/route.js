@@ -128,13 +128,13 @@ export async function POST(request) {
     // 1) Send order confirmation to the customer immediately
     try {
       const { subject, html } = buildCustomerConfirmEmail({ order, baseUrl, delayMinutes })
-      await sendEmail({ to: order.email, senderName: 'Brand Surface', subject, html })
+      await sendEmail({ to: order.email, senderName: 'Brandsurface', subject, html })
     } catch (mailError) {
       console.error('Brevo fejl (kundebekræftelse):', mailError?.message)
       return Response.json({ success: true, orderId: order.id, warning: 'Ordre gemt, men bekræftelsesmail kunne ikke sendes' })
     }
 
-    // 2) Forward to Brand Surface — immediately when no delay, otherwise scheduled
+    // 2) Forward to Brandsurface — immediately when no delay, otherwise scheduled
     if (recipient) {
       if (delayMinutes <= 0) {
         await dispatchToBrandsurface(order)
@@ -147,7 +147,7 @@ export async function POST(request) {
           await sendEmail({
             to: recipient,
             replyTo: order.email,
-            senderName: 'Brand Surface Ordre',
+            senderName: 'Brandsurface Ordre',
             subject: bs.subject,
             html: bs.html,
             scheduledAt: sendAfter,
@@ -158,11 +158,11 @@ export async function POST(request) {
             .update({ send_after: sendAfter.toISOString(), scheduled_email_id: batchId })
             .eq('id', order.id)
         } catch (e) {
-          console.error('Planlægning af Brand Surface-mail fejlede:', e?.message)
+          console.error('Planlægning af Brandsurface-mail fejlede:', e?.message)
         }
       }
     } else {
-      console.warn('Ingen Brand Surface-modtager konfigureret — ingen ordremail planlagt')
+      console.warn('Ingen Brandsurface-modtager konfigureret — ingen ordremail planlagt')
     }
 
     return Response.json({ success: true, orderId: order.id, delayMinutes })

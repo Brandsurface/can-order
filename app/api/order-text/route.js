@@ -110,7 +110,7 @@ export async function GET(request) {
       ? section('FILES', groupUploadsBySlot(o.uploads).flatMap(g => [`${g.label}:\n`, ...g.files.map(f => `  - ${f.name}\n`)]))
       : '',
 
-    `\n${'─'.repeat(32)}\nBrand Surface | brandsurface.dk\n`,
+    `\n${'─'.repeat(32)}\nBrandsurface | brandsurface.dk\n`,
   ]
 
   const text = lines.filter(Boolean).join('\n')
