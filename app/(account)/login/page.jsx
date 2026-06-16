@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers'
 import { translations } from '@/lib/translations'
 import AuthShell, { Banner, Field, inputStyle, btnPrimaryStyle, linkStyle } from '../AuthShell'
+import PasswordInput from '../PasswordInput'
 
 export const dynamic = 'force-dynamic'
 
@@ -32,7 +33,7 @@ export default async function CustomerLogin({ searchParams }) {
           <input name="email" type="email" required autoComplete="username" placeholder="you@company.com" style={inputStyle} />
         </Field>
         <Field label={t.cust_login_password}>
-          <input name="password" type="password" required autoComplete="current-password" placeholder="••••••••" style={inputStyle} />
+          <PasswordInput name="password" autoComplete="current-password" placeholder="••••••••" />
         </Field>
         <button type="submit" style={btnPrimaryStyle}>{t.cust_login_btn}</button>
       </form>
