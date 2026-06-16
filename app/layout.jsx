@@ -1,8 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 
 export const metadata = {
-  title: 'Can Artwork & Production — Brand Surface',
-  description: 'Brief and order can artwork & production from Brand Surface',
+  title: 'Can Artwork & Production — Brandsurface',
+  description: 'Brief and order can artwork & production from Brandsurface',
 }
 
 export default function RootLayout({ children }) {

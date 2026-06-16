@@ -24,12 +24,12 @@ create table if not exists app_settings (
   updated_at timestamptz default now()
 );
 
--- Recipient for the "new approved order" email to Brand Surface.
+-- Recipient for the "new approved order" email to Brandsurface.
 -- Empty value falls back to the BRANDSURFACE_EMAIL env var.
 insert into app_settings (key, value) values ('brandsurface_email', '')
   on conflict (key) do nothing;
 
--- Minutes to wait after submission before forwarding to Brand Surface
+-- Minutes to wait after submission before forwarding to Brandsurface
 -- (grace period for the customer to edit). Set to 0 to send immediately.
 insert into app_settings (key, value) values ('confirm_delay_minutes', '10')
   on conflict (key) do nothing;

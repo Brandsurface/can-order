@@ -1,4 +1,4 @@
-# Brand Surface — Can Artwork & Production
+# Brandsurface — Can Artwork & Production
 
 Order/brief flow for can artwork & production, with database, transactional
 mail (with a grace-period delay), two languages and a flexible admin.
@@ -30,10 +30,10 @@ Customer fills in the form
   ↓ POST /api/order
 Order saved in Supabase (status: pending)
   ↓ Brevo → customer confirmation (with Edit link)
-  ↓ Brevo → Brand Surface order email, SCHEDULED after N minutes (admin-configurable grace period)
+  ↓ Brevo → Brandsurface order email, SCHEDULED after N minutes (admin-configurable grace period)
   │
   ├── Edit link → /?edit=<id> → form re-loads with all data → resubmit (revision +1, timer resets)
-  └── No action → after the delay the order auto-forwards to Brand Surface
+  └── No action → after the delay the order auto-forwards to Brandsurface
 ```
 
 The customer email also contains explicit Approve via the admin "Approve now"
@@ -47,7 +47,7 @@ Cookie-session login (each user sets their password on first login).
 - **Catalogue** — manage **brands & variants** and the option lists
   (**sizes, regions** + the region that hides Pantmærke). Print type
   (Label/Can) and the per-print-type finish lists are fixed in code.
-- **Settings** — Brand Surface recipient email, forward delay, sidebar help box
+- **Settings** — Brandsurface recipient email, forward delay, sidebar help box
 - **Users** (master only) — add/reset/delete admins
 
 The whole order form is data-driven from the Catalogue + Settings, so brands,
@@ -77,7 +77,7 @@ Copy `.env.example` → `.env.local` (local) or add them in Vercel:
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Settings → API (service_role) |
 | `BREVO_API_KEY` | Brevo → SMTP & API → API Keys (v3 key) |
 | `SENDER_EMAIL` | Verified Brevo sender, e.g. `ordre@brandsurface.dk` |
-| `SENDER_NAME` | Display name, e.g. `Brand Surface` (optional) |
+| `SENDER_NAME` | Display name, e.g. `Brandsurface` (optional) |
 | `BRANDSURFACE_EMAIL` | Fallback recipient (also editable in admin) |
 | `ADMIN_SESSION_SECRET` | Long random string (`openssl rand -hex 32`) |
 | `NEXT_PUBLIC_BASE_URL` | Your deployed URL (used in email links) |

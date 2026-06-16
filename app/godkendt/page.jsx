@@ -2,21 +2,21 @@ import { cookies } from 'next/headers'
 
 const T = {
   en: {
-    ok_h: 'Order approved!',
-    ok_b: 'Thank you — your order has been confirmed and forwarded to Brand Surface. We will contact you shortly with next steps.',
+    ok_h: 'This tab can be closed.',
+    ok_b: 'Your order is being submitted to Brandsurface. You will receive an order confirmation shortly.',
     already_h: 'Already approved',
-    already_b: 'This order has already been approved and forwarded to Brand Surface.',
+    already_b: 'This order has already been approved and forwarded to Brandsurface.',
     err_h: 'Something went wrong',
-    err_b: 'We could not process your approval. Please try again or contact Brand Surface directly.',
+    err_b: 'We could not process your approval. Please try again or contact Brandsurface directly.',
     back: '← Place new order',
   },
   da: {
-    ok_h: 'Ordre godkendt!',
-    ok_b: 'Tak — din ordre er bekræftet og videresendt til Brand Surface. Vi kontakter dig snarest med de næste skridt.',
+    ok_h: 'Denne fane kan lukkes.',
+    ok_b: 'Din ordre sendes til Brandsurface. Du modtager en ordrebekræftelse snarest.',
     already_h: 'Allerede godkendt',
-    already_b: 'Denne ordre er allerede godkendt og videresendt til Brand Surface.',
+    already_b: 'Denne ordre er allerede godkendt og videresendt til Brandsurface.',
     err_h: 'Noget gik galt',
-    err_b: 'Vi kunne ikke behandle din godkendelse. Prøv igen eller kontakt Brand Surface direkte.',
+    err_b: 'Vi kunne ikke behandle din godkendelse. Prøv igen eller kontakt Brandsurface direkte.',
     back: '← Opret ny ordre',
   },
 }

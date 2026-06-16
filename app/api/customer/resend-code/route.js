@@ -39,7 +39,7 @@ export async function POST(req) {
           verify_attempts: 0,
         }).eq('id', row.id)
         const { subject, html } = buildVerifyEmail({ code, email, lang })
-        await sendEmail({ to: email, senderName: 'Brand Surface', subject, html })
+        await sendEmail({ to: email, senderName: 'Brandsurface', subject, html })
       }
     }
   } catch (e) {

@@ -39,7 +39,7 @@ create table if not exists orders (
 
   -- Artwork
   andet         text,                   -- brief / notes
-  artwork_help  boolean default false,  -- customer wants Brand Surface to create artwork
+  artwork_help  boolean default false,  -- customer wants Brandsurface to create artwork
   smash_link    boolean default false,  -- customer wants a Smash upload link
   uploads       jsonb not null default '[]',  -- [{path,name,size}] in the order-uploads bucket
 
@@ -47,7 +47,7 @@ create table if not exists orders (
   language      text default 'en' check (language in ('en','da')),
   revision      integer default 0,
   pm_status     text,                   -- internal project-management status
-  send_after    timestamptz,           -- when the Brand Surface mail is scheduled
+  send_after    timestamptz,           -- when the Brandsurface mail is scheduled
   scheduled_email_id text,              -- Brevo batchId of the scheduled mail (for cancel)
 
   -- Podio job (created from Admin)

@@ -17,7 +17,7 @@ function redirect(req, path) {
 
 async function sendCode(email, code, lang) {
   const { subject, html } = buildVerifyEmail({ code, email, lang })
-  await sendEmail({ to: email, senderName: 'Brand Surface', subject, html })
+  await sendEmail({ to: email, senderName: 'Brandsurface', subject, html })
 }
 
 export async function POST(req) {
