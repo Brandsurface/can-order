@@ -453,32 +453,13 @@ function editSubmittedOrder() {
   else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
 
-// Duplicate the order just placed: re-submit the (still-populated) form as a
-// brand-new order. Forcing previous_id=null means no revision bump and the
-// original order is left untouched. Re-sends the order emails (expected).
-let __dupBusy = false;
-async function duplicateOrder() {
-  if (__dupBusy) return;
-  __dupBusy = true;
-  const btn = document.getElementById('dup-btn');
-  const orig = btn ? btn.innerHTML : '';
-  if (btn) { btn.disabled = true; btn.innerHTML = (T.toast_sending || 'Sending…'); }
-  const payload = collectPayload();
-  payload.previous_id = null;
-  try {
-    const res = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Server error');
-    window.__submittedOrderId = data.orderId;
-    document.getElementById('conf-email').textContent = payload.email;
-    showToast(T.toast_duplicated || 'New order created from your last one.', 'success');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  } catch (err) {
-    showToast('Error: ' + err.message, 'error');
-  } finally {
-    __dupBusy = false;
-    if (btn) { btn.disabled = false; btn.innerHTML = orig; }
-  }
+// Duplicate the order just placed: open the order form pre-filled as a
+// brand-new order (nothing is sent yet) so the customer can adjust the details
+// and then submit it as a new order. Uses the ?copy= flow → previous_id stays
+// null, so it never bumps a revision or cancels the original.
+function duplicateOrder() {
+  if (window.__submittedOrderId) window.location.href = '/?copy=' + window.__submittedOrderId;
+  else { showView('view-form'); setPill(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
 
 let __closeTimer = null;
