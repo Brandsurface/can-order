@@ -37,6 +37,16 @@ function section(title, lines) {
   return `\n${title}\n${'─'.repeat(title.length)}\n${body}`
 }
 
+// Group uploaded files under their upload category, keeping the slot display order.
+function groupUploadsBySlot(files) {
+  const order = ['cutterguide', 'ingredients', 'additional', 'artwork']
+  const labels = { cutterguide: 'Cutterguide', ingredients: 'Ingredients & nutrition', additional: 'Additional information', artwork: 'Artwork' }
+  const list = Array.isArray(files) ? files : []
+  return order
+    .map(slot => ({ label: labels[slot], files: list.filter(f => (order.includes(f.slot) ? f.slot : 'artwork') === slot) }))
+    .filter(g => g.files.length)
+}
+
 export async function GET(request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
@@ -97,7 +107,7 @@ export async function GET(request) {
     ]),
 
     o.uploads?.length
-      ? section('FILES', o.uploads.map(f => `- ${f.name}\n`))
+      ? section('FILES', groupUploadsBySlot(o.uploads).flatMap(g => [`${g.label}:\n`, ...g.files.map(f => `  - ${f.name}\n`)]))
       : '',
 
     `\n${'─'.repeat(32)}\nBrand Surface | brandsurface.dk\n`,
