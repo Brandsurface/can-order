@@ -28,6 +28,7 @@ function canSummary(o) {
 
 // Derived display status for the badge
 function statusBadge(o, t, locale) {
+  if (o.pm_status === 'completed') return { cls: 'completed', text: t.badge_completed }
   if (o.status === 'confirmed') return { cls: 'confirmed', text: t.badge_sent }
   if (o.status === 'cancelled') return { cls: 'cancelled', text: t.badge_edited }
   if (o.send_after) {
@@ -149,7 +150,7 @@ export default async function AdminOrders({ searchParams }) {
                       <input type="hidden" name="action" value="set-pm-status" />
                       <input type="hidden" name="id" value={o.id} />
                       <select name="pm_status" className={`pm-select${o.pm_status ? ` ${o.pm_status}` : ''}`}
-                        onChange="this.form.submit()" defaultValue={o.pm_status || ''}>
+                        defaultValue={o.pm_status || ''}>
                         <option value="">—</option>
                         <option value="not_handled">{t.pm_not_handled}</option>
                         <option value="quote_approval">{t.pm_quote_approval}</option>
@@ -202,6 +203,7 @@ export default async function AdminOrders({ searchParams }) {
         function upd(){var b=boxes(),c=b.filter(function(x){return x.checked;}).length;if(cnt)cnt.textContent=c;if(bar)bar.style.display=c?'flex':'none';if(all){all.checked=c>0&&c===b.length;all.indeterminate=c>0&&c<b.length;}}
         if(all)all.addEventListener('change',function(){boxes().forEach(function(x){x.checked=all.checked;});upd();});
         document.addEventListener('change',function(e){if(e.target&&e.target.classList&&e.target.classList.contains('ord-check'))upd();});
+        document.addEventListener('change',function(e){if(e.target&&e.target.classList&&e.target.classList.contains('pm-select'))e.target.form.submit();});
       })();` }} />
 
       <PodioModal employees={employees} t={podioT} />
