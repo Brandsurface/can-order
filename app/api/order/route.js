@@ -18,6 +18,39 @@ async function getSettings() {
   }
 }
 
+// Returns the name of the column a Supabase/Postgres error complains is missing,
+// or null if the error is something else.
+function missingColumnName(error) {
+  if (!error) return null
+  const msg = String(error.message || '') + ' ' + String(error.details || '')
+  // PostgREST schema cache: "Could not find the 'paper' column of 'orders' …"
+  let m = msg.match(/Could not find the '([^']+)' column/i)
+  if (m) return m[1]
+  // Postgres 42703: column "paper" of relation "orders" does not exist
+  m = msg.match(/column "([^"]+)" of relation/i)
+  if (m) return m[1]
+  return null
+}
+
+// Insert an order, gracefully dropping any column the live database doesn't have
+// yet (e.g. a new field whose migration hasn't been run). This keeps an order
+// from failing entirely just because the schema is a step behind the code.
+async function insertOrder(row) {
+  let payload = { ...row }
+  for (let attempt = 0; attempt < 12; attempt++) {
+    const { data, error } = await supabase.from('orders').insert(payload).select().single()
+    if (!error) return { data, error: null }
+    const col = missingColumnName(error)
+    if (col && Object.prototype.hasOwnProperty.call(payload, col)) {
+      console.warn(`orders insert: kolonnen "${col}" findes ikke i databasen — gemmer ordren uden den (kør migrationen for at bevare feltet)`)
+      delete payload[col]
+      continue
+    }
+    return { data: null, error }
+  }
+  return { data: null, error: { message: 'For mange manglende kolonner ved insert' } }
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
@@ -46,42 +79,38 @@ export async function POST(request) {
     }
 
     // Save order
-    const { data: order, error: dbError } = await supabase
-      .from('orders')
-      .insert({
-        butiksnavn:    body.butiksnavn,
-        navn:          body.navn,
-        email:         body.email,
-        delivery_date: body.delivery_date || null,
+    const { data: order, error: dbError } = await insertOrder({
+      butiksnavn:    body.butiksnavn,
+      navn:          body.navn,
+      email:         body.email,
+      delivery_date: body.delivery_date || null,
 
-        brand:         body.brand || null,
-        variant:       body.variant || null,
-        size:          body.size || null,
-        region:        body.region || null,
-        label_type:    body.label_type || null,
-        cutterguide:   body.cutterguide || null,
-        finish:        body.finish || null,
-        paper:         body.paper || null,
-        energy_kj:     body.energy_kj || null,
-        energy_kcal:   body.energy_kcal || null,
-        units:         body.units || null,
-        material_old:  body.material_old || null,
-        material_new:  body.material_new || null,
-        ean:           body.ean || null,
-        pantmaerke:    !!body.pantmaerke,
-        ingredients:   body.ingredients || null,
+      brand:         body.brand || null,
+      variant:       body.variant || null,
+      size:          body.size || null,
+      region:        body.region || null,
+      label_type:    body.label_type || null,
+      cutterguide:   body.cutterguide || null,
+      finish:        body.finish || null,
+      paper:         body.paper || null,
+      energy_kj:     body.energy_kj || null,
+      energy_kcal:   body.energy_kcal || null,
+      units:         body.units || null,
+      material_old:  body.material_old || null,
+      material_new:  body.material_new || null,
+      ean:           body.ean || null,
+      pantmaerke:    !!body.pantmaerke,
+      ingredients:   body.ingredients || null,
 
-        andet:         body.andet || null,
-        artwork_help:  !!body.artwork_help,
-        smash_link:    !!body.smash_link,
-        uploads:       Array.isArray(body.uploads) ? body.uploads : [],
+      andet:         body.andet || null,
+      artwork_help:  !!body.artwork_help,
+      smash_link:    !!body.smash_link,
+      uploads:       Array.isArray(body.uploads) ? body.uploads : [],
 
-        language:      ['en', 'da'].includes(body.language) ? body.language : 'en',
-        status:        'pending',
-        revision,
-      })
-      .select()
-      .single()
+      language:      ['en', 'da'].includes(body.language) ? body.language : 'en',
+      status:        'pending',
+      revision,
+    })
 
     if (dbError) {
       console.error('Supabase INSERT fejl:', dbError)
