@@ -139,7 +139,8 @@ export default async function Home() {
   const me = await getCustomerUser()
   const accountLink = me
     ? `<a class="account-link" href="/mine-ordrer">${esc(t.nav_my_orders)}</a>`
-    : `<a class="account-link" href="/login">${esc(t.nav_login)}</a>`
+    : `<a class="account-link" href="/login">${esc(t.nav_login)}</a>` +
+      `<a class="account-link account-link-primary" href="/opret">${esc(t.cust_signup_btn)}</a>`
   html = html.replace('<!--ACCOUNT_LINK-->', accountLink)
 
   html = html.replace('<!--BRAND_TILES-->', brandTiles)
