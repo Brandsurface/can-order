@@ -32,8 +32,9 @@ const ADMIN_CSS = `
 .a-table td { padding:14px; border-top:1px solid #2e2e2e; font-size:14px; color:#f0ede8; vertical-align:top; }
 .a-badge { display:inline-block; padding:2px 10px; border-radius:999px; font-family:'DM Mono',monospace; font-size:11px; }
 .a-badge.pending { background:rgba(241,86,46,0.12); color:#f1562e; }
-.a-badge.confirmed { background:rgba(74,222,128,0.1); color:#4ade80; }
-.a-badge.cancelled { background:rgba(248,113,113,0.1); color:#f87171; }
+.a-badge.confirmed { background:rgba(251,191,36,0.1); color:#fbbf24; }
+.a-badge.cancelled { background:rgba(249,115,22,0.1); color:#f97316; }
+.a-badge.completed { background:rgba(74,222,128,0.1); color:#4ade80; }
 .a-note { font-size:13px; border-radius:10px; padding:10px 14px; margin-bottom:18px; }
 .a-note.ok { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:#4ade80; }
 .a-note.err { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); color:#f87171; }

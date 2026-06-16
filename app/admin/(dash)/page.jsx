@@ -28,6 +28,7 @@ function canSummary(o) {
 
 // Derived display status for the badge
 function statusBadge(o, t, locale) {
+  if (o.pm_status === 'completed') return { cls: 'completed', text: t.badge_completed }
   if (o.status === 'confirmed') return { cls: 'confirmed', text: t.badge_sent }
   if (o.status === 'cancelled') return { cls: 'cancelled', text: t.badge_edited }
   if (o.send_after) {
