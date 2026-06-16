@@ -33,6 +33,7 @@ export async function GET(request) {
     label_type:    order.label_type,
     cutterguide:   order.cutterguide,
     finish:        order.finish,
+    paper:         order.paper,
     energy_kj:     order.energy_kj,
     energy_kcal:   order.energy_kcal,
     units:         order.units,

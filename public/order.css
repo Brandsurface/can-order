@@ -204,6 +204,7 @@ textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 select:disabled { opacity: 0.55; cursor: not-allowed; }
 
 .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.row-2[hidden] { display: none; }
 .energy-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .field-error { font-size: 11px; color: var(--error); margin-top: 2px; display: none; }
 .field-error.show { display: block; }

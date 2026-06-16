@@ -49,12 +49,14 @@ async function loadData(t) {
   const regions = parseList(settings.regions, ['DK', 'Border'])
   const pantExempt = settings.pantmaerke_exempt_region || 'Border'
 
-  // Print type + finish are fixed in code; the finish options depend on the print type.
+  // Print type, paper and finish are fixed in code. Finish applies to both print
+  // types; paper only applies to Label.
   const labelTypes = ['Label', 'Can']
   const finishMap = {
-    Label: ['White', 'Metallic', 'Transparent', 'To be confirmed'],
+    Label: ['Mat', 'Gloss', 'To be confirmed'],
     Can: ['Mat', 'Gloss', 'To be confirmed'],
   }
+  const paperOpts = ['White', 'Metallic', 'Transparent', 'To be confirmed']
 
   // Brand tiles + variants map
   const variantsMap = {}
@@ -72,13 +74,17 @@ async function loadData(t) {
   // No finish pre-selected: a disabled placeholder + the default print type's options.
   const finishOpts = `<option value="" disabled selected hidden>${esc(t.finish_ph)}</option>` +
     (finishMap[labelTypes[0]] || []).map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')
+  // No paper pre-selected: a disabled placeholder + the paper options (Label only).
+  const paperOptsHtml = `<option value="" disabled selected hidden>${esc(t.paper_ph)}</option>` +
+    paperOpts.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('')
 
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
   const dataScript =
     `window.__VARIANTS=${JSON.stringify(variantsMap).replace(/</g, '\\u003c')};` +
     `window.__SUPABASE_URL=${JSON.stringify(supabaseUrl)};` +
     `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};` +
-    `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};`
+    `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};` +
+    `window.__PAPERS=${JSON.stringify(paperOpts).replace(/</g, '\\u003c')};`
 
   const opKeys = [
     'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
@@ -95,7 +101,7 @@ async function loadData(t) {
   }
   for (const k of opKeys) heroOverrides[k] = settings[k] || ''
 
-  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings), heroOverrides }
+  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, paperOptsHtml, dataScript, helpBox: buildHelpBox(settings), heroOverrides }
 }
 
 function buildHelpBox(settings) {
@@ -112,7 +118,7 @@ export default async function Home() {
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox, heroOverrides } = await loadData(t)
+  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, paperOptsHtml, dataScript, helpBox, heroOverrides } = await loadData(t)
 
   if (heroOverrides.hero_title_en && lang === 'en') t.hero_title = heroOverrides.hero_title_en
   if (heroOverrides.hero_title_da && lang === 'da') t.hero_title = heroOverrides.hero_title_da
@@ -148,6 +154,7 @@ export default async function Home() {
   html = html.replace('<!--REGION_SEG-->', regionSeg)
   html = html.replace('<!--LABELTYPE_SEG-->', labelSeg)
   html = html.replace('<!--FINISH_OPTIONS-->', finishOpts)
+  html = html.replace('<!--PAPER_OPTIONS-->', paperOptsHtml)
   html = html.replace(/\s*<!--HELP_BOX-->/, helpBox)
 
   const tJson = JSON.stringify(t).replace(/</g, '\\u003c')
