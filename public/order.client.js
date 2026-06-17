@@ -614,6 +614,117 @@ function showToast(msg, type = '') { const t = document.getElementById('toast');
 
 function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;SameSite=Lax'; location.reload(); }
 
+// ── Onboarding tour ──
+// A lightweight, dependency-free guided walkthrough. Each step anchors onto an
+// existing element; a "spotlight" (a div with a huge box-shadow) dims everything
+// else while a tooltip explains the field/flow. Texts come from window.__T.
+const TOUR_STEPS = [
+  { sel: '.step-pills',       title: 'tour_s1_title', body: 'tour_s1_body', pad: 8 },
+  { sel: '#butiksnavn',       title: 'tour_s2_title', body: 'tour_s2_body' },
+  { sel: '#brand-grid',       title: 'tour_s3_title', body: 'tour_s3_body' },
+  { sel: '#size-chips',       title: 'tour_s4_title', body: 'tour_s4_body' },
+  { sel: '#ingredients',      title: 'tour_s5_title', body: 'tour_s5_body' },
+  { sel: '#andet',            title: 'tour_s6_title', body: 'tour_s6_body' },
+  { sel: '#artwork-toggle',   title: 'tour_s7_title', body: 'tour_s7_body' },
+  { sel: '.review-order-btn', title: 'tour_s8_title', body: 'tour_s8_body' },
+];
+let __tourIdx = 0;
+let __tourEls = null;
+
+function tourBuild() {
+  if (__tourEls) return __tourEls;
+  const overlay = document.createElement('div');
+  overlay.id = 'tour-overlay';
+  const spot = document.createElement('div');
+  spot.id = 'tour-spot';
+  const pop = document.createElement('div');
+  pop.id = 'tour-pop';
+  pop.innerHTML =
+    '<div id="tour-pop-step"></div>' +
+    '<div id="tour-pop-title"></div>' +
+    '<div id="tour-pop-body"></div>' +
+    '<div id="tour-pop-actions">' +
+      '<button type="button" id="tour-skip" class="tour-btn-text"></button>' +
+      '<span style="flex:1"></span>' +
+      '<button type="button" id="tour-prev" class="tour-btn-2"></button>' +
+      '<button type="button" id="tour-next" class="tour-btn-1"></button>' +
+    '</div>';
+  overlay.appendChild(spot);
+  overlay.appendChild(pop);
+  document.body.appendChild(overlay);
+  pop.querySelector('#tour-skip').addEventListener('click', endTour);
+  pop.querySelector('#tour-prev').addEventListener('click', () => tourGoto(__tourIdx - 1));
+  pop.querySelector('#tour-next').addEventListener('click', () => {
+    if (__tourIdx >= TOUR_STEPS.length - 1) endTour();
+    else tourGoto(__tourIdx + 1);
+  });
+  __tourEls = { overlay, spot, pop };
+  return __tourEls;
+}
+
+function tourPlace() {
+  if (!__tourEls || !__tourEls.overlay.classList.contains('open')) return;
+  const el = document.querySelector(TOUR_STEPS[__tourIdx].sel);
+  if (!el) return;
+  const { spot, pop } = __tourEls;
+  const r = el.getBoundingClientRect();
+  const pad = TOUR_STEPS[__tourIdx].pad != null ? TOUR_STEPS[__tourIdx].pad : 6;
+  const top = Math.max(r.top - pad, 4);
+  const left = Math.max(r.left - pad, 4);
+  const w = Math.min(r.width + pad * 2, window.innerWidth - left - 4);
+  const h = r.height + pad * 2;
+  spot.style.top = top + 'px';
+  spot.style.left = left + 'px';
+  spot.style.width = w + 'px';
+  spot.style.height = h + 'px';
+  // Place the tooltip below the target if there's room, otherwise above.
+  const popH = pop.offsetHeight || 170;
+  const popW = pop.offsetWidth || 320;
+  let pTop = (top + h + 14 + popH < window.innerHeight) ? top + h + 14
+           : (top - 14 - popH > 0) ? top - 14 - popH
+           : Math.max(window.innerHeight - popH - 8, 8);
+  let pLeft = Math.min(left, window.innerWidth - popW - 8);
+  if (pLeft < 8) pLeft = 8;
+  pop.style.top = pTop + 'px';
+  pop.style.left = pLeft + 'px';
+}
+
+function tourGoto(i) {
+  __tourIdx = Math.max(0, Math.min(i, TOUR_STEPS.length - 1));
+  const step = TOUR_STEPS[__tourIdx];
+  const { pop } = tourBuild();
+  const el = document.querySelector(step.sel);
+  if (!el) { // target missing → skip forward (or finish)
+    if (__tourIdx < TOUR_STEPS.length - 1) return tourGoto(__tourIdx + 1);
+    return endTour();
+  }
+  pop.querySelector('#tour-pop-step').textContent = (T.tour_step || 'Step {n} of {total}').replace('{n}', __tourIdx + 1).replace('{total}', TOUR_STEPS.length);
+  pop.querySelector('#tour-pop-title').textContent = T[step.title] || '';
+  pop.querySelector('#tour-pop-body').textContent = T[step.body] || '';
+  pop.querySelector('#tour-skip').textContent = T.tour_skip || 'Skip';
+  const prevBtn = pop.querySelector('#tour-prev');
+  prevBtn.textContent = T.tour_prev || 'Back';
+  prevBtn.style.display = __tourIdx === 0 ? 'none' : '';
+  pop.querySelector('#tour-next').textContent = __tourIdx >= TOUR_STEPS.length - 1 ? (T.tour_done || 'Done') : (T.tour_next || 'Next');
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(tourPlace, 340);
+}
+
+function startTour() {
+  tourBuild();
+  __tourEls.overlay.classList.add('open');
+  tourGoto(0);
+}
+
+function endTour() {
+  if (__tourEls) __tourEls.overlay.classList.remove('open');
+  try { localStorage.setItem('bs_tour_done', '1'); } catch (e) {}
+}
+
+window.startTour = startTour;
+window.addEventListener('resize', tourPlace);
+window.addEventListener('scroll', tourPlace, true);
+
 // ── Init ──
 (function init() {
   const btn = document.getElementById('lang-' + LANG);
@@ -648,4 +759,9 @@ function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;
   const copyId = params.get('copy');
   if (editId) prefillFromOrder(editId);
   else if (copyId) prefillFromOrder(copyId, true);
+
+  // Auto-start the onboarding tour for first-time visitors (not when editing/copying).
+  let tourDone = true;
+  try { tourDone = !!localStorage.getItem('bs_tour_done'); } catch (e) {}
+  if (!tourDone && !editId && !copyId) setTimeout(startTour, 600);
 })();
