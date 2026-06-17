@@ -143,6 +143,26 @@ export default async function Home() {
   }
 
   const me = await getCustomerUser()
+  // When a customer is logged in, prefill name/email and pre-accept consent.
+  // The customers table holds no name, so reuse the name from their latest order.
+  let accountPrefill = null
+  if (me) {
+    let lastName = ''
+    try {
+      const { data: lastOrder } = await supabase
+        .from('orders')
+        .select('navn')
+        .ilike('email', me.email)
+        .not('navn', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      lastName = lastOrder?.navn || ''
+    } catch (e) {
+      console.error('Kunne ikke hente kundenavn til prefill:', e?.message)
+    }
+    accountPrefill = { email: me.email, name: lastName }
+  }
   const accountLink = me
     ? `<a class="account-link" href="/mine-ordrer">${esc(t.nav_my_orders)}</a>`
     : `<a class="account-link" href="/login">${esc(t.nav_login)}</a>` +
@@ -158,7 +178,8 @@ export default async function Home() {
   html = html.replace(/\s*<!--HELP_BOX-->/, helpBox)
 
   const tJson = JSON.stringify(t).replace(/</g, '\\u003c')
-  html = html.replace('/*PRODUCTS_JSON*/', `${dataScript} window.__T=${tJson}; window.__LANG=${JSON.stringify(lang)};`)
+  const meJson = JSON.stringify(accountPrefill).replace(/</g, '\\u003c')
+  html = html.replace('/*PRODUCTS_JSON*/', `${dataScript} window.__T=${tJson}; window.__LANG=${JSON.stringify(lang)}; window.__ME=${meJson};`)
 
   // Server-side translations — replace all {{key}} markers
   html = html.replace(/\{\{(\w+)\}\}/g, (_, key) => t[key] ?? '')

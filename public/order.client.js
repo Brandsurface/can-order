@@ -614,6 +614,22 @@ function showToast(msg, type = '') { const t = document.getElementById('toast');
 
 function setLang(l) { document.cookie = 'lang=' + l + ';path=/;max-age=31536000;SameSite=Lax'; location.reload(); }
 
+// Prefill name/email and pre-accept the GDPR consent for a logged-in customer.
+// Only fills empty fields, so an edit/copy prefill can still override afterwards.
+function prefillFromAccount() {
+  const me = window.__ME;
+  if (!me) return;
+  const emailEl = document.getElementById('bestiller_email');
+  const nameEl = document.getElementById('bestiller_navn');
+  if (me.email && emailEl && !emailEl.value) emailEl.value = me.email;
+  if (me.name && nameEl && !nameEl.value) nameEl.value = me.name;
+  const toggle = document.getElementById('legal-toggle');
+  if (toggle && !toggle.classList.contains('active')) {
+    toggle.classList.add('active');
+    document.getElementById('consent-error').classList.remove('visible');
+  }
+}
+
 // ── Onboarding tour ──
 // A lightweight, dependency-free guided walkthrough. Each step anchors onto an
 // existing element; a "spotlight" (a div with a huge box-shadow) dims everything
@@ -753,6 +769,9 @@ window.addEventListener('scroll', tourPlace, true);
 
   // Close modal on Escape
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('review-modal').classList.contains('open')) goBack(); });
+
+  // Prefill from the logged-in account first; an edit/copy below may override.
+  prefillFromAccount();
 
   const params = new URLSearchParams(window.location.search);
   const editId = params.get('edit');
