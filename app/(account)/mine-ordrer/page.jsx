@@ -13,11 +13,12 @@ function canSummary(o) {
 
 // Customer-facing status badge (mirrors the admin logic, customer palette).
 function statusBadge(o, t) {
-  if (o.pm_status && o.pm_status !== 'taken_further') {
+  if (o.pm_status) {
     const pmBadges = {
       not_handled:    { bg: 'rgba(251,191,36,0.12)',  color: '#fbbf24', text: t.cust_pm_not_handled },
       quote_approval: { bg: 'rgba(249,115,22,0.12)',  color: '#f97316', text: t.cust_pm_quote_approval },
       awaiting_info:  { bg: 'rgba(248,113,113,0.12)', color: '#f87171', text: t.cust_pm_awaiting_info },
+      taken_further:  { bg: 'rgba(96,165,250,0.12)',  color: '#60a5fa', text: t.cust_pm_taken_further },
       completed:      { bg: 'rgba(158,214,184,0.14)', color: '#9ed6b8', text: t.cust_pm_completed },
     }
     if (pmBadges[o.pm_status]) return pmBadges[o.pm_status]
