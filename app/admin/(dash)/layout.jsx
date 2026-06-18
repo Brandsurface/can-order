@@ -76,6 +76,7 @@ export default async function DashLayout({ children }) {
           <a className="a-nav-link" href="/admin">{t.nav_orders}</a>
           <a className="a-nav-link" href="/admin/products">{t.nav_products}</a>
           <a className="a-nav-link" href="/admin/settings">{t.nav_settings}</a>
+          <a className="a-nav-link" href="/admin/customers">{t.nav_customers}</a>
           {user.is_master && <a className="a-nav-link" href="/admin/users">{t.nav_users}</a>}
         </div>
         <div className="a-nav-right">
