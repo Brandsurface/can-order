@@ -340,6 +340,7 @@ select:disabled { opacity: 0.55; cursor: not-allowed; }
 /* ── Artwork / attachments ── */
 .produkt-section-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-3); margin: 20px 0 10px; }
 .artwork-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.artwork-card + .artwork-card { margin-top: 14px; }
 .artwork-card .toggle-pill { background: var(--surface-3); }
 .artwork-note { font-size: 13px; color: var(--text-2); line-height: 1.55; }
 .upload-btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; background: var(--surface-3); border: 1px dashed var(--border-light); border-radius: var(--radius); color: var(--text-2); cursor: pointer; font-family: inherit; font-size: 13px; width: fit-content; transition: all 0.2s; }
