@@ -83,7 +83,6 @@ export async function GET(request) {
       row('Size', o.size),
       row('Region', o.region),
       row('Print Type', o.label_type),
-      row('Paper', o.paper),
       row('Finish', o.finish),
       row('Energy / 100 ml', energyText(o)),
       row('Number of units', o.units),
@@ -102,7 +101,6 @@ export async function GET(request) {
     o.andet ? section('ADDITIONAL INFORMATION', [`${String(o.andet).trim()}\n`]) : '',
 
     section('ARTWORK', [
-      o.artwork_help ? 'Artwork help: Requested\n' : '',
       o.smash_link   ? 'Smash link: Requested\n' : '',
     ]),
 

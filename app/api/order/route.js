@@ -92,7 +92,6 @@ export async function POST(request) {
       label_type:    body.label_type || null,
       cutterguide:   body.cutterguide || null,
       finish:        body.finish || null,
-      paper:         body.paper || null,
       energy_kj:     body.energy_kj || null,
       energy_kcal:   body.energy_kcal || null,
       units:         body.units || null,
@@ -103,7 +102,6 @@ export async function POST(request) {
       ingredients:   body.ingredients || null,
 
       andet:         body.andet || null,
-      artwork_help:  !!body.artwork_help,
       smash_link:    !!body.smash_link,
       uploads:       Array.isArray(body.uploads) ? body.uploads : [],
 

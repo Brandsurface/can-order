@@ -156,21 +156,12 @@
           </div>
         </div>
 
-        <div class="row-2" id="paper-row" style="margin-top:18px;">
-          <div class="field" id="paper-field">
-            <label>{{paper_label}} <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="paper"><!--PAPER_OPTIONS--></select>
-            </div>
-            <div class="field-error" id="err-paper">{{paper_err}}</div>
+        <div class="field" style="gap:10px;margin-top:18px;">
+          <label>{{finish_label}} <span class="req">*</span></label>
+          <div class="select-wrap">
+            <select id="finish"><!--FINISH_OPTIONS--></select>
           </div>
-          <div class="field">
-            <label>{{finish_label}} <span class="req">*</span></label>
-            <div class="select-wrap">
-              <select id="finish"><!--FINISH_OPTIONS--></select>
-            </div>
-            <div class="field-error" id="err-finish">{{finish_err}}</div>
-          </div>
+          <div class="field-error" id="err-finish">{{finish_err}}</div>
         </div>
 
         <div class="row-2" style="margin-top:18px;">
@@ -273,18 +264,6 @@
       <div class="card">
         <div class="card-label"><span class="card-dot"></span>{{card_artwork_label}}</div>
 
-        <div class="artwork-card">
-          <div class="toggle-pill" id="artwork-toggle" onclick="toggleArtwork()">
-            <div class="toggle-switch"></div>
-            <span class="toggle-label">{{artwork_toggle}}</span>
-          </div>
-          <p class="artwork-note">{{artwork_note}}</p>
-          <div class="toggle-pill" id="smash-toggle" onclick="toggleSmash()">
-            <div class="toggle-switch"></div>
-            <span class="toggle-label">{{smash_toggle}}</span>
-          </div>
-        </div>
-
         <div class="produkt-section-label">{{attachments_section}}</div>
         <div class="artwork-card">
           <input type="file" id="file-input" multiple style="display:none" onchange="handleFiles(this)"/>
@@ -294,6 +273,13 @@
           </button>
           <p class="artwork-note">{{attach_note}}</p>
           <div id="upload-list-artwork" class="upload-list"></div>
+        </div>
+
+        <div class="artwork-card">
+          <div class="toggle-pill" id="smash-toggle" onclick="toggleSmash()">
+            <div class="toggle-switch"></div>
+            <span class="toggle-label">{{smash_toggle}}</span>
+          </div>
         </div>
       </div>
 

@@ -33,7 +33,6 @@ export async function GET(request) {
     label_type:    order.label_type,
     cutterguide:   order.cutterguide,
     finish:        order.finish,
-    paper:         order.paper,
     energy_kj:     order.energy_kj,
     energy_kcal:   order.energy_kcal,
     units:         order.units,
@@ -44,7 +43,6 @@ export async function GET(request) {
     ingredients:   order.ingredients,
 
     andet:         order.andet,
-    artwork_help:  order.artwork_help,
     smash_link:    order.smash_link,
     uploads:       order.uploads,
     revision:      order.revision,
