@@ -92,7 +92,6 @@ export async function POST(request) {
       label_type:    body.label_type || null,
       cutterguide:   body.cutterguide || null,
       finish:        body.finish || null,
-      paper:         body.paper || null,
       energy_kj:     body.energy_kj || null,
       energy_kcal:   body.energy_kcal || null,
       units:         body.units || null,

@@ -148,7 +148,6 @@ function selectLabelType(el) {
   state.labelType = el.dataset.labeltype || '';
   // Finish options are identical for both print types, so keep the current pick.
   populateFinish(state.labelType, document.getElementById('finish')?.value || '');
-  updatePaperVisibility();
 }
 // Finish options depend on the print type. Nothing is pre-selected unless `selectVal`
 // is passed (used when restoring a saved order) and is valid for the print type.
@@ -160,29 +159,6 @@ function populateFinish(printType, selectVal) {
   sel.innerHTML = `<option value="" disabled${keep ? '' : ' selected'} hidden>${escHtml(T.finish_ph || 'Choose finish…')}</option>` +
     opts.map(o => `<option value="${escHtml(o)}"${o === selectVal ? ' selected' : ''}>${escHtml(o)}</option>`).join('');
   sel.classList.remove('error');
-}
-// Paper applies to the "Label" print type only. Nothing is pre-selected unless a
-// valid `selectVal` is passed (used when restoring a saved order).
-function populatePaper(selectVal) {
-  const sel = document.getElementById('paper');
-  if (!sel) return;
-  const opts = window.__PAPERS || [];
-  const keep = selectVal && opts.indexOf(selectVal) !== -1;
-  sel.innerHTML = `<option value="" disabled${keep ? '' : ' selected'} hidden>${escHtml(T.paper_ph || 'Choose paper…')}</option>` +
-    opts.map(o => `<option value="${escHtml(o)}"${o === selectVal ? ' selected' : ''}>${escHtml(o)}</option>`).join('');
-  sel.classList.remove('error');
-}
-// Show/hide the paper column only; Finish stays visible in the same row regardless.
-function updatePaperVisibility() {
-  const paperField = document.getElementById('paper-field');
-  if (!paperField) return;
-  const show = state.labelType === 'Label';
-  paperField.hidden = !show;
-  if (!show) {
-    const sel = document.getElementById('paper');
-    if (sel) { sel.value = ''; sel.classList.remove('error'); }
-    document.getElementById('err-paper')?.classList.remove('show');
-  }
 }
 // Hide/omit the deposit mark when the exempt region (e.g. Border) is chosen
 function updatePantmaerke() {
@@ -302,19 +278,6 @@ function validate() {
   document.getElementById('err-finish')?.classList.toggle('show', finishMissing);
   if (finishMissing) ok = false;
 
-  // Paper required when the print type is Label (the field is hidden for Can)
-  const paperField = document.getElementById('paper-field');
-  const paperSel = document.getElementById('paper');
-  if (paperField && !paperField.hidden) {
-    const paperMissing = !paperSel || !paperSel.value;
-    paperSel?.classList.toggle('error', paperMissing);
-    document.getElementById('err-paper')?.classList.toggle('show', paperMissing);
-    if (paperMissing) ok = false;
-  } else {
-    paperSel?.classList.remove('error');
-    document.getElementById('err-paper')?.classList.remove('show');
-  }
-
   // GDPR consent
   const legalActive = document.getElementById('legal-toggle').classList.contains('active');
   document.getElementById('consent-error').classList.toggle('visible', !legalActive);
@@ -346,7 +309,6 @@ function collectPayload() {
     label_type:    state.labelType,
     cutterguide:   g('cutterguide'),
     finish:        g('finish'),
-    paper:         g('paper'),
     energy_kj:     g('energy_kj'),
     energy_kcal:   g('energy_kcal'),
     units:         g('units'),
@@ -391,7 +353,6 @@ function goToReview() {
     rvRow(T.f_size || 'Size', p.size),
     rvRow(T.f_region || 'Region', p.region),
     rvRow(T.f_label_type || 'Label type', p.label_type),
-    (p.paper ? rvRow(T.f_paper || 'Paper', p.paper) : ''),
     rvRow(T.f_finish || 'Finish', p.finish),
     rvRow(T.f_energy || 'Energy / 100 ml', energyStr),
     rvRow(T.f_units || 'Number of units', p.units),
@@ -579,9 +540,6 @@ async function prefillFromOrder(orderId, asCopy = false) {
     if (d.label_type) { const lt = d.label_type === 'Tryk' ? 'Can' : d.label_type; const b = Array.from(document.querySelectorAll('#labeltype-seg .seg-btn')).find(x => x.dataset.labeltype === lt); if (b) selectLabelType(b); }
     // Finish — repopulate for the current print type and restore the saved value if valid
     if (d.finish) populateFinish(state.labelType, d.finish);
-    // Paper — show/hide for the current print type and restore the saved value if present
-    updatePaperVisibility();
-    if (d.paper) populatePaper(d.paper);
 
     if (d.cutterguide) document.getElementById('cutterguide').value = d.cutterguide;
     if (d.energy_kj) document.getElementById('energy_kj').value = d.energy_kj;
@@ -754,8 +712,6 @@ window.addEventListener('scroll', tourPlace, true);
   state.region = document.querySelector('#region-seg .seg-btn.selected')?.dataset.region || '';
   state.labelType = document.querySelector('#labeltype-seg .seg-btn.selected')?.dataset.labeltype || '';
   populateFinish(state.labelType);
-  populatePaper();
-  updatePaperVisibility();
   updatePantmaerke();
 
   // Ingredients rich-text: live marked list + bold-button state
