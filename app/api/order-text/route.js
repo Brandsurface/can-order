@@ -101,7 +101,6 @@ export async function GET(request) {
     o.andet ? section('ADDITIONAL INFORMATION', [`${String(o.andet).trim()}\n`]) : '',
 
     section('ARTWORK', [
-      o.artwork_help ? 'Artwork help: Requested\n' : '',
       o.smash_link   ? 'Smash link: Requested\n' : '',
     ]),
 

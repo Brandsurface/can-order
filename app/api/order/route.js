@@ -102,7 +102,6 @@ export async function POST(request) {
       ingredients:   body.ingredients || null,
 
       andet:         body.andet || null,
-      artwork_help:  !!body.artwork_help,
       smash_link:    !!body.smash_link,
       uploads:       Array.isArray(body.uploads) ? body.uploads : [],
 

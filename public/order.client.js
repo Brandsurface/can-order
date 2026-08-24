@@ -13,7 +13,6 @@ const state = {
   size: '',
   region: '',
   labelType: '',
-  artwork: false,
   smash: false,
 };
 let uploadedFiles = []; // { path, name, size }
@@ -175,10 +174,6 @@ function toggleLegal() {
   document.getElementById('legal-expand').classList.toggle('show', active);
   if (active) document.getElementById('consent-error').classList.remove('visible');
 }
-function toggleArtwork() {
-  state.artwork = !state.artwork;
-  document.getElementById('artwork-toggle').classList.toggle('active', state.artwork);
-}
 function toggleSmash() {
   state.smash = !state.smash;
   document.getElementById('smash-toggle').classList.toggle('active', state.smash);
@@ -319,7 +314,6 @@ function collectPayload() {
     ingredients:   serializeRich(document.getElementById('ingredients')),
 
     andet:         g('andet'),
-    artwork_help:  state.artwork,
     smash_link:    state.smash,
     uploads:       uploadedFiles,
 
@@ -371,7 +365,6 @@ function goToReview() {
   const additional = p.andet ? `<div class="rv-row full"><div class="rv-val pre">${escHtml(p.andet)}</div></div>` : '';
 
   let artwork = '';
-  if (p.artwork_help) artwork += rvRow(T.f_artwork || 'Artwork', T.rv_help_requested || 'Help requested', { full: true });
   if (p.smash_link) artwork += rvRow(T.f_smash || 'Smash upload link', T.rv_smash_requested || 'Requested', { full: true });
 
   let html =
@@ -553,7 +546,6 @@ async function prefillFromOrder(orderId, asCopy = false) {
     if (ingEl) { ingEl.innerHTML = d.ingredients ? richToSafeHtml(d.ingredients) : ''; updateMarked(); }
     if (d.andet) { const aEl = document.getElementById('andet'); if (aEl) aEl.value = d.andet; }
 
-    if (d.artwork_help && !state.artwork) toggleArtwork();
     if (d.smash_link && !state.smash) toggleSmash();
     if (Array.isArray(d.uploads)) { uploadedFiles = d.uploads.map(f => ({ ...f, slot: f.slot || 'artwork' })); renderUploads(); }
 
@@ -599,7 +591,7 @@ const TOUR_STEPS = [
   { sel: '#size-chips',       title: 'tour_s4_title', body: 'tour_s4_body' },
   { sel: '#ingredients',      title: 'tour_s5_title', body: 'tour_s5_body' },
   { sel: '#andet',            title: 'tour_s6_title', body: 'tour_s6_body' },
-  { sel: '#artwork-toggle',   title: 'tour_s7_title', body: 'tour_s7_body' },
+  { sel: '.produkt-section-label', title: 'tour_s7_title', body: 'tour_s7_body' },
   { sel: '.review-order-btn', title: 'tour_s8_title', body: 'tour_s8_body' },
 ];
 let __tourIdx = 0;

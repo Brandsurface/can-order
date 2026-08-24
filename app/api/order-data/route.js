@@ -43,7 +43,6 @@ export async function GET(request) {
     ingredients:   order.ingredients,
 
     andet:         order.andet,
-    artwork_help:  order.artwork_help,
     smash_link:    order.smash_link,
     uploads:       order.uploads,
     revision:      order.revision,
