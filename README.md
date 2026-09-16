@@ -16,9 +16,9 @@ One order = one **can brief**:
 
 1. **Order details** — campaign/project, name, email, deadline, GDPR consent
 2. **Brand selection** — brand (tiles) → variant (dropdown, cascades from the brand)
-3. **Size & technical specs** — size, region (DK/Border), label type, cutterguide (+ attach), finish
-4. **Production details** — material no. (old/new), EAN, *Pantmærke* (auto-hidden for `Border`), ingredients & nutrition (+ attach PDF)
-5. **Artwork** — upload files, request artwork help, or request a Smash link
+3. **Size & technical specs** — size, finish
+4. **Production details** — EAN, *Pantmærke*, ingredients & nutrition (+ attach PDF)
+5. **Artwork** — upload files, or request a Smash link
 
 Pressing **Review order** opens a popup summarising everything; the customer
 can always go back and edit before submitting.
@@ -44,9 +44,8 @@ action (`/api/admin/orders`) and `/api/confirm` / `/api/cancel` endpoints.
 Cookie-session login (each user sets their password on first login).
 
 - **Orders** — list, status, PM-status, approve-now, edit, delete (+ bulk)
-- **Catalogue** — manage **brands & variants** and the option lists
-  (**sizes, regions** + the region that hides Pantmærke). Print type
-  (Label/Can) and the per-print-type finish lists are fixed in code.
+- **Catalogue** — manage **brands & variants** and the **sizes** option list.
+  Finish's options are fixed in code.
 - **Settings** — Brandsurface recipient email, forward delay, sidebar help box
 - **Users** (master only) — add/reset/delete admins
 

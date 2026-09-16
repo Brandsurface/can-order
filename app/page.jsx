@@ -30,7 +30,7 @@ async function loadData(t) {
     const [{ data: brandRows }, { data: settingRows }] = await Promise.all([
       supabase.from('brands').select('name, variants, active, sort').eq('active', true).order('sort', { ascending: true }),
       supabase.from('app_settings').select('key, value').in('key', [
-        'sizes', 'regions', 'pantmaerke_exempt_region', 'help_box_active', 'help_box_html',
+        'sizes', 'help_box_active', 'help_box_html',
         'hero_title_en', 'hero_title_da', 'hero_sub_en', 'hero_sub_da',
         'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
         'op_step1_title_en', 'op_step1_title_da', 'op_step1_p_en', 'op_step1_p_da',
@@ -45,16 +45,10 @@ async function loadData(t) {
     console.error('Kunne ikke hente formular-data:', e?.message)
   }
 
-  const sizes = parseList(settings.sizes, ['250 ml', '330 ml', '330 ml slim', '440 ml', '500 ml'])
-  const regions = parseList(settings.regions, ['DK', 'Border'])
-  const pantExempt = settings.pantmaerke_exempt_region || 'Border'
+  const sizes = parseList(settings.sizes, ['330 ml', '440 ml'])
 
-  // Print type and finish are fixed in code. Finish applies to both print types.
-  const labelTypes = ['Label', 'Can']
-  const finishMap = {
-    Label: ['Mat', 'Gloss', 'To be confirmed'],
-    Can: ['Mat', 'Gloss', 'To be confirmed'],
-  }
+  // Finish is fixed in code (no longer depends on print type, which was removed).
+  const FINISHES = ['Mat', 'Gloss', 'To be confirmed']
 
   // Brand tiles + variants map
   const variantsMap = {}
@@ -67,18 +61,14 @@ async function loadData(t) {
   brandTiles += `<button type="button" class="brand-tile unknown" data-unknown="1" onclick="selectBrand(this)"><span class="brand-radio"></span><span class="brand-name">${esc(t.brand_unknown)}</span></button>`
 
   const sizeChips = sizes.map(s => `<button type="button" class="size-chip" data-size="${esc(s)}" onclick="selectSize(this)">${esc(s)}</button>`).join('')
-  const regionSeg = regions.map((r, i) => `<button type="button" class="seg-btn${i === 0 ? ' selected' : ''}" data-region="${esc(r)}" onclick="selectRegion(this)">${esc(r)}</button>`).join('')
-  const labelSeg = labelTypes.map((l, i) => `<button type="button" class="seg-btn${i === 0 ? ' selected' : ''}" data-labeltype="${esc(l)}" onclick="selectLabelType(this)">${esc(l)}</button>`).join('')
-  // No finish pre-selected: a disabled placeholder + the default print type's options.
+  // No finish pre-selected: a disabled placeholder + the fixed options.
   const finishOpts = `<option value="" disabled selected hidden>${esc(t.finish_ph)}</option>` +
-    (finishMap[labelTypes[0]] || []).map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')
+    FINISHES.map(f => `<option value="${esc(f)}">${esc(f)}</option>`).join('')
 
   const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
   const dataScript =
     `window.__VARIANTS=${JSON.stringify(variantsMap).replace(/</g, '\\u003c')};` +
-    `window.__SUPABASE_URL=${JSON.stringify(supabaseUrl)};` +
-    `window.__PANT_EXEMPT=${JSON.stringify(pantExempt)};` +
-    `window.__FINISHES=${JSON.stringify(finishMap).replace(/</g, '\\u003c')};`
+    `window.__SUPABASE_URL=${JSON.stringify(supabaseUrl)};`
 
   const opKeys = [
     'op_label_en', 'op_label_da', 'op_sub_en', 'op_sub_da',
@@ -95,7 +85,7 @@ async function loadData(t) {
   }
   for (const k of opKeys) heroOverrides[k] = settings[k] || ''
 
-  return { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox: buildHelpBox(settings), heroOverrides }
+  return { brandTiles, sizeChips, finishOpts, dataScript, helpBox: buildHelpBox(settings), heroOverrides }
 }
 
 function buildHelpBox(settings) {
@@ -112,7 +102,7 @@ export default async function Home() {
   const filePath = path.join(process.cwd(), 'app', 'page.html')
   let html = fs.readFileSync(filePath, 'utf-8')
 
-  const { brandTiles, sizeChips, regionSeg, labelSeg, finishOpts, dataScript, helpBox, heroOverrides } = await loadData(t)
+  const { brandTiles, sizeChips, finishOpts, dataScript, helpBox, heroOverrides } = await loadData(t)
 
   if (heroOverrides.hero_title_en && lang === 'en') t.hero_title = heroOverrides.hero_title_en
   if (heroOverrides.hero_title_da && lang === 'da') t.hero_title = heroOverrides.hero_title_da
@@ -165,8 +155,6 @@ export default async function Home() {
 
   html = html.replace('<!--BRAND_TILES-->', brandTiles)
   html = html.replace('<!--SIZE_CHIPS-->', sizeChips)
-  html = html.replace('<!--REGION_SEG-->', regionSeg)
-  html = html.replace('<!--LABELTYPE_SEG-->', labelSeg)
   html = html.replace('<!--FINISH_OPTIONS-->', finishOpts)
   html = html.replace(/\s*<!--HELP_BOX-->/, helpBox)
 
