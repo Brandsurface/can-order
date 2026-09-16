@@ -39,8 +39,8 @@ function section(title, lines) {
 
 // Group uploaded files under their upload category, keeping the slot display order.
 function groupUploadsBySlot(files) {
-  const order = ['cutterguide', 'ingredients', 'additional', 'artwork']
-  const labels = { cutterguide: 'Cutterguide', ingredients: 'Ingredients & nutrition', additional: 'Additional information', artwork: 'Artwork' }
+  const order = ['ingredients', 'additional', 'artwork']
+  const labels = { ingredients: 'Ingredients & nutrition', additional: 'Additional information', artwork: 'Artwork' }
   const list = Array.isArray(files) ? files : []
   return order
     .map(slot => ({ label: labels[slot], files: list.filter(f => (order.includes(f.slot) ? f.slot : 'artwork') === slot) }))
@@ -81,19 +81,14 @@ export async function GET(request) {
       row('Brand', o.brand),
       row('Variant', o.variant),
       row('Size', o.size),
-      row('Region', o.region),
-      row('Print Type', o.label_type),
       row('Finish', o.finish),
       row('Energy / 100 ml', energyText(o)),
       row('Number of units', o.units),
-      row('Cutterguide', o.cutterguide),
     ]),
 
     section('PRODUCTION', [
-      row('Material No. (old)', o.material_old),
-      row('Material No. (new)', o.material_new),
       row('EAN', o.ean),
-      String(o.region || '').toLowerCase() !== 'border' ? row('Deposit mark', o.pantmaerke ? 'Yes' : 'No') : '',
+      row('Deposit mark', o.pantmaerke ? 'Yes' : 'No'),
       row('Ingredients / Nutrition', stripBold(o.ingredients)),
       boldList(o.ingredients).length ? row('Marked in bold', boldList(o.ingredients).join(', ')) : '',
     ]),
